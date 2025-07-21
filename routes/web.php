@@ -10,6 +10,7 @@ use App\Http\Controllers\WholesaleController;
 use App\Models\Product;
 use App\Models\Wholesaler;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BuyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,6 +85,8 @@ Route::group(
         Route::get('/sale/listado', [SaleController::class, 'filtroPorfecha'])->name('sales.filtroPorfecha');
         Route::get('/sale/detalles/{id}', [SaleController::class, 'detallesVenta'])->name('sale.detallesVenta');
         Route::get('/sale/pdf/{id}', [SaleController::class, 'generatePDF'])->name('sales.pdf');
+        
+        Route::get('/sale/pdf/nota/{id}', [SaleController::class, 'generatePDFNotaVenta'])->name('salesNota.pdf');
         Route::post('/sale/enviar-sunat/{id}', [SaleController::class, 'enviarSunat'])->name('sales.enviarSunat');
         //UNIDAD MEDIDA
         Route::resource('units',  App\Http\Controllers\UnitController::class);
@@ -100,6 +103,13 @@ Route::group(
         Route::get('/wholesaler/listado', [WholesaleController::class, 'filtroPorfecha'])->name('wholesalers.filtroPorfecha');
         Route::get('/wholesaler/detalles/{id}', [WholesaleController::class, 'detallesWholesaler'])->name('wholesalers.detallesWholesaler');
         Route::get('/wholesaler/pdf/{id}', [WholesaleController::class, 'generatePDF'])->name('wholesalers.pdf');
+        // compras
+        Route::resource('buys', BuyController::class);
+        Route::post('/buy/producto/addStock', [BuyController::class, 'addStock'])->name('buy.addStock');
+        Route::get('buy/search', [App\Http\Controllers\BuyController::class, 'search'])->name('buy.search');
+        Route::get('/buy/detalles/{id}', [BuyController::class, 'detallesBuy'])->name('buy.detallesBuy');
+        Route::get('/buy/pdf/{id}', [BuyController::class, 'generatePDF'])->name('buy.pdf');
+
     }
 );
 require __DIR__ . '/auth.php';

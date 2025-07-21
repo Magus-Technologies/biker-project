@@ -39,22 +39,11 @@
         @endif
 
         <!-- Page Content -->
-        <main :class="sidebarOpen && window.innerWidth < 768 ? 'ml-64' : 'ml-0 md:ml-16'"
-            class="transition-all duration-300 pt-4 px-4">
+         <main :class="sidebarOpen && window.innerWidth < 768 ? 'ml-64' : 'ml-0 md:ml-16'"
+            class="transition-all duration-300 pt-4 px-4" style="margin-left: 50px;">
             {{ $slot }}
         </main>
     </div>
-    <script>
-        const sidebar = document.getElementById('sidebar');
-
-        sidebar.addEventListener('mouseenter', () => {
-            sidebar.classList.add('expanded');
-        });
-
-        sidebar.addEventListener('mouseleave', () => {
-            sidebar.classList.remove('expanded');
-        });
-    </script>
 </body>
 
 </html>

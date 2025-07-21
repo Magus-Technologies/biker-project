@@ -30,7 +30,7 @@
                 Agregar
             </a>
         </div>
-        <!-- Mensajes de Ã©xito o error -->
+        <!-- Mensajes de éxito o error -->
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
                 {{ session('success') }}
@@ -47,7 +47,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            NÂº
+                            Nº
                         </th>
                         <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Documento
@@ -86,7 +86,7 @@
                 </tbody>
             </table>
         </div>
-        <!-- Mostrar los enlaces de paginaciÃ³n -->
+        <!-- Mostrar los enlaces de paginación -->
         {{-- @if ($registros instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
             {{ $registros->links() }}
         @endif --}}
@@ -94,10 +94,10 @@
     <!-- Modal -->
     <div id="detalleModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex justify-center items-center p-4">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-5 border border-gray-300 relative">
-            <!-- BotÃ³n de Cierre -->
+            <!-- Botón de Cierre -->
             <button onclick="cerrarModal()"
                 class="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-lg font-semibold transition">
-                âœ–
+                ?
             </button>
 
             <!-- Encabezado -->
@@ -105,7 +105,7 @@
                 Detalles de la Venta
             </h2>
 
-            <!-- InformaciÃ³n General -->
+            <!-- Información General -->
             <div class="mt-3 p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-xs space-y-1">
                 <p><strong>Cliente:</strong> <span id="ventaCliente"></span></p>
                 <p><strong>DNI:</strong> <span id="ventaDni"></span></p>
@@ -122,14 +122,14 @@
                         <thead class="bg-gray-100 text-gray-800 uppercase text-xs">
                             <tr>
                                 <th class="py-2 px-2 border-r border-gray-300">Tipo</th>
-                                <th class="py-2 px-2 border-r border-gray-300">DescripciÃ³n</th>
+                                <th class="py-2 px-2 border-r border-gray-300">Descripción</th>
                                 <th class="py-2 px-2 text-center border-r border-gray-300">Cantidad</th>
                                 <th class="py-2 px-2 text-center border-r border-gray-300">Precio Unitario</th>
                                 <th class="py-2 px-2 text-center">Total</th>
                             </tr>
                         </thead>
                         <tbody id="listaDetalles" class="divide-y divide-gray-300">
-                            <!-- AquÃ­ se insertarÃ¡n los productos y servicios -->
+                            <!-- Aquí se insertarán los productos y servicios -->
                         </tbody>
                     </table>
                 </div>
@@ -185,7 +185,7 @@
                             let row = document.createElement('tr');
                             row.innerHTML = `
                         <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">${sale.code}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900"><a href="javascript:void(0)" class="text-blue-600 hover:underline"onclick="generarPDF(${sale.id})">${sale.serie} - ${sale.number}</a></td>
+                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900"><a href="javascript:voi"${sale.document_type_id == 6 ? `generarPDFNota(${sale.id})` : `generarPDF(${sale.id})`}">${sale.serie} - ${sale.number}</a></td>
                         <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">${sale.customer_names_surnames == null ? 'Sin cliente' : sale.customer_names_surnames}</td> 
                         <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">${sale.customer_dni}</td>
                         <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
@@ -212,7 +212,7 @@
                             <button class="text-xl px-2 py-1 rounded"
                         onclick="deleteSale(${sale.id})" ${sale.status_sunat == 1 ? 'disabled' : ''}><i class="bi bi-trash3-fill text-red-500"></i></button>
                         <button class="text-xl px-2 py-1 rounded" 
-                        onclick="generarPDF(${sale.id})"><i class="bi bi-filetype-pdf text-red-500"></i></button>
+                        onclick="${sale.document_type_id == 6 ? `generarPDFNota(${sale.id})` : `generarPDF(${sale.id})`}"><i class="bi bi-filetype-pdf text-red-500"></i></button>
                         <button class=" text-white px-2 py-1 rounded text-xl" ${sale.status_sunat == 1 ? 'disabled' : ''}
                         onclick="enviarSunat(${sale.id})" title="${sale.status_sunat == 1 ? 'Enviado a Sunat' : 'No enviado a Sunat'}">${sale.status_sunat == 1 ? '<i class="bi bi-send-check text-blue-500"></i>' : '<i class="bi bi-send-slash text-green-500"></i>'}</button>
                         </td>
@@ -233,7 +233,7 @@
             event.preventDefault();
             finAllSales();
         })
-        // FunciÃ³n para obtener los detalles de la venta
+        // Función para obtener los detalles de la venta
         async function verDetalles(saleId) {
             try {
                 let url = `{{ route('sale.detallesVenta', ':id') }}`.replace(':id', saleId);
@@ -256,7 +256,7 @@
                 let listaDetalles = document.getElementById("listaDetalles");
                 listaDetalles.innerHTML = "";
 
-                // Recorrer los Ã­tems de la venta y agregarlos a la tabla
+                // Recorrer los ítems de la venta y agregarlos a la tabla
                 data.sale.sale_items.forEach(item => {
                     let fila = document.createElement("tr");
                     fila.innerHTML = `
@@ -278,13 +278,13 @@
         async function deleteSale(saleId) {
 
             const result = await Swal.fire({
-                title: 'Â¿EstÃ¡s seguro?',
-                text: "No podrÃ¡s revertir esta acciÃ³n",
+                title: '¿Estás seguro?',
+                text: "No podrás revertir esta acción",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'SÃ­, eliminar',
+                confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
             });
             if (!result.isConfirmed) {
@@ -320,6 +320,15 @@
         async function generarPDF(saleId) {
             try {
                 let url = `{{ route('sales.pdf', ':id') }}`.replace(':id', saleId);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error("Error al generar el PDF:", error);
+            }
+        }
+        
+         async function generarPDFNota(saleId) {
+            try {
+                let url = `{{ route('salesNota.pdf', ':id') }}`.replace(':id', saleId);
                 window.open(url, '_blank');
             } catch (error) {
                 console.error("Error al generar el PDF:", error);

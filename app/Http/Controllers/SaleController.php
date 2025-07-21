@@ -55,11 +55,47 @@ class SaleController extends Controller
         $hashBase64 = base64_encode($hash);
         $generarQr = new GenerarQR($sale->companies->ruc, $sale->documentType->sunat_code, $sale->serie, $sale->number, $sale->igv, $sale->total_price, $fecha_registro, $sale->customer_dni, $hashBase64);
         $imagenQr = $generarQr->obtenerQR();
-        // Si `sale_items` es null, aseguramos que sea un array vacÃ­o para evitar errores
+        // Si `sale_items` es null, aseguramos que sea un array vacío para evitar errores
         $sale->sale_items = $sale->sale_items ?? [];
         $pdf = Pdf::loadView('sales.pdf', compact('sale', 'imagenQr', 'hashBase64'));
         return $pdf->stream('venta.pdf');
     }
+    
+    public function generatePDFNotaVenta($id)
+    {
+        $sale = Sale::with('saleItems.item', 'userRegister')->find($id);
+        if (!$sale) {
+            return abort(404, 'Venta no encontrada');
+        }
+    
+        $fecha_registro = Carbon::parse($sale->fecha_registro)->format('Y-m-d');
+    
+        // Generar QR
+        $hash = hash('sha1', '' . time(), true);
+        $hashBase64 = base64_encode($hash);
+        $generarQr = new GenerarQR(
+            $sale->companies->ruc,
+            $sale->documentType->sunat_code,
+            $sale->serie,
+            $sale->number,
+            $sale->igv,
+            $sale->total_price,
+            $fecha_registro,
+            $sale->customer_dni,
+            $hashBase64
+        );
+        $imagenQr = $generarQr->obtenerQR();
+    
+        $sale->sale_items = $sale->sale_items ?? [];
+    
+        // Mitad de hoja A4: 210mm x 148.5mm ? en puntos ˜ 595pt x 420pt
+        $pdf = Pdf::loadView('sales.nota', compact('sale', 'imagenQr', 'hashBase64'))
+                  ->setPaper([0, 0, 595.28, 420.94]); // tamaño personalizado vertical
+    
+        return $pdf->stream('venta.pdf');
+    }
+
+    
     /**
      * Show the form for creating a new resource.
      */
@@ -82,7 +118,7 @@ class SaleController extends Controller
     {
         // return response()->json($request);
         try {
-            // 1ï¸âƒ£ Crear la Venta
+            // 1?? Crear la Venta
             $sale = Sale::create([
                 'code' => $this->generateCode(),
                 'total_price' => $request->total,
@@ -230,26 +266,26 @@ class SaleController extends Controller
                 "cliente" => $cliente,
                 "detalles" => $products
             ];
-            // Agregar cuotas_credito solo si no estÃ¡ vacÃ­o
+            // Agregar cuotas_credito solo si no está vacío
             if (!empty($cuotas_credito)) {
                 $data["cuotas_credito"] = $cuotas_credito;
             }
 
             // return response()->json($data);
-            // InicializaciÃ³n de la instancia de ApiSunat
+            // Inicialización de la instancia de ApiSunat
             $apiSunat = new ApiSunat('1');
             $apiSunat->setData($data);
 
-            // EnvÃ­o de los datos y obtenciÃ³n de la respuesta de la API
+            // Envío de los datos y obtención de la respuesta de la API
             $respuestaSunat = $apiSunat->enviarData();
             $contenidoXml = "";
 
             // Manejo de la respuesta de la API
             if (!$respuestaSunat || !isset($respuestaSunat['estado']) || (isset($respuestaSunat['estado']) && !$respuestaSunat['estado'])) {
                 $respuesta['success'] = false;
-                $respuesta['message'] = "Error: Error en comunicaciÃ³n con la API. respuesta: " . json_encode($respuestaSunat) . " -------------------- " . json_encode($data);
+                $respuesta['message'] = "Error: Error en comunicación con la API. respuesta: " . json_encode($respuestaSunat) . " -------------------- " . json_encode($data);
             } else {
-                // Si la comunicaciÃ³n fue exitosa, procesar el XML recibido
+                // Si la comunicación fue exitosa, procesar el XML recibido
                 $nombre_archivo = $respuestaSunat['data']['nombre_archivo'] . ".xml";
                 $contenidoXml = $respuestaSunat['data']['contenido_xml'];
                 $rutaArchivo = '/sunat/xml/' . $nombre_archivo;
@@ -258,7 +294,7 @@ class SaleController extends Controller
                 // Almacenar el XML generado en el disco personalizado
                 Storage::disk('public')->put($rutaArchivo, $contenidoXml);
 
-                // Verificar si el archivo se almacenÃ³ correctamente
+                // Verificar si el archivo se almacenó correctamente
                 if (Storage::disk('public')->exists($rutaArchivo)) {
                     $respuesta['xml'] = $nombre_archivo;
                 } else {
@@ -337,7 +373,7 @@ class SaleController extends Controller
                 if ($salesItem->item_type === Product::class) {
                     $stock = Stock::where('product_id', $salesItem->item_id)->first();
                     if ($stock) {
-                        $stock->quantity += $salesItem->quantity; // Revertir la reducciÃ³n del stock
+                        $stock->quantity += $salesItem->quantity; // Revertir la reducción del stock
                         $stock->save();
                     }
                 }
@@ -351,7 +387,7 @@ class SaleController extends Controller
     public function filtroPorfecha(Request $request)
     {
         if (!$request->filled('fecha_desde') || !$request->filled('fecha_hasta')) {
-            return response()->json(['error' => 'Faltan parÃ¡metros'], 400);
+            return response()->json(['error' => 'Faltan parámetros'], 400);
         }
         $user = auth()->user();
         $ventas = Sale::with('userRegister', 'mechanic')
@@ -392,10 +428,10 @@ class SaleController extends Controller
         ];
 
         if (!isset($prefijos[$tipoDocumento->name])) {
-            throw new \Exception('Tipo de documento no vÃ¡lido');
+            throw new \Exception('Tipo de documento no válido');
         }
 
-        // FACTURA y BOLETA DE VENTA usan tres dÃ­gitos (F001, B001), NOTA DE VENTA usa dos (NV01)
+        // FACTURA y BOLETA DE VENTA usan tres dígitos (F001, B001), NOTA DE VENTA usa dos (NV01)
         $numeroSerie = ($tipoDocumento->name === 'NOTA DE VENTA') ? '01' : '001';
 
         return $prefijos[$tipoDocumento->name] . $numeroSerie;
@@ -405,7 +441,7 @@ class SaleController extends Controller
     {
         $documentTypeId = (int) $documentTypeId;
         if ($documentTypeId <= 0) {
-            throw new \Exception('ID de documento no vÃ¡lido');
+            throw new \Exception('ID de documento no válido');
         }
         $ultimaVenta = Sale::where('document_type_id', $documentTypeId)
             ->orderByDesc('number')
