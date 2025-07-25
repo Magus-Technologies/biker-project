@@ -200,7 +200,7 @@
             // Prevenir scroll del body en móviles
             document.body.style.overflow = 'hidden';
             
-            // Hacer petición AJAX
+            // Hacer petición AJAXaa
           fetch(`{{ route('drives.details', ['id' => '__driverId__']) }}`.replace('__driverId__', driverId))
                 .then(response => response.json())
                 .then(data => {
