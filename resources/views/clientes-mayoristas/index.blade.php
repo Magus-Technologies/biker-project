@@ -197,7 +197,9 @@
             document.body.style.overflow = 'hidden';
             
             // Hacer petición AJAX
-            fetch(`/clientes-mayoristas/${clienteId}/detalles`)
+            // fetch(`/clientes-mayoristas/${clienteId}/detalles`)
+         fetch(`{{ route('clientes-mayoristas.detalles', ['id' => '__clienteId__']) }}`.replace('__clienteId__', clienteId))
+            
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
