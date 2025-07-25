@@ -1,71 +1,70 @@
 <?php
+// app/Models/ClienteMayorista.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
-class Drive extends Model
+class ClienteMayorista extends Model
 {
     use HasFactory;
 
+    protected $table = 'clientes_mayoristas';
+
     protected $fillable = [
+        'codigo',
         'tipo_doc',
         'nro_documento',
         'nombres',
         'apellido_paterno',
         'apellido_materno',
-        // 'nacionalidad', // ya no se usa
-        // 'nro_licencia', //  ya no se usa
-        // 'categoria_licencia', // ya no se usa
-        'fecha_nacimiento',
+        'nombre_negocio',
+        'tienda',
         'telefono',
         'correo',
-        'foto',
         'departamento',
         'provincia',
         'distrito',
         'direccion_detalle',
-        'user_register',
         'nombres_contacto',
         'telefono_contacto',
         'parentesco_contacto',
+        'foto',
+        'status',
+        'user_register',
         'user_update',
         'fecha_registro',
-        'fecha_actualizacion',
-        'status',
-        'codigo',
-        'nro_motor',
-        'nro_chasis', // NUEVO CAMPO
-        'nro_placa',  // NUEVO CAMPO
+        'fecha_actualizacion'
     ];
-
-    public $timestamps = true;
 
     protected $casts = [
-        'fecha_nacimiento' => 'date',
         'fecha_registro' => 'datetime',
         'fecha_actualizacion' => 'datetime',
-        'status' => 'boolean',
+        'status' => 'boolean'
     ];
 
-    public function userRegistered()
+    // Relaciones
+    public function usuarioRegistro()
     {
         return $this->belongsTo(User::class, 'user_register');
     }
 
-    public function userUpdated()
+    public function usuarioActualizacion()
     {
         return $this->belongsTo(User::class, 'user_update');
     }
-    
-    protected static function booted()
+
+    // Accessor para nombre completo
+    public function getNombreCompletoAttribute()
     {
-        static::creating(function ($model) {
-            $model->user_register = auth()->id();
-        });
-        static::updating(function ($model) {
-            $model->user_update = auth()->id();
-        });
+        return "{$this->nombres} {$this->apellido_paterno} {$this->apellido_materno}";
+    }
+
+    // Accessor para dirección completa
+    public function getDireccionCompletaAttribute()
+    {
+        return "{$this->direccion_detalle}, {$this->distrito}, {$this->provincia}, {$this->departamento}";
     }
 }

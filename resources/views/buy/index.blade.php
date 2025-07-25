@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight"></h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">dcsadcsad</h2>
     </x-slot>
 
     <div class="max-w-max mx-auto px-4 py-12 text-xs">

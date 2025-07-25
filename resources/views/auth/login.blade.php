@@ -55,7 +55,7 @@
                     <div class="flex items-center mb-6">
                         <input id="remember_me" type="checkbox" name="remember"
                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" />
-                        <label for="remember_me" class="ml-2 text-sm text-gray-600">Remember me</label>
+                        <label for="remember_me" class="ml-2 text-sm text-gray-600">Recordarme</label>
                     </div>
 
                     <!-- Login Button -->
