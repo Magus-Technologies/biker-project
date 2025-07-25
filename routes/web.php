@@ -115,7 +115,8 @@ Route::group(
 
 
         Route::resource('clientes-mayoristas', ClienteMayoristaController::class);
-        Route::get('/clientes-mayoristas/{id}/detalles', [ClienteMayoristaController::class, 'obtenerDetalles'])->name('clientes-mayoristas.detalles');
+      Route::get('/clientes-mayoristas/{id}/detalles', [ClienteMayoristaController::class, 'obtenerDetalles'])
+    ->name('clientes-mayoristas.detalles');
     }
 );
 require __DIR__ . '/auth.php';

@@ -134,12 +134,11 @@
     <!-- Modal de Detalles del Cliente Mayorista - Responsive -->
     <div id="clienteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <!-- Contenedor del Modal - Responsive -->
-        <div class="relative 
-                    md:top-20 md:mx-auto md:p-5 md:border md:w-11/12 md:max-w-4xl md:shadow-lg md:rounded-md md:bg-white
-                    top-0 mx-0 p-0 border-0 w-full max-w-none shadow-none rounded-none bg-white h-full">
-            
+        <div class="relative
+                    md:top-20 md:mx-auto md:p-5 md:border md:w-11/12 md:max-w-2xl md:shadow-lg md:rounded-md md:bg-white
+                    top-0 mx-0 p-0 border-0 w-full max-w-none shadow-none rounded-none bg-white">
             <!-- Header del Modal -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 
+            <div class="flex items-center justify-between p-4 border-b border-gray-200
                         md:static sticky top-0 bg-white z-10">
                 <h3 class="text-xl font-semibold text-gray-900">
                     Detalles del Cliente Mayorista
@@ -152,15 +151,11 @@
             </div>
 
             <!-- Contenido del Modal -->
-            <div id="modalContent" class="p-4 md:p-6 
-                                        h-full md:h-auto 
-                                        overflow-y-auto md:overflow-visible
-                                        pb-20 md:pb-6">
+            <div id="modalContent" class="p-4 md:p-6 md:max-h-[70vh] overflow-y-auto">
                 <!-- Loading spinner -->
                 <div id="loadingSpinner" class="flex justify-center items-center py-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
-                
                 <!-- Contenido dinámico se cargará aquí -->
                 <div id="clienteDetails" class="hidden"></div>
             </div>
@@ -168,11 +163,11 @@
             <!-- Footer del Modal - Sticky en móviles -->
             <div class="flex items-center justify-end p-4 border-t border-gray-200 space-x-2
                         md:static sticky bottom-0 bg-white z-10">
-                <button onclick="cerrarModal()" 
+                <button onclick="cerrarModal()"
                         class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                     Cerrar
                 </button>
-                <button id="editClienteBtn" 
+                <button id="editClienteBtn"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors hidden">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>

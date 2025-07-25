@@ -132,14 +132,14 @@
     </div>
 
     <!-- Modal de Detalles del Conductor - Responsive -->
-    <div id="driverModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div id="driverModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center">
         <!-- Contenedor del Modal - Responsive -->
-        <div class="relative 
-                    md:top-20 md:mx-auto md:p-5 md:border md:w-11/12 md:max-w-4xl md:shadow-lg md:rounded-md md:bg-white
+        <div class="relative flex flex-col 
+                    md:top-0 md:mx-auto md:p-0 md:border md:w-11/12 md:max-w-4xl md:shadow-lg md:rounded-md md:bg-white md:max-h-[90vh] md:overflow-hidden
                     top-0 mx-0 p-0 border-0 w-full max-w-none shadow-none rounded-none bg-white h-full">
             
             <!-- Header del Modal -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 
+            <div class="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200 
                         md:static sticky top-0 bg-white z-10">
                 <h3 class="text-xl font-semibold text-gray-900">
                     Detalles del Conductor
@@ -152,9 +152,8 @@
             </div>
 
             <!-- Contenido del Modal -->
-            <div id="modalContent" class="p-4 md:p-6 
-                                        h-full md:h-auto 
-                                        overflow-y-auto md:overflow-visible
+            <div id="modalContent" class="flex-grow overflow-y-auto 
+                                        p-4 md:p-6 
                                         pb-20 md:pb-6">
                 <!-- Loading spinner -->
                 <div id="loadingSpinner" class="flex justify-center items-center py-8">
@@ -166,7 +165,7 @@
             </div>
 
             <!-- Footer del Modal - Sticky en móviles -->
-            <div class="flex items-center justify-end p-4 border-t border-gray-200 space-x-2
+            <div class="flex-shrink-0 flex items-center justify-end p-4 border-t border-gray-200 space-x-2
                         md:static sticky bottom-0 bg-white z-10">
                 <button onclick="closeModal()" 
                         class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">

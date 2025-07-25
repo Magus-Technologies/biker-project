@@ -132,32 +132,39 @@ class ClienteMayoristaController extends Controller
     /**
      * Get client details for modal (AJAX)
      */
-    public function obtenerDetalles(string $id)
-    {
-        try {
-            $cliente = ClienteMayorista::with(['usuarioRegistro', 'usuarioActualizacion'])->find($id);
-            
-            if (!$cliente) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cliente mayorista no encontrado'
-                ], 404);
-            }
-            
-            $html = view('clientes-mayoristas.partials.detalles-cliente', compact('cliente'))->render();
-            
-            return response()->json([
-                'success' => true,
-                'html' => $html
-            ]);
-            
-        } catch (\Exception $e) {
+ public function obtenerDetalles(string $id)
+{
+    \Log::info('Método obtenerDetalles llamado con ID: ' . $id);
+    
+    try {
+        $cliente = ClienteMayorista::with(['usuarioRegistro', 'usuarioActualizacion'])->find($id);
+        
+        \Log::info('Cliente encontrado: ' . ($cliente ? 'Sí' : 'No'));
+        
+        if (!$cliente) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar los detalles: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Cliente mayorista no encontrado'
+            ], 404);
         }
+        
+        \Log::info('Intentando renderizar vista...');
+        $html = view('clientes-mayoristas.partials.detalles-cliente', compact('cliente'))->render();
+        \Log::info('Vista renderizada exitosamente');
+        
+        return response()->json([
+            'success' => true,
+            'html' => $html
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error('Error en obtenerDetalles: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar los detalles: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Show the form for editing the specified resource.

@@ -1,4 +1,4 @@
-<!-- resources\views\clientes-mayoristas\partials\detalles-cliente.blade.php -->
+<!-- resources\views\clientes-mayoristas\partials\detalles-cliente.blade.php-->
 <div class="space-y-4 md:space-y-6">
     <!-- Header con foto y datos principales -->
     <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg px-4 md:px-6 py-4 md:py-6 text-white">
@@ -134,7 +134,7 @@
     </div>
 
     <!-- Información del Sistema -->
-    <div class="bg-gray-50 rounded-lg p-3 md:p-4 lg:col-span-2">
+    <div class="bg-gray-50 rounded-lg p-3 md:p-4">
         <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4 flex items-center">
             <svg class="w-4 h-4 md:w-5 md:h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -150,7 +150,7 @@
                 <div class="flex flex-col md:flex-row md:justify-between">
                     <span class="text-gray-600 text-sm md:text-base">Fecha de Registro:</span>
                     <span class="font-medium text-sm md:text-base">
-                        {{ $cliente->fecha_registro ? \Carbon\Carbon::parse($cliente->fecha_registro)->format('d/m/Y H:i') : 'N/A' }}
+                        {{ $cliente->created_at ? $cliente->created_at->format('d/m/Y H:i') : 'N/A' }}
                     </span>
                 </div>
             </div>
@@ -163,7 +163,7 @@
                     <div class="flex flex-col md:flex-row md:justify-between">
                         <span class="text-gray-600 text-sm md:text-base">Fecha de actualización:</span>
                         <span class="font-medium text-sm md:text-base">
-                            {{ $cliente->fecha_actualizacion ? \Carbon\Carbon::parse($cliente->fecha_actualizacion)->format('d/m/Y H:i') : 'N/A' }}
+                            {{ $cliente->updated_at ? $cliente->updated_at->format('d/m/Y H:i') : 'N/A' }}
                         </span>
                     </div>
                 </div>
