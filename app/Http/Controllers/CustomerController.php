@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Drive;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException as ValidationValidationException;
@@ -23,7 +24,8 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return view('driver.create');
+        $regions = Region::all();
+        return view('driver.create', compact('regions'));
     }
 
     /**
@@ -32,44 +34,53 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $messages = [
-            'num_doc.unique' => 'El número de documento ya está registrado.',
+            'nro_documento.required' => 'El número de documento es obligatorio.',
+            'nro_documento.unique' => 'El número de documento ya está registrado.',
+            'telefono.required' => 'El número de teléfono es obligatorio.',
+            'nro_chasis.required' => 'El número de chasis es obligatorio.',
+            'nro_chasis.unique' => 'El número de chasis ya está registrado.',
+            'nro_placa.required' => 'El número de placa es obligatorio.',
+            'nro_placa.unique' => 'El número de placa ya está registrado.',
             'nro_motor.unique' => 'El número de motor ya está registrado.',
-            'nro_licencia.unique' => 'La licencia ya está registrada.',
         ];
+        
         try {
             $request->validate([
-                'nro_motor' => 'unique:drives,nro_motor',
-                'num_doc' => 'nullable|unique:drives,nro_documento',
-                'nro_licencia' => 'nullable|unique:drives,nro_licencia',
+                'nro_documento' => 'required|unique:drives,nro_documento',
+                'telefono' => 'required',
+                'nro_chasis' => 'required|unique:drives,nro_chasis',
+                'nro_placa' => 'required|unique:drives,nro_placa',
+                'nro_motor' => 'nullable|unique:drives,nro_motor',
             ], $messages);
         } catch (ValidationValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+        
         try {
             $driver = Drive::create([
                 'codigo' => $this->generateCode(),
                 'tipo_doc' => $request->tipo_doc,
-                'nro_documento' => $request->num_doc,
-                'nacionalidad' => $request->nacionalidad,
+                'nro_documento' => $request->nro_documento,
                 'nombres' => $request->nombres,
                 'apellido_paterno' => $request->apellido_paterno,
                 'apellido_materno' => $request->apellido_materno,
-                'nro_licencia' => $request->nro_licencia,
-                'categoria_licencia' => $request->licencia_categoria,
                 'nro_motor' => $request->nro_motor,
+                'nro_chasis' => $request->nro_chasis,
+                'nro_placa' => $request->nro_placa,
                 'fecha_nacimiento' => $request->fecha_nacimiento,
                 'telefono' => $request->telefono,
                 'correo' => $request->correo,
                 'departamento' => $request->departamento,
                 'provincia' => $request->provincia,
                 'distrito' => $request->distrito,
-                'direccion_detalle' => $request->direccion_domicilio,
-                'nombres_contacto' => $request->nombre_contacto,
+                'direccion_detalle' => $request->direccion_detalle,
+                'nombres_contacto' => $request->nombres_contacto,
                 'telefono_contacto' => $request->telefono_contacto,
                 'parentesco_contacto' => $request->parentesco_contacto,
                 'photo' => $request->photo,
                 'user_register' => auth()->user()->id,
             ]);
+            
             if ($driver) {
                 return response()->json([
                     'success' => true,
@@ -88,18 +99,56 @@ class CustomerController extends Controller
             ]);
         }
     }
+    
     public function generateCode()
     {
         $lastCodigo = Drive::max('codigo') ?? '0000000';
         $nextCodigo = intval($lastCodigo) + 1;
         return str_pad($nextCodigo, 7, '0', STR_PAD_LEFT);
     }
+    
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        $driver = Drive::with(['userRegistered', 'userUpdated'])->find($id);
+        
+        if (!$driver) {
+            return redirect()->route('drives.index')->with('error', 'Conductor no encontrado');
+        }
+        
+        return view('driver.show', compact('driver'));
+    }
+
+    /**
+     * Get driver details for modal (AJAX)
+     */
+    public function getDetails(string $id)
+    {
+        try {
+            $driver = Drive::with(['userRegistered', 'userUpdated'])->find($id);
+            
+            if (!$driver) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Conductor no encontrado'
+                ], 404);
+            }
+            
+            $html = view('driver.partials.driver-details', compact('driver'))->render();
+            
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar los detalles: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -109,9 +158,10 @@ class CustomerController extends Controller
     {
         $driver = Drive::find($id);
         if (!$driver) {
-            return redirect()->route('driver.index');
+            return redirect()->route('drives.index');
         }
-        return view('driver.edit', compact('driver'));
+        $regions = Region::all();
+        return view('driver.edit', compact('driver', 'regions'));
     }
 
     /**
@@ -120,28 +170,40 @@ class CustomerController extends Controller
     public function update(Request $request, string $id)
     {
         $messages = [
+            'nro_documento.required' => 'El número de documento es obligatorio.',
             'nro_documento.unique' => 'El número de documento ya está registrado.',
+            'telefono.required' => 'El número de teléfono es obligatorio.',
+            'nro_chasis.required' => 'El número de chasis es obligatorio.',
+            'nro_chasis.unique' => 'El número de chasis ya está registrado.',
+            'nro_placa.required' => 'El número de placa es obligatorio.',
+            'nro_placa.unique' => 'El número de placa ya está registrado.',
             'nro_motor.unique' => 'El número de motor ya está registrado.',
-            'nro_licencia.unique' => 'La licencia ya está registrada.',
         ];
+        
         try {
             $request->validate([
                 'nro_documento' => [
-                    'nullable',
+                    'required',
                     Rule::unique('drives', 'nro_documento')->ignore($id),
+                ],
+                'telefono' => 'required',
+                'nro_chasis' => [
+                    'required',
+                    Rule::unique('drives', 'nro_chasis')->ignore($id),
+                ],
+                'nro_placa' => [
+                    'required',
+                    Rule::unique('drives', 'nro_placa')->ignore($id),
                 ],
                 'nro_motor' => [
                     'nullable',
                     Rule::unique('drives', 'nro_motor')->ignore($id),
                 ],
-                'nro_licencia' => [
-                    'nullable',
-                    Rule::unique('drives', 'nro_licencia')->ignore($id),
-                ],
             ], $messages);
         } catch (ValidationValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+        
         $driver = Drive::find($id);
 
         if (!$driver) {
@@ -150,6 +212,7 @@ class CustomerController extends Controller
                 'message' => 'Conductor no encontrado'
             ], 404);
         }
+        
         try {
             $driver->update($request->except(['_method', '_token']));
 

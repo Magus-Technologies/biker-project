@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClienteMayoristaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\WholesaleController;
+use App\Http\Controllers\CustomerController;
 use App\Models\Product;
 use App\Models\Wholesaler;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +47,7 @@ Route::group(
         Route::get('users/{userId}/delete', [App\Http\Controllers\UserController::class, 'destroy']);
         //CLIENTES
         Route::resource('drives', App\Http\Controllers\CustomerController::class);
+        Route::get('/drives/{id}/details', [CustomerController::class, 'getDetails'])->name('drives.details');
         //MECANICOS
         Route::resource('mechanics', App\Http\Controllers\MechanicController::class);
         Route::get('mechanic/MecanicosDisponibles', [App\Http\Controllers\MechanicController::class, 'MecanicosDisponibles'])->name('obtener.MecanicosDisponibles');
@@ -110,6 +113,9 @@ Route::group(
         Route::get('/buy/detalles/{id}', [BuyController::class, 'detallesBuy'])->name('buy.detallesBuy');
         Route::get('/buy/pdf/{id}', [BuyController::class, 'generatePDF'])->name('buy.pdf');
 
-    }
+
+        Route::resource('clientes-mayoristas', ClienteMayoristaController::class);
+Route::get('/clientes-mayoristas/{id}/detalles', [ClienteMayoristaController::class, 'obtenerDetalles'])->name('clientes-mayoristas.detalles');
+   }
 );
 require __DIR__ . '/auth.php';

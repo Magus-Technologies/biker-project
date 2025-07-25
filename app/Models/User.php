@@ -28,6 +28,7 @@ class User extends Authenticatable
         'direccion',
         'status',
         'correo',
+         'tienda_id',
         'dni',
         'user_register',
         'user_update',
@@ -66,6 +67,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Service::class, 'users_id'); // Relación con la tabla de servicios
     }
+    public function tienda()
+{
+    return $this->belongsTo(Tienda::class, 'tienda_id');
+}
     protected static function booted()
     {
         static::creating(function ($model) {

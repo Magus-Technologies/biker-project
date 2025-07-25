@@ -1,8 +1,10 @@
 <?php
+// Actualizar app/Http/Controllers/UserController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Tienda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -19,14 +21,18 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::with('roles')->get();
+        $users = User::with(['roles', 'tienda'])->get();
         return view('role-permission.workers.index', ['users' => $users]);
     }
 
     public function create()
     {
         $roles = Role::pluck('name', 'name')->all();
-        return view('role-permission.workers.create', ['roles' => $roles]);
+        $tiendas = Tienda::activas()->select('id', 'nombre')->orderBy('nombre')->get();
+        return view('role-permission.workers.create', [
+            'roles' => $roles,
+            'tiendas' => $tiendas
+        ]);
     }
 
     public function store(Request $request)
@@ -39,8 +45,9 @@ class UserController extends Controller
             'apellidos' => 'required|string|max:255',
             'telefono' => 'required|string|max:255',
             'direccion' => 'required|string|max:255',
-            'dni' => 'required|string|unique:users,dni',
-            'correo' => 'required|string|max:255|unique:users,correo',
+            'dni' => 'required|string|unique:users,dni|size:8',
+            'correo' => 'required|email|max:255|unique:users,correo',
+            'tienda_id' => 'nullable|exists:tiendas,id'
         ]);
 
         $user = User::create([
@@ -52,14 +59,16 @@ class UserController extends Controller
             'direccion' => $request->direccion,
             'dni' => $request->dni,
             'correo' => $request->correo,
+            'tienda_id' => $request->tienda_id,
             'user_register' => auth()->user()->id,
             'codigo' => $this->generateCode(),
         ]);
 
         $user->syncRoles($request->roles);
 
-        return redirect('/users')->with('status', 'Trabajador creado con éxito');
+        return redirect('/users')->with('status', 'Trabajador creado con éxito');
     }
+
     public function generateCode()
     {
         $lastCodigo = User::max('codigo') ?? '0000000';
@@ -71,10 +80,13 @@ class UserController extends Controller
     {
         $roles = Role::pluck('name', 'name')->all();
         $userRoles = $user->roles->pluck('name', 'name')->all();
+        $tiendas = Tienda::activas()->select('id', 'nombre')->orderBy('nombre')->get();
+        
         return view('role-permission.workers.edit', [
             'user' => $user,
             'roles' => $roles,
-            'userRoles' => $userRoles
+            'userRoles' => $userRoles,
+            'tiendas' => $tiendas
         ]);
     }
 
@@ -83,7 +95,13 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'password' => 'nullable|string|min:8|max:20',
-            'roles' => 'required'
+            'roles' => 'required',
+            'apellidos' => 'required|string|max:255',
+            'telefono' => 'required|string|max:255',
+            'direccion' => 'required|string|max:255',
+            'dni' => 'required|string|size:8|unique:users,dni,' . $user->id,
+            'correo' => 'required|email|max:255|unique:users,correo,' . $user->id,
+            'tienda_id' => 'nullable|exists:tiendas,id'
         ]);
 
         $data = [
@@ -94,6 +112,7 @@ class UserController extends Controller
             'direccion' => $request->direccion,
             'dni' => $request->dni,
             'correo' => $request->correo,
+            'tienda_id' => $request->tienda_id,
             'user_update' => auth()->user()->id
         ];
 
@@ -106,7 +125,7 @@ class UserController extends Controller
         $user->update($data);
         $user->syncRoles($request->roles);
 
-        return redirect('/users')->with('status', 'Trabajador actualizado con éxito');
+        return redirect('/users')->with('status', 'Trabajador actualizado con éxito');
     }
 
     public function destroy($userId)

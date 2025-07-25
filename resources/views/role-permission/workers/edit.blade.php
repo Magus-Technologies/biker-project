@@ -1,3 +1,4 @@
+<!-- resources\views\role-permission\workers\edit.blade.php -->
 <x-app-layout>
     <div class="container mx-auto mt-8 px-6">
         <div class="row justify-center">
