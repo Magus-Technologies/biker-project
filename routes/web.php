@@ -84,15 +84,15 @@ Route::group(
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
         //VENTAS
-        Route::resource('sales',  SaleController::class);
+        Route::resource('sales', SaleController::class);
         Route::get('/sale/listado', [SaleController::class, 'filtroPorfecha'])->name('sales.filtroPorfecha');
         Route::get('/sale/detalles/{id}', [SaleController::class, 'detallesVenta'])->name('sale.detallesVenta');
         Route::get('/sale/pdf/{id}', [SaleController::class, 'generatePDF'])->name('sales.pdf');
-        
+
         Route::get('/sale/pdf/nota/{id}', [SaleController::class, 'generatePDFNotaVenta'])->name('salesNota.pdf');
         Route::post('/sale/enviar-sunat/{id}', [SaleController::class, 'enviarSunat'])->name('sales.enviarSunat');
         //UNIDAD MEDIDA
-        Route::resource('units',  App\Http\Controllers\UnitController::class);
+        Route::resource('units', App\Http\Controllers\UnitController::class);
         Route::get('/units', [UnitController::class, 'search']);
         // COTIZACIONES
         Route::resource('quotations', QuotationController::class);
@@ -115,7 +115,7 @@ Route::group(
 
 
         Route::resource('clientes-mayoristas', ClienteMayoristaController::class);
-Route::get('/clientes-mayoristas/{id}/detalles', [ClienteMayoristaController::class, 'obtenerDetalles'])->name('clientes-mayoristas.detalles');
-   }
+        Route::get('/clientes-mayoristas/{id}/detalles', [ClienteMayoristaController::class, 'obtenerDetalles'])->name('clientes-mayoristas.detalles');
+    }
 );
 require __DIR__ . '/auth.php';
