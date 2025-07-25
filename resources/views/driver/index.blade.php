@@ -201,7 +201,7 @@
             document.body.style.overflow = 'hidden';
             
             // Hacer petición AJAX
-            fetch(`/drives/${driverId}/details`)
+          fetch(`{{ route('drives.details', ['id' => '__driverId__']) }}`.replace('__driverId__', driverId))
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
