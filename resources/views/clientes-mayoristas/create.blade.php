@@ -161,7 +161,7 @@
 </div>
 </x-app-layout>
 <script>
-    const _URL = '<?= URL::base() ?>';
+   
 
 let form = document.getElementById('formClienteMayorista');
 form.addEventListener('submit', function(e) {
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function fetchProvinces(regionId) {
-        fetch(_URL + `/api/provinces/${regionId}`)
+        fetch( `/biker-project/public/api/provinces/${regionId}`)
             .then(response => response.json())
             .then(data => {
                 const provinceSelect = document.getElementById('provinces_id');
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchDistricts(provinceId) {
-        fetch(_URL + `/api/districts/${provinceId}`)
+        fetch(`/biker-project/public/api/districts/${provinceId}`)
             .then(response => response.json())
             .then(data => {
                 const districtSelect = document.getElementById('districts_id');
