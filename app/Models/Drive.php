@@ -15,9 +15,9 @@ class Drive extends Model
         'nombres',
         'apellido_paterno',
         'apellido_materno',
-        'nacionalidad',
-        'nro_licencia',
-        'categoria_licencia',
+        // 'nacionalidad', // ya no se usa
+        // 'nro_licencia', //  ya no se usa
+        // 'categoria_licencia', // ya no se usa
         'fecha_nacimiento',
         'telefono',
         'correo',
@@ -36,6 +36,8 @@ class Drive extends Model
         'status',
         'codigo',
         'nro_motor',
+        'nro_chasis', // NUEVO CAMPO
+        'nro_placa',  // NUEVO CAMPO
     ];
 
     public $timestamps = true;
@@ -56,6 +58,7 @@ class Drive extends Model
     {
         return $this->belongsTo(User::class, 'user_update');
     }
+    
     protected static function booted()
     {
         static::creating(function ($model) {

@@ -12,6 +12,7 @@ use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException as ValidationValidationException;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -290,13 +291,12 @@ class ProductController extends Controller
             'brand.required' => 'La marca es obligatoria.',
             'unit_name.required' => 'La unidad es obligatoria.',
             'code_sku.required' => 'El código es obligatorio.',
-            'code_sku.unique' => 'El código ya está registrado.',
+            'code_sku.unique' => 'El código ya está registrado para este almacén y código de barra.',
             'code_bar.required' => 'El código de barra es obligatorio.',
-            'code_bar.unique' => 'El código de barra ya está registrado.',
+            'code_bar.unique' => 'El código de barra ya está registrado para este almacén y código SKU.',
             'prices.array' => 'Los precios deben ser una lista.',
             'prices.*.numeric' => 'Cada precio debe ser un número válido.',
             'prices.*.min' => 'Cada precio debe ser mayor o igual a 0.',
-
         ];
 
         try {
@@ -310,8 +310,22 @@ class ProductController extends Controller
                 'unit_name' => 'required|string|max:255',
                 'prices' => 'nullable|array',
                 'prices.*' => 'nullable|numeric|min:0',
-                'code_sku' => 'required|string|unique:products,code_sku',
-                'code_bar' => 'required|string|unique:products,code_bar',
+                'code_sku' => [
+                    'required',
+                    'string',
+                    Rule::unique('products')->where(function ($query) use ($request) {
+                        return $query->where('warehouse_id', $request->warehouse_id)
+                            ->where('code_bar', $request->code_bar);
+                    }),
+                ],
+                'code_bar' => [
+                    'required',
+                    'string',
+                    Rule::unique('products')->where(function ($query) use ($request) {
+                        return $query->where('warehouse_id', $request->warehouse_id)
+                            ->where('code_sku', $request->code_sku);
+                    }),
+                ],
             ], $messages);
 
             $validated['code'] = $this->generateCode();
@@ -332,12 +346,9 @@ class ProductController extends Controller
             ]);
             $validated['unit_id'] = $unit->id;
 
-
             // Normaliza la marca y la crea si no existe
             $brandName = ucfirst(strtolower($request->brand));
             $brand = Brand::firstOrCreate(['name' => $brandName]);
-
-            // Agregar el brand_id a los datos validados
             $validated['brand_id'] = $brand->id;
 
             $product = Product::create($validated);
@@ -353,6 +364,7 @@ class ProductController extends Controller
                     ]);
                 }
             }
+
             $prices = $validated['prices'] ?? [];
             $priceData = [];
             foreach ($prices as $type => $price) {
