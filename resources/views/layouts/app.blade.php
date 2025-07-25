@@ -599,13 +599,13 @@
                                 <span class="nav-text">Clientes</span>
                             </a>
                         @endcan
-                        
+<!--                         
                         <div class="nav-link submenu-link cursor-pointer">
                             <i class="bi bi-building"></i>
                             <span class="nav-text">Sucursales</span>
-                        </div>
+                        </div> -->
                         
-                        <a class="nav-link submenu-link {{ request()->routeIs('wholesalers.index') ? 'active' : '' }}" href="{{ route('wholesalers.index') }}">
+                        <a class="nav-link submenu-link {{ request()->routeIs('clientes-mayoristas.index') ? 'active' : '' }}" href="{{ route('clientes-mayoristas.index') }}">
                             <i class="bi bi-people"></i>
                             <span class="nav-text">Mayoristas</span>
                         </a>
