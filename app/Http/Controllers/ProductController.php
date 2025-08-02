@@ -19,17 +19,21 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use App\Imports\ProductsImport;
 use App\Models\UnitType;
+use App\Models\Tienda;
+use App\Models\ScannedCode;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    // Reemplaza la función index() existente
     public function index()
     {
-        $warehouses = Warehouse::all();
-        $products = Product::where('status', 1)->with('brand', 'unit', 'warehouse', 'prices')->get();
-        return view('product.index', compact('products', 'warehouses'));
+        $warehouses = Warehouse::with('tienda')->get();
+        $tiendas = Tienda::where('status', 1)->get();
+        $products = Product::where('status', 1)->with('brand', 'unit', 'prices', 'stocks.tienda')->get();
+        return view('product.index', compact('products', 'warehouses', 'tiendas'));
     }
     public function export(Request $request)
     {
@@ -176,7 +180,7 @@ class ProductController extends Controller
     {
         $buscar = $request->buscar;
         $query = Product::where('status', 1)
-            ->with('brand', 'unit', 'warehouse', 'images', 'prices');
+            ->with('brand', 'unit', 'images', 'prices', 'stocks.tienda'); // ← Quité 'warehouse' y agregué 'stocks.tienda'
 
         if (!empty($buscar)) {
             $query->where(function ($q) use ($buscar) {
@@ -184,9 +188,11 @@ class ProductController extends Controller
                     ->orWhere('code', 'like', "%{$buscar}%");
             });
         }
-        if ($request->has('almacen') && $request->almacen !== 'todos') {
-            $query->where('warehouse_id', $request->almacen);
-        }
+        
+        // Comenté esta parte porque no tienes warehouse_id en products
+        // if ($request->has('almacen') && $request->almacen !== 'todos') {
+        //     $query->where('warehouse_id', $request->almacen);
+        // }
 
         $products = $query->get();
 
@@ -267,12 +273,13 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    // Reemplaza la función create() existente
     public function create()
     {
         $brands = Brand::all();
         $units = Unit::all();
-        $warehouses = Warehouse::all();
-        return view('product.create', compact('brands', 'units', 'warehouses'));
+        $tiendas = Tienda::where('status', 1)->get();
+        return view('product.create', compact('brands', 'units', 'tiendas'));
     }
     public function generateCode()
     {
@@ -281,7 +288,7 @@ class ProductController extends Controller
         return str_pad($nextCodigo, 7, '0', STR_PAD_LEFT);
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $messages = [
             'description.string' => 'La descripción debe ser un texto.',
@@ -291,48 +298,50 @@ class ProductController extends Controller
             'brand.required' => 'La marca es obligatoria.',
             'unit_name.required' => 'La unidad es obligatoria.',
             'code_sku.required' => 'El código es obligatorio.',
-            'code_sku.unique' => 'El código ya está registrado para este almacén y código de barra.',
-            'code_bar.required' => 'El código de barra es obligatorio.',
+            'code_sku.unique' => 'El código SKU ya está registrado.',
+            'code_bar.unique' => 'El código de barras ya está registrado.',
             'code_bar.unique' => 'El código de barra ya está registrado para este almacén y código SKU.',
             'prices.array' => 'Los precios deben ser una lista.',
             'prices.*.numeric' => 'Cada precio debe ser un número válido.',
             'prices.*.min' => 'Cada precio debe ser mayor o igual a 0.',
         ];
 
+        // Determinar si se necesita validar almacén y tienda
+        $quantity = $request->quantity ?? 0;
+        $needsWarehouse = $quantity > 0;
+        
+        $validationRules = [
+            'description' => 'nullable|string',
+            'amount' => 'nullable|integer',
+            'model' => 'required|string',
+            'location' => 'nullable|string',
+            'brand' => 'required|string|max:255',
+            'unit_name' => 'required|string|max:255',
+            'prices' => 'nullable|array',
+            'prices.*' => 'nullable|numeric|min:0',
+            'code_sku' => 'required|string|unique:products,code_sku',
+            'code_bar' => 'required|string|unique:products,code_bar',
+            'quantity' => 'nullable|integer|min:0', // Cambiado: ahora es nullable y min:0
+            'control_type' => 'required|in:cantidad,codigo_unico',
+        ];
+        
+        // Solo agregar validaciones de tienda si la cantidad es mayor a 0
+        if ($needsWarehouse) {
+            $validationRules['tienda_id'] = 'required|exists:tiendas,id';
+        }
+        
         try {
-            $validated = $request->validate([
-                'description' => 'nullable|string',
-                'amount' => 'nullable|integer',
-                'model' => 'required|string',
-                'location' => 'nullable|string',
-                'warehouse_id' => 'required|exists:warehouses,id',
-                'brand' => 'required|string|max:255',
-                'unit_name' => 'required|string|max:255',
-                'prices' => 'nullable|array',
-                'prices.*' => 'nullable|numeric|min:0',
-                'code_sku' => [
-                    'required',
-                    'string',
-                    Rule::unique('products')->where(function ($query) use ($request) {
-                        return $query->where('warehouse_id', $request->warehouse_id)
-                            ->where('code_bar', $request->code_bar);
-                    }),
-                ],
-                'code_bar' => [
-                    'required',
-                    'string',
-                    Rule::unique('products')->where(function ($query) use ($request) {
-                        return $query->where('warehouse_id', $request->warehouse_id)
-                            ->where('code_sku', $request->code_sku);
-                    }),
-                ],
-            ], $messages);
-
-            $validated['code'] = $this->generateCode();
+            $validated = $request->validate($validationRules, $messages);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        // Solo después de que TODA la validación pase, generar código y comenzar transacción
+        $validated['code'] = $this->generateCode();
+
+        // Asegurar que el control_type se guarde correctamente
+        $validated['control_type'] = $request->control_type;
+        
         DB::beginTransaction();
 
         try {
@@ -377,11 +386,25 @@ class ProductController extends Controller
                 }
             }
 
-            Stock::create([
-                'product_id' => $product->id,
-                'quantity' => $request->quantity,
-                'minimum_stock' => $request->minimum_stock,
-            ]);
+            // Crear stock solo si hay cantidad y tienda seleccionada
+            if ($quantity > 0 && $request->tienda_id) {
+                $stock = Stock::create([
+                    'product_id' => $product->id,
+                    'tienda_id' => $request->tienda_id,
+                    'quantity' => $request->quantity,
+                    'minimum_stock' => $request->minimum_stock,
+                ]);
+
+                // Si es control por código único, guardar códigos escaneados
+                if ($request->control_type === 'codigo_unico' && $request->scanned_codes) {
+                    foreach ($request->scanned_codes as $code) {
+                        ScannedCode::create([
+                            'stock_id' => $stock->id,
+                            'code' => $code
+                        ]);
+                    }
+                }
+            }
 
             if (!empty($priceData)) {
                 ProductPrice::insert($priceData);
@@ -401,7 +424,7 @@ class ProductController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
+    } 
 
     /**
      * Display the specified resource.
@@ -433,15 +456,15 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    // Reemplaza la función edit() existente
     public function edit(string $id)
     {
         try {
-            $product = Product::with('brand', 'unit', 'warehouse', 'prices')->findOrFail($id);
-            // $brands = Brand::all();
+            $product = Product::with('brand', 'unit', 'prices')->findOrFail($id);
             $units = Unit::all();
-            $warehouses = Warehouse::all();
-            $productStock = Stock::where('product_id', $product->id)->first();
-            return view('product.edit', compact('product', 'units', 'warehouses', 'productStock'));
+            $tiendas = Tienda::where('status', 1)->get();
+            $productStock = Stock::where('product_id', $product->id)->with('tienda', 'scannedCodes')->get();
+            return view('product.edit', compact('product', 'units', 'tiendas', 'productStock'));
         } catch (\Throwable $th) {
             return redirect()->route('product.index');
         }
@@ -473,7 +496,6 @@ class ProductController extends Controller
                 'amount' => 'nullable|integer',
                 'model' => 'required|string',
                 'location' => 'nullable|string',
-                'warehouse_id' => 'required|exists:warehouses,id',
                 'brand' => 'required|string|max:255',
                 'unit_name' => 'required|string|max:255',
                 'prices' => 'nullable|array',
@@ -482,7 +504,7 @@ class ProductController extends Controller
                 'code_bar' => 'required|string|unique:products,code_bar,' . $id,
             ], $messages);
         } catch (ValidationValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 500);
+            return response()->json(['errors' => $e->errors()], 422);
         }
         try {
             // Buscar el producto existente
@@ -545,16 +567,6 @@ class ProductController extends Controller
                 }
             }
 
-            // Actualizar el stock
-            $stock = Stock::where('product_id', $product->id)->first();
-            if ($stock) {
-                $stock->update([
-                    'product_id' => $product->id,
-                    'quantity' => $request->quantity,
-                    'minimum_stock' => $request->minimum_stock,
-                ]);
-            }
-
             // Insertar los nuevos precios si hay datos
             if (!empty($priceData)) {
                 ProductPrice::insert($priceData);
@@ -574,6 +586,123 @@ class ProductController extends Controller
         }
     }
 
+    public function manageStock(Request $request, $productId)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $action = $request->action; // 'increase' o 'decrease'
+            $quantity = $request->quantity;
+            $tiendaId = $request->tienda_id;
+
+            $stock = Stock::where('product_id', $productId)
+                        ->where('tienda_id', $tiendaId)
+                        ->first();
+                        
+            if (!$stock) {
+                $stock = Stock::create([
+                    'product_id' => $productId,
+                    'tienda_id' => $tiendaId,
+                    'quantity' => 0,
+                    'minimum_stock' => 0
+                ]);
+            }
+            
+            $product = Product::find($productId);
+            
+            if ($action === 'increase') {
+                $stock->quantity += $quantity;
+                
+                // Si es control por código único, guardar códigos
+                if ($product->control_type === 'codigo_unico' && $request->scanned_codes) {
+                    foreach ($request->scanned_codes as $code) {
+                        ScannedCode::create([
+                            'stock_id' => $stock->id,
+                            'code' => $code
+                        ]);
+                    }
+                }
+            } else { // decrease
+                if ($product->control_type === 'codigo_unico') {
+                    // Para código único: eliminar códigos específicos seleccionados
+                    if ($request->codes_to_remove) {
+                        $removedCount = 0;
+                        foreach ($request->codes_to_remove as $codeId) {
+                            $scannedCode = ScannedCode::where('stock_id', $stock->id)
+                                                    ->where('id', $codeId)
+                                                    ->first();
+                            if ($scannedCode) {
+                                $scannedCode->delete();
+                                $removedCount++;
+                            }
+                        }
+                        $stock->quantity -= $removedCount;
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Debe seleccionar los códigos específicos a eliminar'
+                        ], 400);
+                    }
+                } else {
+                    // Para control por cantidad: disminuir normalmente
+                    $stock->quantity -= $quantity;
+                }
+                
+                if ($stock->quantity < 0) $stock->quantity = 0;
+            }
+            
+            $stock->save();
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Stock actualizado correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar stock: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getStockCodes(Request $request, $productId)
+    {
+        try {
+            $tiendaId = $request->tienda_id;
+
+            $stock = Stock::where('product_id', $productId)
+                        ->where('tienda_id', $tiendaId)
+                        ->with('scannedCodes')
+                        ->first();
+                        
+            if (!$stock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró stock para este producto en la tienda especificada'
+                ], 404);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'codes' => $stock->scannedCodes->map(function($code) {
+                    return [
+                        'id' => $code->id,
+                        'code' => $code->code,
+                        'created_at' => $code->created_at->format('d/m/Y H:i')
+                    ];
+                })
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener códigos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Remove the specified resource from storage.

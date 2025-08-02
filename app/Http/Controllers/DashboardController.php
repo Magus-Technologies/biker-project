@@ -23,8 +23,8 @@ class DashboardController extends Controller
         $totalConductores = Drive::where('status', 1)->count();
         
         // Productos con stock bajo (menos de 10 unidades)
-        $productosStockBajo = Product::with(['brand', 'unit', 'stock'])
-            ->whereHas('stock', function($query) {
+        $productosStockBajo = Product::with(['brand', 'unit', 'stocks'])  // ← 'stocks' plural
+            ->whereHas('stocks', function($query) {  // ← 'stocks' plural
                 $query->where('quantity', '<', 10);
             })
             ->orderBy('created_at', 'desc')

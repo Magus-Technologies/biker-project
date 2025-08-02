@@ -12,6 +12,19 @@ use App\Models\BuyItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProductPrice;
+use App\Models\Supplier;  // ← Agregar esta línea
+use App\Models\Tienda; 
+use App\Models\PaymentMethod;  // ← Agregar esta línea
+use Illuminate\Support\Facades\Http;  // ← AGREGAR esta línea
+use App\Models\ScannedCode;           // ← AGREGAR esta línea
+use App\Models\BuyPaymentMethod;      // ← AGREGAR esta línea (si no existe ya)
+use App\Models\ProductPriceHistory;  
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use App\Models\BuyCreditInstallment;
+use App\Exports\BuysExport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\BuyTemplateExport;
 
 class BuyController extends Controller
 {
@@ -21,8 +34,9 @@ class BuyController extends Controller
     public function index()
     {
         $warehouses = Warehouse::all();
-        $products = Product::where('status', 1)->with('brand', 'unit', 'warehouse', 'prices','stock')->get();
-        return view('buy.index', compact('products', 'warehouses'));
+        $products = Product::where('status', 1)->with('brand', 'unit', 'prices', 'stocks')->get();
+        $suppliers = Supplier::where('status', 1)->get();  // ← Agregar esta línea
+        return view('buy.index', compact('products', 'warehouses', 'suppliers'));  // ← Agregar 'suppliers' al compact
     }
     public function search(Request $request)
     {
@@ -62,6 +76,7 @@ class BuyController extends Controller
             'serie' => $this->generateSerie($request->document_type_id),
             'number' => $this->generateNumero($request->document_type_id),
         ]);
+
 
         // Procesar cada producto
         foreach ($request->products as $productData) {
@@ -117,26 +132,44 @@ class BuyController extends Controller
     }
     public function generatePDF($id)
     {
-        $buy = Buy::with('buyItems.product', 'userRegister','documentType')->find($id);
+        $buy = Buy::with('buyItems.product', 'userRegister', 'documentType', 'supplier')->find($id);
         if (!$buy) {
             return abort(404, 'compra no encontrada');
         }
         
         $buy->buy_items = $buy->buyItems ?? [];
-        //dd($buy);
+        
+        // Agregar información del proveedor incluyendo documento
+        if ($buy->supplier) {
+            $buy->supplier_document = $buy->supplier->nro_documento;
+            $buy->supplier_doc_type = $buy->supplier->tipo_doc;
+            $buy->supplier_full_name = $buy->supplier->nombre_negocio ?: $buy->supplier->getFullNameAttribute();
+        } else {
+            $buy->supplier_document = null;
+            $buy->supplier_doc_type = null;
+            $buy->supplier_full_name = null;
+        }
+        
         $pdf = Pdf::loadView('buy.pdf', compact('buy'));
         return $pdf->stream('buy.pdf');
     }
     /**
      * Show the form for creating a new resource.
      */
+    // Busca el método create() (alrededor de la línea 125) y reemplázalo por:
     public function create()
     {
         $documentTypes = DocumentType::whereIn('name', ['NOTA DE VENTA'])->get();
         $warehouses = Warehouse::all();
+        $suppliers = Supplier::where('status', 1)->get();
+        $tiendas = Tienda::where('status', 1)->get();  // ← Línea agregada
 
-        return view('buy.create',compact('documentTypes','warehouses'));
+        $paymentMethods = PaymentMethod::where('status', 1)->get();  // ← Línea agregada
+
+        return view('buy.create',compact('documentTypes','warehouses','suppliers','tiendas','paymentMethods')); 
+
     }
+
     private function generateSerie($documentTypeId)
     {
         $documentTypeId = (int) $documentTypeId; // Convertir a entero
@@ -214,4 +247,1129 @@ class BuyController extends Controller
     {
         //
     }
+
+    public function getPriceHistory($productId)
+    {
+        $history = ProductPriceHistory::with(['buy', 'user'])
+            ->where('product_id', $productId)
+            ->where('type', 'buy')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($history);
+    }
+
+    /**
+     * Obtener compras filtradas para reportes
+     */
+    private function getFilteredBuys($filters)
+    {
+        $query = Buy::with([
+            'userRegister', 
+            'supplier', 
+            'tienda', 
+            'documentType',
+            'buyItems.product',
+            'paymentMethods.paymentMethod'
+        ]);
+
+        if (!empty($filters['fecha_desde'])) {
+            $query->whereDate('fecha_registro', '>=', $filters['fecha_desde']);
+        }
+        
+        if (!empty($filters['fecha_hasta'])) {
+            $query->whereDate('fecha_registro', '<=', $filters['fecha_hasta']);
+        }
+        
+        if (!empty($filters['delivery_status'])) {
+            $query->where('delivery_status', $filters['delivery_status']);
+        }
+        
+        if (!empty($filters['supplier_id'])) {
+            $query->where('supplier_id', $filters['supplier_id']);
+        }
+        
+        if (!empty($filters['tienda_id'])) {
+            $query->where('tienda_id', $filters['tienda_id']);
+        }
+
+        return $query->orderBy('fecha_registro', 'desc')->get();
+    }
+
+    /**
+     * Crear o actualizar proveedor automáticamente
+     */
+    private function createOrUpdateSupplier($supplierData)
+    {
+        $supplier = Supplier::where('nro_documento', $supplierData['document'])
+            ->first();
+
+        if (!$supplier) {
+            $supplier = Supplier::create([
+                'nro_documento' => $supplierData['document'],
+                'nombres' => $supplierData['names'] ?? '',
+                'apellido_paterno' => $supplierData['paternal_surname'] ?? '',
+                'apellido_materno' => $supplierData['maternal_surname'] ?? '',
+                'nombre_negocio' => $supplierData['business_name'] ?? $supplierData['names'],
+                'tipo_doc' => strlen($supplierData['document']) == 8 ? 'DNI' : 'RUC',
+                'telefono' => $supplierData['phone'] ?? '',
+                'direccion_detalle' => $supplierData['address'] ?? '',
+                'status' => 1
+            ]);
+        } else {
+            // Actualizar información si es necesario
+            $supplier->update([
+                'nombres' => $supplierData['names'] ?? $supplier->nombres,
+                'nombre_negocio' => $supplierData['business_name'] ?? $supplier->nombre_negocio,
+                'telefono' => $supplierData['phone'] ?? $supplier->telefono,
+                'direccion_detalle' => $supplierData['address'] ?? $supplier->direccion_detalle
+            ]);
+        }
+
+        return $supplier;
+    }
+
+    /**
+     * Validar códigos únicos escaneados
+     */
+    private function validateScannedCodes($product, $scannedCodes, $quantity)
+    {
+        if ($product->control_type !== 'codigo_unico') {
+            return true;
+        }
+
+        if (count($scannedCodes) !== $quantity) {
+            throw new \Exception("El producto {$product->description} requiere escanear {$quantity} códigos únicos");
+        }
+
+        // Verificar que los códigos no estén duplicados
+        $uniqueCodes = array_unique($scannedCodes);
+        if (count($uniqueCodes) !== count($scannedCodes)) {
+            throw new \Exception("Hay códigos duplicados para el producto {$product->description}");
+        }
+
+        // Verificar que los códigos no existan ya en el sistema
+        foreach ($scannedCodes as $code) {
+            $existingCode = ScannedCode::where('code', $code)->first();
+            if ($existingCode) {
+                throw new \Exception("El código {$code} ya existe en el sistema");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Generar reporte de compras por proveedor
+     */
+    public function supplierReport(Request $request)
+    {
+        $supplierId = $request->supplier_id;
+        $dateFrom = $request->fecha_desde;
+        $dateTo = $request->fecha_hasta;
+
+        $supplier = Supplier::findOrFail($supplierId);
+        
+        $compras = Buy::with(['buyItems.product', 'tienda'])
+            ->where('supplier_id', $supplierId)
+            ->whereDate('fecha_registro', '>=', $dateFrom)
+            ->whereDate('fecha_registro', '<=', $dateTo)
+            ->get();
+
+        $totalCompras = $compras->sum('total_price');
+        $totalProductos = $compras->sum(function($compra) {
+            return $compra->buyItems->sum('quantity');
+        });
+
+        $pdf = Pdf::loadView('buy.supplier_report', compact(
+            'supplier', 
+            'compras', 
+            'totalCompras', 
+            'totalProductos',
+            'dateFrom',
+            'dateTo'
+        ));
+
+        return $pdf->download("reporte_proveedor_{$supplier->nro_documento}.pdf");
+    }
+
+    /**
+     * Reporte de productos más comprados
+     */
+    public function topProductsReport(Request $request)
+    {
+        $dateFrom = $request->fecha_desde;
+        $dateTo = $request->fecha_hasta;
+        $limit = $request->limit ?? 20;
+
+        $productos = DB::table('buy_items')
+            ->join('products', 'buy_items.product_id', '=', 'products.id')
+            ->join('buys', 'buy_items.buy_id', '=', 'buys.id')
+            ->whereDate('buys.fecha_registro', '>=', $dateFrom)
+            ->whereDate('buys.fecha_registro', '<=', $dateTo)
+            ->select(
+                'products.description',
+                'products.code_sku',
+                DB::raw('SUM(buy_items.quantity) as total_quantity'),
+                DB::raw('SUM(buy_items.quantity * buy_items.price) as total_amount'),
+                DB::raw('AVG(buy_items.price) as avg_price'),
+                DB::raw('COUNT(DISTINCT buy_items.buy_id) as total_purchases')
+            )
+            ->groupBy('products.id', 'products.description', 'products.code_sku')
+            ->orderBy('total_quantity', 'desc')
+            ->limit($limit)
+            ->get();
+
+        $pdf = Pdf::loadView('buy.top_products_report', compact(
+            'productos',
+            'dateFrom', 
+            'dateTo',
+            'limit'
+        ));
+
+        return $pdf->download('reporte_productos_mas_comprados.pdf');
+    }
+
+    /**
+     * Actualizar precios masivamente
+     */
+    public function updatePricesMassive(Request $request)
+    {
+        $request->validate([
+            'updates' => 'required|array',
+            'updates.*.product_id' => 'required|exists:products,id',
+            'updates.*.new_price' => 'required|numeric|min:0',
+            'updates.*.price_type' => 'required|in:buy,sale,wholesale'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($request->updates as $update) {
+                $productPrice = ProductPrice::where('product_id', $update['product_id'])
+                    ->where('type', $update['price_type'])
+                    ->first();
+
+                if ($productPrice) {
+                    // Guardar historial antes de actualizar
+                    ProductPriceHistory::create([
+                        'product_id' => $update['product_id'],
+                        'price' => $productPrice->price,
+                        'type' => $update['price_type']
+                    ]);
+
+                    // Actualizar precio
+                    $productPrice->update(['price' => $update['new_price']]);
+                }
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Precios actualizados correctamente'], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error al actualizar precios', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Obtener estadísticas de compras
+     */
+    public function getStatistics(Request $request)
+    {
+        $dateFrom = $request->fecha_desde ?? now()->startOfMonth();
+        $dateTo = $request->fecha_hasta ?? now()->endOfMonth();
+
+        $stats = [
+            'total_compras' => Buy::whereDate('fecha_registro', '>=', $dateFrom)
+                ->whereDate('fecha_registro', '<=', $dateTo)
+                ->count(),
+            
+            'total_monto' => Buy::whereDate('fecha_registro', '>=', $dateFrom)
+                ->whereDate('fecha_registro', '<=', $dateTo)
+                ->sum('total_price'),
+            
+            'compras_pendientes' => Buy::where('delivery_status', 'pending')
+                ->whereDate('fecha_registro', '>=', $dateFrom)
+                ->whereDate('fecha_registro', '<=', $dateTo)
+                ->count(),
+            
+            'compras_recibidas' => Buy::where('delivery_status', 'received')
+                ->whereDate('fecha_registro', '>=', $dateFrom)
+                ->whereDate('fecha_registro', '<=', $dateTo)
+                ->count(),
+            
+            'proveedores_activos' => Buy::whereDate('fecha_registro', '>=', $dateFrom)
+                ->whereDate('fecha_registro', '<=', $dateTo)
+                ->distinct('supplier_id')
+                ->count(),
+            
+            'productos_comprados' => DB::table('buy_items')
+                ->join('buys', 'buy_items.buy_id', '=', 'buys.id')
+                ->whereDate('buys.fecha_registro', '>=', $dateFrom)
+                ->whereDate('buys.fecha_registro', '<=', $dateTo)
+                ->sum('buy_items.quantity')
+        ];
+
+        return response()->json($stats);
+    }
+
+    /**
+     * Obtener lista filtrada de compras
+     */
+    public function filteredList(Request $request)
+    {
+       $query = Buy::with(['supplier', 'tienda', 'documentType', 'userRegister']);
+
+        if ($request->fecha_desde) {
+            $query->whereDate('fecha_registro', '>=', $request->fecha_desde);
+        }
+        
+        if ($request->fecha_hasta) {
+            $query->whereDate('fecha_registro', '<=', $request->fecha_hasta);
+        }
+        
+        if ($request->products_status) {
+            $query->where('delivery_status', $request->products_status === 'recibidos' ? 'received' : 'pending');
+        }
+        
+        if ($request->supplier_id) {
+            $query->where('supplier_id', $request->supplier_id);
+        }
+
+        $buys = $query->orderBy('fecha_registro', 'desc')->get();
+
+        // Agregar status de productos para la vista
+        $buys->each(function($buy) {
+            $buy->products_status = $buy->delivery_status === 'received' ? 'recibidos' : 'pendientes';
+        });
+
+        return response()->json($buys);
+    }
+
+    /**
+     * Exportar reportes
+     */
+    public function exportReports(Request $request)
+    {
+        $filters = [
+            'fecha_desde' => $request->fecha_desde,
+            'fecha_hasta' => $request->fecha_hasta,
+            'products_status' => $request->products_status,
+            'supplier_id' => $request->supplier_id
+        ];
+
+        $compras = $this->getFilteredBuys($filters);
+
+        if ($request->format === 'excel') {
+            return $this->exportExcel($compras);
+        } else {
+            return $this->generateDetailedPDF($compras);
+        }
+    }
+
+    /**
+     * Descargar plantilla de importación
+     */
+    public function downloadImportTemplate()
+    {
+        return Excel::download(new BuyTemplateExport(), 'plantilla_importacion_compras.xlsx');
+    }
+
+    /**
+     * Importar compras desde archivo (método legacy - redirige al nuevo proceso)
+     */
+    public function importBuys(Request $request)
+    {
+        // Redirigir al nuevo método de procesamiento
+        return $this->processImportFile($request);
+    }
+
+// ARCHIVO: app/Http/Controllers/BuyController.php
+// AGREGAR estas funciones al final del archivo, antes del último }
+
+    /**
+     * Buscar productos por código, SKU, código de barras o nombre
+     */
+    public function searchProducts(Request $request)
+    {
+        $search = $request->search;
+        
+        if (empty($search)) {
+            return response()->json([]);
+        }
+        
+        $products = Product::with(['prices', 'brand', 'unit', 'stocks'])
+            ->where('status', 1)
+            ->where(function($query) use ($search) {
+                $query->where('code', 'LIKE', "%{$search}%")
+                    ->orWhere('code_bar', 'LIKE', "%{$search}%")
+                    ->orWhere('code_sku', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
+            })
+            ->limit(10)
+            ->get();
+        
+        // Agregar información de precios y stock
+        $products->each(function($product) {
+            $product->precio_compra = $product->prices->where('type', 'buy')->first()->price ?? 0;
+            $product->precio_venta = $product->prices->where('type', 'sale')->first()->price ?? 0;
+            $product->stock_total = $product->stocks->sum('quantity');
+        });
+        
+        return response()->json($products);
+    }
+
+    /**
+     * Buscar información de documento (DNI/RUC)
+     */
+    public function buscarDocumento($doc)
+    {
+        $token = env('RENIEC_API_TOKEN');
+        
+        if (strlen($doc) == 8) {
+            $url = 'https://dniruc.apisperu.com/api/v1/dni/' . $doc . '?token=' . $token;
+        } else {
+            $url = 'https://dniruc.apisperu.com/api/v1/ruc/' . $doc . '?token=' . $token;
+        }
+        
+        // SOLUCIÓN: Desactiva verificación SSL solo en desarrollo
+        $response = Http::withoutVerifying()->get($url);
+        
+        if ($response->successful()) {
+            $data = $response->json();
+            
+            if (strlen($doc) == 8) {
+                $data["nombre"] = $data["nombres"] . " " . $data["apellidoPaterno"] . " " . $data["apellidoMaterno"];
+            } else {
+                $data["nombre"] = $data["razonSocial"];
+            }
+            
+            return response()->json($data);
+        } else {
+            return response()->json([
+                'message' => 'No se pudo obtener la información del documento',
+                'status' => $response->status()
+            ], $response->status());
+        }
+    }
+
+    /**
+     * Crear proveedor rápido
+     */
+    public function createQuickSupplier(Request $request)
+    {
+        $request->validate([
+            'nro_documento' => 'required|unique:clientes_mayoristas,nro_documento',
+            'nombres' => 'required|string|max:255',
+            'apellido_paterno' => 'nullable|string|max:255',
+            'apellido_materno' => 'nullable|string|max:255',
+            'nombre_negocio' => 'required|string|max:255',
+            'telefono' => 'nullable|string|max:20',
+            'direccion_detalle' => 'nullable|string|max:500'
+        ]);
+        
+        try {
+            $supplier = Supplier::create([
+                'codigo' => 'PROV' . str_pad(Supplier::count() + 1, 3, '0', STR_PAD_LEFT),
+                'nro_documento' => $request->nro_documento,
+                'nombres' => $request->nombres,
+                'apellido_paterno' => $request->apellido_paterno,
+                'apellido_materno' => $request->apellido_materno,
+                'nombre_negocio' => $request->nombre_negocio,
+                'tipo_doc' => strlen($request->nro_documento) == 8 ? 'DNI' : 'RUC',
+                'telefono' => $request->telefono,
+                'direccion_detalle' => $request->direccion_detalle,
+                'departamento' => null,
+                'provincia' => null,
+                'distrito' => null,
+                'user_register' => auth()->id(),
+                'status' => 1
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'supplier' => $supplier,
+                'message' => 'Proveedor creado exitosamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear proveedor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Registrar nueva compra con validaciones completas
+     */
+    public function storePurchase(Request $request)
+    {
+        $request->validate([
+            'supplier_id' => 'required|exists:clientes_mayoristas,id',
+            'document_type_id' => 'required|exists:document_types,id',
+            'tienda_id' => 'required|exists:tiendas,id',
+            'payment_type' => 'required|in:cash,credit',
+            'delivery_status' => 'required|in:received,pending',
+            'total_price' => 'required|numeric|min:0',
+            'igv' => 'required|numeric|min:0',
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
+            'payment_methods' => 'required|array|min:1'
+        ]);
+        
+        DB::beginTransaction();
+        
+        try {
+            // Crear la compra
+            $buy = Buy::create([
+                'supplier_id' => $request->supplier_id,
+                'document_type_id' => $request->document_type_id,
+                'tienda_id' => $request->tienda_id,
+                'payment_type' => $request->payment_type,
+                'delivery_status' => $request->delivery_status,
+                'total_price' => $request->total_price,
+                'igv' => $request->igv,
+                'observation' => $request->observation,
+                'serie' => $this->generateSerie($request->document_type_id),
+                'number' => $this->generateNumero($request->document_type_id),
+                'received_date' => $request->delivery_status === 'received' ? now() : null,
+                'customer_dni' => '', // Campo requerido por el modelo
+                'customer_names_surnames' => '', // Campo requerido por el modelo
+                'customer_address' => '' // Campo requerido por el modelo
+            ]);
+            
+            // Procesar productos
+            foreach ($request->products as $productData) {
+                $product = Product::findOrFail($productData['product_id']);
+                
+                
+                // Validar códigos escaneados SOLO si es código único Y productos están recibidos
+                $scannedCodes = [];
+                if ($product->control_type === 'codigo_unico' && $request->delivery_status === 'received') {
+                    // Buscar códigos escaneados en el array de productos
+                    $productos = $request->input('products', []);
+                    foreach ($productos as $prod) {
+                        if (isset($prod['product_id']) && $prod['product_id'] == $product->id) {
+                            if (isset($prod['scanned_codes']) && !empty($prod['scanned_codes'])) {
+                                if (is_string($prod['scanned_codes'])) {
+                                    $decoded = json_decode($prod['scanned_codes'], true);
+                                    $scannedCodes = is_array($decoded) ? $decoded : [];
+                                } elseif (is_array($prod['scanned_codes'])) {
+                                    $scannedCodes = $prod['scanned_codes'];
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (count($scannedCodes) !== (int)$productData['quantity']) {
+                        throw new \Exception("El producto {$product->description} requiere escanear {$productData['quantity']} códigos únicos. Se recibieron " . count($scannedCodes) . " códigos.");
+                    }
+                }
+
+                
+                // Crear item de compra
+                $buyItem = BuyItem::create([
+                    'buy_id' => $buy->id,
+                    'product_id' => $product->id,
+                    'tienda_id' => $request->tienda_id,
+                    'quantity' => $productData['quantity'],
+                    'price' => $productData['price'],
+                    'custom_price' => isset($productData['use_custom_price']) && $productData['use_custom_price'] ? $productData['price'] : null,
+                    'scanned_codes' => $product->control_type === 'codigo_unico' ? $scannedCodes : [] // Solo guardar códigos si es código único
+                ]);
+
+                
+                // Actualizar stock solo si los productos están recibidos
+                if ($request->delivery_status === 'received') {
+                    $stock = Stock::firstOrCreate(
+                        ['product_id' => $product->id, 'tienda_id' => $request->tienda_id],
+                        ['quantity' => 0, 'minimum_stock' => 0]
+                    );
+                    
+                    $stock->quantity += $productData['quantity'];
+                    $stock->save();
+                    
+                    // Guardar códigos escaneados si aplica
+                    if ($product->control_type === 'codigo_unico' && !empty($scannedCodes)) {
+                        foreach ($scannedCodes as $code) {
+                            ScannedCode::create([
+                                'stock_id' => $stock->id,
+                                'code' => $code
+                            ]);
+                        }
+                    }
+                }
+                
+                // Guardar historial de precios si es precio personalizado
+                if (isset($productData['use_custom_price']) && $productData['use_custom_price']) {
+                    ProductPriceHistory::create([
+                        'product_id' => $product->id,
+                        'buy_id' => $buy->id,
+                        'price' => $productData['price'],
+                        'type' => 'buy'
+                    ]);
+                } else {
+                    // Actualizar precio de compra del producto
+                    $productPrice = ProductPrice::where('product_id', $product->id)
+                        ->where('type', 'buy')
+                        ->first();
+                    
+                    if ($productPrice) {
+                        $productPrice->update(['price' => $productData['price']]);
+                    }
+                }
+            }
+            
+            // Guardar métodos de pago
+            foreach ($request->payment_methods as $index => $paymentMethod) {
+                $buyPaymentMethod = BuyPaymentMethod::create([
+                    'buy_id' => $buy->id,
+                    'payment_method_id' => $paymentMethod['payment_method_id'],
+                    'amount' => $paymentMethod['amount'],
+                    'installments' => $paymentMethod['installments'] ?? 1,
+                    'due_date' => $paymentMethod['due_date'] ?? null
+                ]);
+                
+                // Generar cuotas si el pago es a crédito y tiene más de 1 cuota
+                if ($request->payment_type === 'credit' && $buyPaymentMethod->installments > 1) {
+                    $installmentsConfig = null;
+                    if ($request->has("installments_config.{$index}")) {
+                        $installmentsConfig = json_decode($request->input("installments_config.{$index}"), true);
+                    }
+                    
+                    $this->generateCreditInstallments($buyPaymentMethod, $installmentsConfig);
+                }
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Compra registrada exitosamente',
+                'buy_id' => $buy->id
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar compra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generar cuotas automáticamente para pagos a crédito
+     */
+    private function generateCreditInstallments($buyPaymentMethod, $installmentsConfig = null)
+    {
+        if ($buyPaymentMethod->installments <= 1) {
+            return; // No generar cuotas si es pago único
+        }
+
+        $installmentAmount = $buyPaymentMethod->amount / $buyPaymentMethod->installments;
+        $baseDate = $buyPaymentMethod->due_date ? Carbon::parse($buyPaymentMethod->due_date) : Carbon::now();
+
+        for ($i = 1; $i <= $buyPaymentMethod->installments; $i++) {
+            // Calcular fecha de vencimiento para cada cuota
+            $dueDate = $baseDate->copy()->addMonths($i - 1);
+            
+            // Si hay configuración personalizada de cuotas, usar esos datos
+            $customAmount = $installmentAmount;
+            $customDate = $dueDate;
+            
+            if (is_array($installmentsConfig)) {
+                foreach ($installmentsConfig as $config) {
+                    if ($config['installment_number'] == $i) {
+                        $customAmount = $config['amount'];
+                        $customDate = Carbon::parse($config['due_date']);
+                        break;
+                    }
+                }
+            }
+
+            BuyCreditInstallment::create([
+                'buy_payment_method_id' => $buyPaymentMethod->id,
+                'installment_number' => $i,
+                'amount' => $customAmount,
+                'due_date' => $customDate,
+                'status' => 'pendiente'
+            ]);
+        }
+    }
+
+    /**
+     * Generar PDF detallado de compras
+     */
+    private function generateDetailedPDF($compras)
+    {
+        // Cargar datos adicionales para el reporte
+        $totalCompras = $compras->count();
+        $montoTotal = $compras->sum('total_price');
+        $igvTotal = $compras->sum('igv');
+        $comprasRecibidas = $compras->where('delivery_status', 'received')->count();
+        $comprasPendientes = $compras->where('delivery_status', 'pending')->count();
+        
+        // Estadísticas por proveedor
+        $estadisticasProveedores = $compras->groupBy('supplier_id')->map(function($comprasProveedor) {
+            $primeraCompra = $comprasProveedor->first();
+            $supplier = $primeraCompra ? $primeraCompra->supplier : null;
+            $nombreProveedor = $supplier ? $supplier->nombre_negocio : 'Sin Proveedor';
+            $totalCompras = $comprasProveedor->count();
+            $montoTotal = $comprasProveedor->sum('total_price');
+            $productosRecibidos = $comprasProveedor->where('delivery_status', 'received')->count();
+            $productosPendientes = $comprasProveedor->where('delivery_status', 'pending')->count();
+            
+            $estadistica = [
+                'proveedor' => $nombreProveedor,
+                'total_compras' => $totalCompras,
+                'monto_total' => $montoTotal,
+                'productos_recibidos' => $productosRecibidos,
+                'productos_pendientes' => $productosPendientes
+            ];
+            return $estadistica;
+        })->sortByDesc('monto_total');
+        
+        // Estadísticas por tienda
+        $estadisticasTiendas = $compras->groupBy('tienda_id')->map(function($comprasTienda) {
+            $primeraCompra = $comprasTienda->first();
+            $tienda = $primeraCompra ? $primeraCompra->tienda : null;
+            $nombreTienda = $tienda ? $tienda->nombre : 'Sin Tienda';
+            $totalCompras = $comprasTienda->count();
+            $montoTotal = $comprasTienda->sum('total_price');
+            
+            $estadistica = [
+                'tienda' => $nombreTienda,
+                'total_compras' => $totalCompras,
+                'monto_total' => $montoTotal
+            ];
+            return $estadistica;
+        })->sortByDesc('monto_total');
+        
+        // Productos más comprados
+        $productosComprados = [];
+        foreach($compras as $compra) {
+            foreach($compra->buyItems as $item) {
+                $key = $item->product_id;
+                if(isset($productosComprados[$key])) {
+                    $productosComprados[$key]['cantidad_total'] += $item->quantity;
+                    $productosComprados[$key]['monto_total'] += ($item->quantity * $item->price);
+                    $productosComprados[$key]['compras_count'] += 1;
+                } else {
+                    $productosComprados[$key] = [
+                        'producto' => $item->product->description ?? 'Producto eliminado',
+                        'sku' => $item->product->code_sku ?? 'N/A',
+                        'cantidad_total' => $item->quantity,
+                        'monto_total' => ($item->quantity * $item->price),
+                        'compras_count' => 1,
+                        'precio_promedio' => $item->price
+                    ];
+                }
+            }
+        }
+        
+        // Convertir a collection solo para ordenar y luego volver a array
+        $productosComprados = collect($productosComprados)->sortByDesc('cantidad_total')->take(15)->values()->toArray();
+
+        // Convertir Collections a arrays para evitar errores en PHP 8.4
+        $estadisticasProveedores = $estadisticasProveedores->values()->toArray();
+        $estadisticasTiendas = $estadisticasTiendas->values()->toArray();
+        // $productosComprados ya es array, no necesita conversión adicional
+
+        $datos = compact(
+            'compras', 
+            'totalCompras', 
+            'montoTotal', 
+            'igvTotal',
+            'comprasRecibidas', 
+            'comprasPendientes',
+            'estadisticasProveedores',
+            'estadisticasTiendas',
+            'productosComprados'
+        );
+
+        $pdf = Pdf::loadView('buy.detailed_report', $datos);
+        $pdf->setPaper('A4', 'portrait');
+        
+        return $pdf->download('reporte_detallado_compras_' . date('Y-m-d_H-i') . '.pdf');
+    }
+
+    /**
+     * Exportar compras a Excel
+     */
+    private function exportExcel($compras)
+    {
+        return Excel::download(new BuysExport($compras), 'reporte_compras_detallado_' . date('Y-m-d_H-i') . '.xlsx');
+    }
+
+    /**
+     * Procesar archivo de importación y mostrar preview
+     */
+    public function processImportFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            $import = new \App\Imports\BuysImport();
+            $rawData = Excel::toArray($import, $request->file('file'));
+            
+            // Procesar los datos usando el nuevo método
+            $result = $import->processImportData($rawData[0]);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $result['data'] ?? [],
+                'errors' => $result['errors'] ?? []
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el archivo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Importar compras seleccionadas
+     */
+    public function importSelectedBuys(Request $request)
+    {
+        $request->validate([
+            'selected_buys' => 'required|array|min:1',
+            'selected_buys.*.supplier' => 'required',
+            'selected_buys.*.product' => 'required',
+            'selected_buys.*.cantidad' => 'required|numeric|min:1',
+            'selected_buys.*.precio' => 'required|numeric|min:0'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $importedCount = 0;
+            $errors = [];
+
+            // Agrupar por compra (mismo proveedor, fecha, documento)
+            $groupedBuys = collect($request->selected_buys)->groupBy(function($item) {
+                return $item['supplier']['id'] . '_' . $item['fecha'] . '_' . $item['document_type']['id'] . '_' . $item['tienda']['id'];
+            });
+
+            foreach ($groupedBuys as $group) {
+                try {
+                    $firstItem = $group->first();
+                    
+                    // Crear la compra principal
+                    $totalPrice = $group->sum(function($item) {
+                        return $item['cantidad'] * $item['precio'];
+                    });
+                    
+                    $igv = $totalPrice * 0.18;
+
+                    $buy = Buy::create([
+                        'supplier_id' => $firstItem['supplier']['id'],
+                        'document_type_id' => $firstItem['document_type']['id'],
+                        'tienda_id' => $firstItem['tienda']['id'],
+                        'payment_type' => $firstItem['payment_method']['type'],
+                        'delivery_status' => $firstItem['delivery_status'],
+                        'total_price' => $totalPrice,
+                        'igv' => $igv,
+                        'observation' => $firstItem['observacion'],
+                        'serie' => $this->generateSerie($firstItem['document_type']['id']),
+                        'number' => $this->generateNumero($firstItem['document_type']['id']),
+                        'received_date' => $firstItem['delivery_status'] === 'received' ? now() : null,
+                        'fecha_registro' => $firstItem['fecha'],
+                        'customer_dni' => '',
+                        'customer_names_surnames' => '',
+                        'customer_address' => ''
+                    ]);
+
+                    // Crear items de compra
+                    foreach ($group as $item) {
+                        BuyItem::create([
+                            'buy_id' => $buy->id,
+                            'product_id' => $item['product']['id'],
+                            'tienda_id' => $item['tienda']['id'],
+                            'quantity' => $item['cantidad'],
+                            'price' => $item['precio']
+                        ]);
+
+                        // Actualizar stock si está marcado como recibido
+                        if ($item['delivery_status'] === 'received') {
+                            $stock = Stock::firstOrCreate(
+                                ['product_id' => $item['product']['id'], 'tienda_id' => $item['tienda']['id']],
+                                ['quantity' => 0, 'minimum_stock' => 0]
+                            );
+                            
+                            $stock->quantity += $item['cantidad'];
+                            $stock->save();
+                        }
+                    }
+
+                    // Crear método de pago
+                    BuyPaymentMethod::create([
+                        'buy_id' => $buy->id,
+                        'payment_method_id' => $firstItem['payment_method']['id'],
+                        'amount' => $totalPrice,
+                        'installments' => 1
+                    ]);
+
+                    $importedCount++;
+
+                } catch (\Exception $e) {
+                    $errors[] = "Error al procesar compra del proveedor {$firstItem['supplier']['nombre_negocio']}: " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Se importaron {$importedCount} compras exitosamente",
+                'imported_count' => $importedCount,
+                'errors' => $errors
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al importar compras: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener detalles completos de la compra para modal
+     */
+    public function getModalDetails($id)
+    {
+        $buy = Buy::with([
+            'buyItems.product.brand',
+            'buyItems.product.unit',
+            'supplier',
+            'tienda',
+            'documentType',
+            'userRegister',
+            'paymentMethods.paymentMethod',
+            'paymentMethods.creditInstallments'
+        ])->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'buy' => $buy
+        ]);
+    }
+
+    /**
+     * Marcar cuota como pagada
+     */
+    public function markInstallmentAsPaid(Request $request, $installmentId)
+    {
+        $request->validate([
+            'paid_amount' => 'nullable|numeric|min:0'
+        ]);
+
+        DB::beginTransaction();
+        
+        try {
+            $installment = BuyCreditInstallment::findOrFail($installmentId);
+            
+            $installment->update([
+                'status' => 'pagado',
+                'paid_at' => now()
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cuota marcada como pagada exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al marcar la cuota como pagada: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Desmarcar cuota como pagada (volver a pendiente)
+     */
+    public function markInstallmentAsPending($installmentId)
+    {
+        DB::beginTransaction();
+        
+        try {
+            $installment = BuyCreditInstallment::findOrFail($installmentId);
+            
+            $installment->update([
+                'status' => 'pendiente',
+                'paid_at' => null
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cuota marcada como pendiente exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar el estado de la cuota: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener datos para modal de recepción
+     */
+    public function getReceptionData($id)
+    {
+        $buy = Buy::with([
+            'buyItems.product.brand',
+            'buyItems.product.unit',
+            'supplier',
+            'tienda'
+        ])->findOrFail($id);
+
+        // Solo permitir recepción si está pendiente
+        if ($buy->delivery_status === 'received') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta compra ya ha sido recepcionada'
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'buy' => $buy
+        ]);
+    }
+
+    /**
+     * Procesar recepción de productos
+     */
+    public function processReception(Request $request, $id)
+    {
+        $request->validate([
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity_received' => 'required|integer|min:0',
+            'products.*.scanned_codes' => 'nullable|array'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $buy = Buy::findOrFail($id);
+
+            if ($buy->delivery_status === 'received') {
+                throw new \Exception('Esta compra ya ha sido recepcionada');
+            }
+
+            foreach ($request->products as $productData) {
+                $buyItem = BuyItem::where('buy_id', $id)
+                    ->where('product_id', $productData['product_id'])
+                    ->first();
+
+                if (!$buyItem) {
+                    throw new \Exception("Producto no encontrado en la compra");
+                }
+
+                $product = Product::findOrFail($productData['product_id']);
+                $quantityReceived = $productData['quantity_received'];
+
+                // Validar códigos únicos si es necesario
+                if ($product->control_type === 'codigo_unico' && $quantityReceived > 0) {
+                    $scannedCodes = $productData['scanned_codes'] ?? [];
+                    
+                    if (count($scannedCodes) !== $quantityReceived) {
+                        throw new \Exception("El producto {$product->description} requiere {$quantityReceived} códigos únicos, pero se recibieron " . count($scannedCodes));
+                    }
+
+                    // Verificar que los códigos no existan
+                    foreach ($scannedCodes as $code) {
+                        $existingCode = ScannedCode::where('code', $code)->first();
+                        if ($existingCode) {
+                            throw new \Exception("El código {$code} ya existe en el sistema");
+                        }
+                    }
+
+                    // Guardar códigos escaneados en el BuyItem
+                    $buyItem->scanned_codes = $scannedCodes;
+                }
+
+                // Actualizar stock solo para la cantidad recibida
+                if ($quantityReceived > 0) {
+                    $stock = Stock::firstOrCreate(
+                        ['product_id' => $product->id, 'tienda_id' => $buy->tienda_id],
+                        ['quantity' => 0, 'minimum_stock' => 0]
+                    );
+
+                    $stock->quantity += $quantityReceived;
+                    $stock->save();
+
+                    // Guardar códigos escaneados en la tabla scanned_codes
+                    if ($product->control_type === 'codigo_unico' && !empty($scannedCodes)) {
+                        foreach ($scannedCodes as $code) {
+                            ScannedCode::create([
+                                'stock_id' => $stock->id,
+                                'code' => $code
+                            ]);
+                        }
+                    }
+                }
+
+                $buyItem->save();
+            }
+
+            // Marcar como recibida si todos los productos fueron recepcionados
+            $allProductsReceived = true;
+            foreach ($buy->buyItems as $item) {
+                // Si no hay códigos escaneados y el producto requiere códigos únicos, no está completo
+                if ($item->product->control_type === 'codigo_unico') {
+                    if (empty($item->scanned_codes) || count($item->scanned_codes) < $item->quantity) {
+                        $allProductsReceived = false;
+                        break;
+                    }
+                }
+            }
+
+            if ($allProductsReceived) {
+                $buy->update([
+                    'delivery_status' => 'received',
+                    'received_date' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Recepción procesada exitosamente',
+                'fully_received' => $allProductsReceived
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar la recepción: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

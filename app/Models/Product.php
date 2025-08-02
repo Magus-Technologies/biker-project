@@ -16,16 +16,15 @@ class Product extends Model
         'amount',
         'model',
         'location',
-        'warehouse_id',
         'brand_id',
         'unit_id',
         'code_sku',
         'status',
+        'control_type',
         'user_register',
         'user_update',
         'fecha_registro',
         'fecha_actualizacion',
-        'warehouse_id',
     ];
 
     public function prices()
@@ -39,10 +38,6 @@ class Product extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class);
-    }
-    public function warehouse()
-    {
-        return $this->belongsTo(Warehouse::class);
     }
     public function images()
     {
@@ -63,8 +58,20 @@ class Product extends Model
         $nextCodigo = intval($lastCodigo) + 1;
         return str_pad($nextCodigo, 7, '0', STR_PAD_LEFT);
     }
-    public function stock()
+    public function stocks()  // ← PLURAL
     {
-        return $this->hasOne(Stock::class, 'product_id');
+        return $this->hasMany(Stock::class, 'product_id');  // hasMany en lugar de hasOne
     }
+
+    // Agregar esta función después de stocks():
+    public function getStockByTienda($tiendaId)
+    {
+        return $this->stocks()->where('tienda_id', $tiendaId)->first();
+    }
+
+    public function priceHistories()
+    {
+        return $this->hasMany(ProductPriceHistory::class);
+    }
+    
 }

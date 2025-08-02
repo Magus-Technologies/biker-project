@@ -39,6 +39,12 @@ class Tienda extends Model
         return $this->hasMany(User::class, 'tienda_id');
     }
 
+    // NUEVA RELACIÓN: Relación con warehouses (almacenes)
+    public function warehouses()
+    {
+        return $this->hasMany(Warehouse::class);
+    }
+
     // Scope para tiendas activas
     public function scopeActivas($query)
     {
