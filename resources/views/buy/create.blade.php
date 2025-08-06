@@ -1,538 +1,1744 @@
 <x-app-layout>
-    <x-slot name="header" class="max-w-max mx-auto p-2 text-sm">
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <i class="fas fa-shopping-cart mr-2"></i>{{ __('Nueva Compra') }}
+            </h2>
+            <a href="{{ route('buys.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                <i class="fas fa-arrow-left mr-2"></i>Volver
+            </a>
+        </div>
     </x-slot>
-    <div class="max-w-max mx-auto p-5 text-sm">
-        <div class="grid grid-cols-3 gap-6">
-            <!-- Formulario de Cliente -->
-            <div class="col-span-2 bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-bold mb-4">Proveedor</h2>
-                <input type="text" id="dni_personal" placeholder="Ingrese Documento"
-                    class="w-full p-2 border rounded mb-2">
-                <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos"
-                    class="w-full p-2 border rounded mb-2">
-                <input type="text" placeholder="Direccion del cliente" id="direccion"
-                    class="w-full p-2 border rounded mb-2">
-                <!-- Botón que abre el modal -->
-                <button class="bg-yellow-400 p-2 rounded w-3/12 mt-2" id="buscarProductos">Consultar
-                    Productos</button>
-                <!-- Modal -->
-                <div id="buscarProductosModal"
-                    class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4 hidden">
-                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
-                        <h3 class="text-lg font-bold mb-4">Productos</h3>
 
-                        <!-- Campo de búsqueda dentro del modal -->
-                        <div class="mb-4 flex items-center ">
-                            <div class="w-8/12">
-                                <input type="text" placeholder="Buscar por codigo del producto..."
-                                    class="w-full p-2 border rounded" id="searchProduct">
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+                <form id="purchaseForm">
+                    @csrf
+                    
+                    <!-- Información del Proveedor -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 text-blue-800">
+                                <i class="fas fa-truck mr-2"></i>Información del Proveedor
+                            </h3>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Documento del Proveedor</label>
+                                <div class="flex">
+                                    <input type="text" id="supplier_document" class="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-4" 
+                                        placeholder="DNI o RUC" maxlength="11">
+                                    <button type="button" id="searchSupplierBtn" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-r-md">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <small class="text-gray-500">Ingrese DNI (8 dígitos) o RUC (11 dígitos)</small>
                             </div>
-                            <div>
-                                <button class="bg-blue-500 text-white px-4 py-2  rounded-md rounded-l-none mr-5"
-                                    id="btnBuscarProduct">Buscar</button>
-                            </div>
-                            <div class="w-3/12">
-                                <label for="almacen" class="block font-medium text-gray-700"></label>
-                                <select id="almacen" name="almacen"
-                                    class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                                    <option value="todos">Todos</option>
-                                    @foreach ($warehouses as $warehouse => $almacen)
-                                        <option value="{{ $almacen->id }}">{{ $almacen->name }}</option>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Proveedor</label>
+                                <select id="supplier_id" name="supplier_id" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Seleccionar proveedor...</option>
+                                    @foreach($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}" data-document="{{ $supplier->nro_documento }}">
+                                            {{ $supplier->nombre_negocio }} - {{ $supplier->nro_documento }}
+                                        </option>
                                     @endforeach
                                 </select>
-
+                                <button type="button" id="createSupplierBtn" class="mt-2 text-sm text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-plus mr-1"></i>Crear nuevo proveedor
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Tabla con los productos -->
-                        <div class="overflow-x-auto overflow-y-auto h-80">
-                            <table class="min-w-full table-auto text-xs">
-                                <thead class="bg-gray-200 sticky top-0">
+                        
+                        <!-- Información de la Compra -->
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 text-green-800">
+                                <i class="fas fa-file-invoice mr-2"></i>Información de la Compra
+                            </h3>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento</label>
+                                    <select name="document_type_id" id="document_type_id" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="">Seleccionar...</option>
+                                        @foreach($documentTypes as $docType)
+                                            <option value="{{ $docType->id }}">{{ $docType->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tienda</label>
+                                    <select name="tienda_id" id="tienda_id" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="">Seleccionar tienda...</option>
+                                        @foreach($tiendas as $tienda)
+                                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Pago</label>
+                                    <select name="payment_type" id="payment_type" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="cash">Contado</option>
+                                        <option value="credit">Crédito</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Estado de Productos</label>
+                                    <select name="delivery_status" id="delivery_status" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="received">Productos Recibidos</option>
+                                        <option value="pending">En Espera de Productos</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Búsqueda de Productos -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                            <i class="fas fa-search mr-2"></i>Buscar Productos
+                        </h3>
+                        
+                        <div class="relative">
+                            <input type="text" id="product_search" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10" 
+                                   placeholder="Buscar por código, SKU, código de barras o nombre...">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            
+                            <!-- Lista de resultados -->
+                            <div id="search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 hidden max-h-60 overflow-y-auto">
+                                <!-- Los resultados se cargarán aquí -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de Productos -->
+                    <div class="bg-white border rounded-lg mb-6">
+                        <div class="bg-gray-100 px-4 py-3 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                <i class="fas fa-shopping-basket mr-2"></i>Productos de la Compra
+                            </h3>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full" id="products_table">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-2 py-1 border">Código</th>
-                                        <th class="px-2 py-1 border">Descripción</th>
-                                        <th class="px-2 py-1 border">Precio Compra</th>
-                                        <th class="px-2 py-1 border">Stock Actual</th>
-                                        <th class="px-2 py-1 border">Stock Mínimo</th>
-                                        <th class="px-2 py-1 border">Cantidad</th>
-                                        <th class="px-2 py-1 border">Aumentar Stock</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="productTable">
-                                    <!-- Productos generados dinámicamente -->
+                                <tbody id="products_tbody">
+                                    <tr id="no_products_row">
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                            <i class="fas fa-box-open text-4xl mb-2"></i>
+                                            <p>No hay productos agregados</p>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Botón de cerrar modal -->
-                        <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-                            onclick="closeModal('buscarProductosModal')">Cerrar</button>
                     </div>
-                </div>
-            </div>
-            <!-- Detalle del Pedido -->
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-bold mb-4">Documento</h2>
-                <div>
-                    <label class="font-bold">Tipo de documento</label>
-                    <!-- Se agrega id para capturar el valor -->
-                    <select id="documentType" class="w-full p-2 border rounded">
-                        <option value="">Seleccione</option>
-                        @foreach ($documentTypes as $documentType)
-                            <option value="{{ $documentType->id }}">{{ $documentType->name === 'NOTA DE VENTA' ? 'NOTA DE COMPRA' : $documentType->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <label>Fecha</label>
-                <!-- Se agrega id para la fecha -->
-                <input type="date" id="orderDate" value="{{ date('Y-m-d') }}"
-                    class="w-full p-2 border rounded mb-4">
-                <div class="bg-gray-200 text-gray-800 p-1 rounded text-center text-sm font-bold mb-2">
-                    Subtotal: <span id="subtotalAmount">S/ 0.00</span>
-                </div>
-                <!-- IGV (18%) -->
-                <div class="bg-gray-200 text-gray-800 p-1 rounded text-center text-sm font-bold mb-2">
-                    IGV (18%): <span id="igvAmount">S/ 0.00</span>
-                </div>
+                    
+                    <!-- Métodos de Pago -->
+                    <div class="bg-yellow-50 p-4 rounded-lg mb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-yellow-800">
+                            <i class="fas fa-credit-card mr-2"></i>Métodos de Pago
+                        </h3>
+                        
+                        <div id="payment_methods_container">
+                            <div class="payment-method-row grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                                    <select name="payment_methods[0][payment_method_id]" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="">Seleccionar...</option>
+                                        @foreach($paymentMethods as $method)
+                                            <option value="{{ $method->id }}">{{ $method->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+                                    <input type="number" name="payment_methods[0][amount]" step="0.01" min="0" 
+                                        class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 payment-amount-input" required>
+                                </div>
+                                
+                                <div class="credit-fields hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cuotas</label>
+                                    <div class="flex">
+                                        <input type="number" name="payment_methods[0][installments]" min="1" 
+                                            class="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                        <button type="button" onclick="openInstallmentsModal(0)" 
+                                                class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-r-md text-xs">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="add_payment_method" class="text-sm text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-plus mr-1"></i>Agregar método de pago
+                        </button>
+                    </div>
+                    
+                    <!-- Totales -->
+                    <div class="bg-gray-100 p-4 rounded-lg mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subtotal</label>
+                                <input type="number" id="subtotal" readonly class="w-full rounded-md border-gray-300 bg-gray-100" value="0.00">
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center mb-2">
+                                    <input type="checkbox" id="incluir_igv" name="incluir_igv" checked class="mr-2">
+                                    <label class="block text-sm font-medium text-gray-700">Incluir IGV (18%)</label>
+                                </div>
+                                <input type="number" name="igv" id="igv" readonly class="w-full rounded-md border-gray-300 bg-gray-100" value="0.00">
+                            </div>
 
-                <div class="bg-indigo-500 text-white p-1 rounded text-center text-sm font-bold" id="totalAmount">
-                    S/ 0.00
-                </div>
-                <div class="mt-4">
-                    <!-- Botón para guardar la orden -->
-                    <button class="bg-blue-500 text-white p-2 rounded" onclick="save()">Guardar</button>
-                </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total</label>
+                                <input type="number" name="total_price" id="total_price" readonly class="w-full rounded-md border-gray-300 bg-gray-100 font-bold text-lg" value="0.00">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                            <textarea name="observation" rows="3" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                      placeholder="Observaciones adicionales..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de Acción -->
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="window.location.href='{{ route('buys.index') }}'"
+                                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded">
+                            <i class="fas fa-times mr-2"></i>Cancelar
+                        </button>
+                        
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+                            <i class="fas fa-save mr-2"></i>Guardar Compra
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
-
-        <!-- Tabla de Productos (Detalle del Pedido) -->
-        <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-lg font-bold mb-4">Producto</h2>
-            <div class="mb-4 flex items-center justify-end ">
-                <div class="w-5/12">
-                    <input type="text" placeholder="Buscar por nombre del producto..."
-                        class="w-full p-2 border rounded" id="searchProductList">
-                </div>
-                {{-- <div>
-                    <button class="bg-blue-500 text-white px-4 py-2  rounded-md rounded-l-none mr-5"
-                        id="btnBuscarProductList">Buscar</button>
-                </div> --}}
-            </div>
-
-            <table class="w-full border-collapse border border-gray-300" id="orderTable">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border p-2">Item</th>
-                        <th class="border p-2">Producto</th>
-                        <th class="border p-2">Cantidad</th>
-                        <th class="border p-2">Precio Compra</th>
-                        <th class="border p-2">Parcial</th>
-                        <th class="border p-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="orderTableBody">
-                    <tr id="emptyRow">
-                        <td class="border p-2 text-center" colspan="7">No hay productos agregados</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
-</x-app-layout>
 
-<script>
-    let services = [];
-    let orderCount = 0; // para numerar los ítems
-    const searchInput = document.getElementById("searchProduct");
-    let products = []; // Productos disponibles en el modal
-    let quotationItems = [];
-    let orderTableBody = document.getElementById("orderTableBody");
-    const totalAmountEl = document.getElementById("totalAmount");
-    let payments = [];
-  
-    function updateSelectOptions(selectId, options) {
-        const select = document.getElementById(selectId);
-        select.innerHTML = '<option value="todos">Seleccione una opción</option>';
-        options.forEach(option => {
-            const opt = document.createElement('option');
-            opt.value = option.id;
-            opt.textContent = option.name;
-            select.appendChild(opt);
+    <!-- Modal Crear Proveedor -->
+    <div id="createSupplierModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Crear Nuevo Proveedor</h3>
+                    <button type="button" onclick="closeSupplierModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="createSupplierForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Documento *</label>
+                        <input type="text" id="new_supplier_document" name="nro_documento" required 
+                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombres *</label>
+                        <input type="text" id="new_supplier_names" name="nombres" required 
+                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Apellido Paterno</label>
+                            <input type="text" id="new_supplier_paternal" name="apellido_paterno" 
+                                   class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Apellido Materno</label>
+                            <input type="text" id="new_supplier_maternal" name="apellido_materno" 
+                                   class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Negocio *</label>
+                        <input type="text" id="new_supplier_business" name="nombre_negocio" required 
+                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                        <input type="tel" name="telefono" 
+                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
+                        <textarea name="direccion_detalle" rows="2" 
+                                  class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeSupplierModal()" 
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                            Crear Proveedor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Escanear Códigos -->
+    <div id="scanCodesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-2/3 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4 bg-green-500 text-white p-3 rounded-t">
+                    <h3 class="text-lg font-medium flex items-center">
+                        <i class="fas fa-barcode mr-2"></i>Escanear Códigos
+                    </h3>
+                    <button type="button" onclick="closeScanModal()" class="text-white hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4 p-3 bg-gray-50 rounded">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium" id="scan_product_name">Producto:</p>
+                            <p class="text-sm text-gray-600">Cantidad esperada: <span id="scan_expected_quantity" class="font-bold">1</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-green-600 font-bold">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                <span id="scan_current_count">1</span> de <span id="scan_total_needed">1</span> códigos escaneados
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Código escaneado:</label>
+                    <div class="flex">
+                        <input type="text" id="inputCodigoEscaneado" 
+                            class="flex-1 rounded-l-md border-gray-300 focus:border-green-500 focus:ring-green-500" 
+                                placeholder="Escanee o ingrese el código...">
+                        <button type="button" id="btnAgregarCodigo" 
+                                class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-r-md">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
+                    </div>
+                    <small class="text-gray-500">Presione Enter después de escanear o use el botón Agregar</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Códigos escaneados:</label>
+                    <div class="bg-black text-green-400 p-4 rounded font-mono text-sm max-h-40 overflow-y-auto" id="codigosEscaneadosList">
+                        <!-- Los códigos aparecerán aquí -->
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeScanModal()" 
+                            class="bg-gray-500 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnConfirmarCodigos" 
+                            class="bg-green-500 hover:bg-green-700 text-white font-medium py-2 px-4 rounded">
+                        <i class="fas fa-check mr-2"></i>Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Configurar Cuotas -->
+    <div id="configureInstallmentsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-4/5 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4 bg-blue-500 text-white p-3 rounded-t">
+                    <h3 class="text-lg font-medium flex items-center">
+                        <i class="fas fa-calendar-alt mr-2"></i>Configurar Cuotas de Pago
+                    </h3>
+                    <button type="button" onclick="closeInstallmentsModal()" class="text-white hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="installments_configuration">
+                    <!-- Las cuotas se generarán dinámicamente aquí -->
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeInstallmentsModal()" 
+                            class="bg-gray-500 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnConfirmarCuotas" 
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                        <i class="fas fa-check mr-2"></i>Confirmar Cuotas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let productIndex = 0;
+        let paymentMethodIndex = 1;
+        let currentScanProduct = null;
+        let scannedCodes = [];
+
+        $(document).ready(function() {
+            initializeEventListeners();
+            calculateTotals();
         });
-    }
 
-    function clearSelect(selectId) {
-        const select = document.getElementById(selectId);
-        select.innerHTML = '<option value="todos">Seleccione una opción</option>';
-    }
-
-    function fetchDistricts(provinceId) {
-        fetch(`/api/districts/${provinceId}`)
-            .then(response => response.json())
-            .then(data => {
-                const districtSelect = document.getElementById('districts_id');
-                districtSelect.removeAttribute(
-                    'disabled');
-                updateSelectOptions('districts_id', data.districts);
-            })
-            .catch(error => console.error('Error fetching districts:', error));
-    }
-
-
-    //agregando buscador 
-    document.getElementById('searchProductList').addEventListener('input', function() {
-        let searchProductList = document.getElementById('searchProductList').value;
-        let filteredItems = quotationItems.filter(item =>
-            item.description.toLowerCase().includes(searchProductList.toLowerCase())
-        );
-        console.log(searchProductList, "searchProductList")
-        console.log(filteredItems, "filteredItems")
-        console.log(quotationItems, "quotationItems")
-        mostrarProductos(filteredItems);
-    })
-
-    function mostrarProductos(items) {
-        let productListContainer = document.getElementById('orderTableBody');
-        productListContainer.innerHTML = ''; // Limpia la tabla
-
-        if (items.length === 0) {
-            productListContainer.innerHTML = `
-            <tr id="emptyRow">
-                <td colspan="7" class="text-center p-2">No hay productos disponibles</td>
-            </tr>
-        `;
-            return;
-        }
-
-        items.forEach(product => {
-            addProductTo(product); // Usa la misma función para crear filas
-        });
-    }
-
-   
-    // FIN DE SERVICIOS
-
-    function openModal(modalId, callback) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove("hidden");
-            if (callback) callback();
-        }
-    }
-
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add("hidden");
-        }
-    }
-    document.getElementById("buscarProductos").addEventListener("click", () => {
-        openModal("buscarProductosModal", () => {
-            fetchProducts();
-        });
-    });
-
-    document.getElementById("btnBuscarProduct").addEventListener("click", () => {
-        fetchProducts();
-    })
-
-    function fetchProducts() {
-        const almacen = document.getElementById("almacen").value;
-        const search = searchInput.value;
-        // Realizar la solicitud a la API
-        fetch('/api/product?almacen=' + almacen + '&search=' + search)
-            .then(res => res.json())
-            .then(data => {
-                let allProducts = data
-                    .filter(product => !quotationItems.some(item => item.product_id === product.id))
-                    .map(product => ({
-                        ...product,
-                        selectedQuantity: 1,
-                        selectedPrice: ""
-                    }));
-                products = [...allProducts];
-                console.log(products)
-                renderProducts(products);
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // // Renderiza la lista de productos en el modal
-    function renderProducts(productList) {
-        productTable.innerHTML = "";
-        productList.forEach(product => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                    <td class="px-2 py-1 border">${product.code_sku}</td>
-                    <td class="px-2 py-1 border">${product.description}</td>
-                    <td class="px-2 py-1 border">
-                        ${(() => {
-                            const precioBuy = product.prices.find(price => price.type === 'buy');
-                            return `<input 
-                                        type="text" 
-                                        class="p-2 border rounded data-price-id-${product.id}" 
-                                        data-product-id="${product.id}" 
-                                        style="width: 120px;" 
-                                        value="${precioBuy ? precioBuy.price : ''}" 
-                                        data-price-id="${precioBuy ? precioBuy.id : ''}" 
-                                        >`;
-                        })()}
-                    </td>                    <td class="px-2 py-1 border">${product.stock.quantity}</td>
-                    <td class="px-2 py-1 border">${product.stock.minimum_stock}</td>
-                    <td class="px-2 py-1 border">
-                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id} value="1" min="1" max="${product.stock.quantity}" data-product-id="${product.id}">
-                    </td>
-                   
-
-                    <td class="px-2 py-1 border subtotal-cell" id="subtotal-${product.id}" style="display: none;">0</td>
-                    <td class="px-2 py-1 border">
-                        <button class="bg-blue-500 text-white px-3 py-1 rounded" data-product-id="${product.id}"  onclick="agregarProducto(${product.id})">Aumentar stock</button>
-                    </td>
-                `;
-            productTable.appendChild(row);
-            addSubtotalEvents(row, product.id);
-
-        });
-    }
-
-    // calcular subtotal de productos en el modal y tabla
-    function addSubtotalEvents(row, productId) {
-        const quantity = row.querySelector(`.data-quantity-id-${productId}`);
-        const priceSelect = row.querySelector(`.data-price-id-${productId}`);
-
-        quantity.addEventListener("input", () => updateModalSubtotal(productId, quantity, priceSelect));
-        priceSelect.addEventListener("input", () => updateModalSubtotal(productId, quantity, priceSelect));
-    }
-
-    function updateModalSubtotal(productId, quantityInput, priceSelect) {
-        const quantity = parseInt(quantityInput.value) || 0;
-        const price = parseFloat(priceSelect.value) || 0;
-        const subtotal = quantity * price;
-        const subtotalElement = document.getElementById(`subtotal-${productId}`);
-
-        if (subtotalElement) {
-            subtotalElement.textContent = subtotal.toFixed(2);
-        }
-    }
-
-    function updatePriceAndTotal(productId) {
-        const quantityInput = document.querySelector(`.data-quantity-value-${productId}`);
-        const price = document.querySelector(`.data-price-${productId}`).value;
-        const totalValueCell = document.querySelector(`.data-total-value-${productId}`);
-        const quantity = parseFloat(quantityInput.value) || 0;
-        totalValueCell.textContent = (price * quantity).toFixed(2);
-
-        console.log('price',price);
-        console.log('quantity',quantity);
-        console.log('productId',productId);
-        quotationItems.forEach(item => {
-            if (item.product_id == productId) {
-                item.quantity = quantity;
-                item.price = price;
-            }
-        })
-        updateInformationCalculos();
-
-    }
-
-    // guardar cotizacion 
-    async function save() {
-        try {
-
-            const orderData = buildOrderData();
-            const response = await fetch('{{ route('buy.addStock') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    ...orderData,
-                })
+        function initializeEventListeners() {
+            // Búsqueda de productos
+            $('#product_search').on('input', debounce(searchProducts, 300));
+            $('#product_search').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const firstResult = $('#search_results .search-result-item').first();
+                    if (firstResult.length) {
+                        addProductToCart(JSON.parse(firstResult.attr('data-product')));
+                    }
+                }
             });
 
-            if (!response.ok) throw new Error("Error en la petición");
-            const data = await response.json();
-            alert("La cotización se ha guardado correctamente.");
-        } catch (error) {
-            console.error("Error al guardar la orden:", error);
-            alert("Error al guardar la orden.");
+            // Búsqueda de proveedor
+            $('#searchSupplierBtn').on('click', searchSupplierByDocument);
+            $('#supplier_document').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchSupplierByDocument();
+                }
+            });
+
+            // Crear proveedor
+            $('#createSupplierBtn').on('click', openSupplierModal);
+            $('#createSupplierForm').on('submit', createSupplier);
+
+            // Tipo de pago
+            $('#payment_type').on('change', toggleCreditFields);
+
+            // IGV opcional
+            $('#incluir_igv').on('change', calculateTotals);
+
+            // Agregar método de pago
+            $('#add_payment_method').on('click', addPaymentMethod);
+
+            // Envío del formulario
+            $('#purchaseForm').on('submit', submitPurchase);
+
+            // Modal de escaneo
+            $('#btnAgregarCodigo').on('click', addScannedCode);
+            $('#inputCodigoEscaneado').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addScannedCode();
+                }
+            });
+            $('#btnConfirmarCodigos').on('click', confirmScannedCodes);
+
+            $('#btnConfirmarCuotas').on('click', confirmInstallments);
+
+            // Ocultar resultados al hacer clic fuera
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#product_search, #search_results').length) {
+                    $('#search_results').addClass('hidden');
+                }
+            });
         }
-    }
 
-
-
-    //agregar productos
-    function agregarProducto(productId) {
-        const quantity = document.querySelector(`.data-quantity-id-${productId}`).value;
-        const price = document.querySelector(`.data-price-id-${productId}`).value;
-        const response = products.find(product => product.id == productId);
-        if (response) {
-            const product = {
-                product_id: productId,
-                description: response.description,
-                price: price,
-                quantity: quantity,
+        // Función para buscar productos
+        function searchProducts() {
+            const search = $('#product_search').val().trim();
+            
+            if (search.length < 2) {
+                $('#search_results').addClass('hidden');
+                return;
             }
-            quotationItems.push(product);
-            addProductTo(product);
-            updateInformationCalculos();
 
+            $.ajax({
+                url: '{{ route("buy.search-products") }}',
+                method: 'GET',
+                data: { search: search },
+                success: function(products) {
+                    displaySearchResults(products);
+                },
+                error: function() {
+                    showAlert('Error al buscar productos', 'error');
+                }
+            });
         }
-        products = products.filter(product => product.id != productId)
-          // Ocultar la fila del input quantity
-          const inputQuantity = document.querySelector(`.data-quantity-id-${productId}`);
-        if (inputQuantity) {
-            const row = inputQuantity.closest("tr");
-            if (row) row.style.display = "none";
-        }
-    }
 
-    function addProductTo(product) {
-        console.log(product)
-        const emptyRow = document.getElementById("emptyRow");
-        if (emptyRow) {
-            emptyRow.remove();
+        function displaySearchResults(products) {
+            const resultsContainer = $('#search_results');
+            resultsContainer.empty();
+
+            if (products.length === 0) {
+                resultsContainer.html('<div class="p-3 text-gray-500">No se encontraron productos</div>');
+            } else {
+                products.forEach(product => {
+                    const resultHtml = `
+                        <div class="search-result-item p-3 hover:bg-blue-50 cursor-pointer border-b" 
+                            data-product='${JSON.stringify(product)}' onclick='addProductToCart(${JSON.stringify(product).replace(/"/g, "&quot;")})'>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">${product.description}</p>
+                                    <p class="text-sm text-gray-500">SKU: ${product.code_sku} | Stock: ${product.stock_total}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm">Precio: S/. ${parseFloat(product.precio_compra).toFixed(2)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultsContainer.append(resultHtml);
+                });
+            }
+
+            resultsContainer.removeClass('hidden');
         }
-        orderCount++;
-        const orderRow = document.createElement("tr");
-        orderRow.setAttribute("data-product-id", product.product_id);
-        orderRow.innerHTML = `
-            <td class="border p-2 text-center">${orderCount}</td>
-            <td class="border p-2">${product.description}</td>
-            <td class="border p-2">
-                <input type="number" class="p-2 border rounded data-quantity-value-${product.product_id}" oninput="updatePriceAndTotal(${product.product_id})"
-                       value="${product.quantity}" 
-                       max="${product.maximum_stock}"
-                       min="1"
-                       style="width: 60px;">
-            </td>
-            <td class="border p-2 " >
-                <input
-                    type="number" 
-                    class="border rounded p-1 text-center w-full total-price-input-${product.product_id} data-price-${product.product_id}" 
-                    value="${product.price}" 
-                    data-item-id="${product.product_id}"
-                     oninput="updatePriceAndTotal(${product.product_id})"
-                    >
-            </td>
-            <td class="border p-2 data-total-value-${product.product_id}" >${product.price * product.quantity} </td>
-            <td class="border p-2 text-center">
-                <button class="bg-red-500 text-white px-2 py-1 rounded eliminar-btn" 
-                       onclick="deleteProduct(${product.product_id})">
-                    Eliminar
+
+        function addProductToCart(product) {
+            $('#search_results').addClass('hidden');
+            $('#product_search').val('');
+
+            // Verificar si el producto ya está en el carrito
+            const existingRow = $(`#product_row_${product.id}`);
+            if (existingRow.length) {
+                const quantityInput = existingRow.find('.quantity-input');
+                quantityInput.val(parseInt(quantityInput.val()) + 1).trigger('input');
+                showAlert('Cantidad del producto actualizada', 'success');
+                return;
+            }
+
+            // Remover fila de "no hay productos"
+            $('#no_products_row').remove();
+
+            const scanButtonHtml = product.control_type === 'codigo_unico' 
+                ? `<button type="button" class="scan-codes-btn bg-green-500 hover:bg-green-700 text-white px-2 py-1 rounded text-xs ml-2" 
+                          onclick="openScanModal(${product.id}, '${product.description}')">
+                      <i class="fas fa-barcode mr-1"></i>Escanear
+                   </button>` 
+                : '';
+
+            const rowHtml = `
+                <tr id="product_row_${product.id}">
+                    <td class="px-4 py-3">
+                        <div>
+                            <p class="font-medium">${product.description}</p>
+                            <p class="text-sm text-gray-500">SKU: ${product.code_sku}</p>
+                            <p class="text-xs text-gray-400">Control: ${product.control_type === 'codigo_unico' ? 'Código Único' : 'Cantidad'}</p>
+                        </div>
+                        <input type="hidden" name="products[${productIndex}][product_id]" value="${product.id}">
+                        <input type="hidden" name="products[${productIndex}][scanned_codes]" value="" class="scanned-codes-input">
+                    </td>
+                    <td class="px-4 py-3">
+                        <input type="number" name="products[${productIndex}][quantity]" 
+                               class="quantity-input w-20 rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                               value="1" min="1" required>
+                        ${scanButtonHtml}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="space-y-2">
+                            <input type="number" name="products[${productIndex}][price]" step="0.01" min="0"
+                                   class="price-input w-24 rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                   value="${product.precio_compra}" required readonly>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="products[${productIndex}][use_custom_price]" 
+                                       class="custom-price-checkbox mr-2">
+                                <label class="text-xs text-gray-600">Usar precio diferente al registrado</label>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="subtotal-display font-medium">S/. ${parseFloat(product.precio_compra).toFixed(2)}</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button type="button" onclick="removeProduct(${product.id})" 
+                                class="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded text-xs">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            $('#products_tbody').append(rowHtml);
+
+            // Agregar event listeners para el nuevo producto
+            $(`#product_row_${product.id} .quantity-input, #product_row_${product.id} .price-input`).on('input', calculateTotals);
+
+            // Event listener para el checkbox de precio personalizado
+            $(`#product_row_${product.id} .custom-price-checkbox`).on('change', function() {
+                const priceInput = $(this).closest('tr').find('.price-input');
+                if ($(this).is(':checked')) {
+                    priceInput.prop('readonly', false);
+                    priceInput.focus();
+                } else {
+                    priceInput.prop('readonly', true);
+                    priceInput.val(product.precio_compra); // ← AQUÍ ESTÁ LA CORRECCIÓN
+                    calculateTotals();
+                }
+            });
+
+            productIndex++;
+            calculateTotals();
+            reproducirSonidoEscaner();
+        }
+
+        function removeProduct(productId) {
+            $(`#product_row_${productId}`).remove();
+            
+            if ($('#products_tbody tr').length === 0) {
+                $('#products_tbody').html(`
+                    <tr id="no_products_row">
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-box-open text-4xl mb-2"></i>
+                            <p>No hay productos agregados</p>
+                        </td>
+                    </tr>
+                `);
+            }
+            
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            let subtotal = 0;
+            
+            $('#products_tbody tr:not(#no_products_row)').each(function() {
+                const quantity = parseFloat($(this).find('.quantity-input').val()) || 0;
+                const price = parseFloat($(this).find('.price-input').val()) || 0;
+                const itemSubtotal = quantity * price;
+                
+                $(this).find('.subtotal-display').text(`S/. ${itemSubtotal.toFixed(2)}`);
+                subtotal += itemSubtotal;
+            });
+            
+            const incluirIgv = $('#incluir_igv').is(':checked');
+            const igv = incluirIgv ? subtotal * 0.18 : 0;
+            const total = subtotal + igv;
+            
+            $('#subtotal').val(subtotal.toFixed(2));
+            $('#igv').val(igv.toFixed(2));
+            $('#total_price').val(total.toFixed(2));
+            updatePaymentMethodsAmounts(); // ← Cambiar el nombre de la función
+        }
+
+        // Función para distribuir el total entre todos los métodos de pago
+        function updatePaymentMethodsAmounts() {
+            const totalPrice = parseFloat($('#total_price').val()) || 0;
+            const paymentAmountInputs = $('.payment-amount-input');
+            
+            if (paymentAmountInputs.length > 0 && totalPrice > 0) {
+                // Si solo hay un método de pago, asignar todo el monto
+                if (paymentAmountInputs.length === 1) {
+                    paymentAmountInputs.first().val(totalPrice.toFixed(2));
+                } else {
+                    // Si hay múltiples métodos, distribuir equitativamente
+                    const amountPerMethod = totalPrice / paymentAmountInputs.length;
+                    paymentAmountInputs.each(function() {
+                        $(this).val(amountPerMethod.toFixed(2));
+                    });
+                }
+            }
+        }
+
+        // Búsqueda de proveedor
+        function searchSupplierByDocument() {
+            const document = $('#supplier_document').val().trim();
+            
+            if (!document || (document.length !== 8 && document.length !== 11)) {
+                showAlert('Ingrese un DNI (8 dígitos) o RUC (11 dígitos) válido', 'error');
+                return;
+            }
+
+            // Buscar si ya existe en el select
+            const existingOption = $(`#supplier_id option[data-document="${document}"]`);
+            if (existingOption.length) {
+                $('#supplier_id').val(existingOption.val());
+                showAlert('Proveedor encontrado en el sistema', 'success');
+                return;
+            }
+
+            // Buscar en la API
+            $.ajax({
+                url: `{{ url('buy/buscar-documento') }}/${document}`,
+                method: 'GET',
+                success: function(data) {
+                    fillSupplierData(data);
+                    showAlert('Datos encontrados. Complete la información faltante.', 'info');
+                },
+                error: function() {
+                    showAlert('No se encontró información del documento. Crear proveedor manualmente.', 'warning');
+                    openSupplierModal();
+                    $('#new_supplier_document').val(document);
+                }
+            });
+        }
+
+        function fillSupplierData(data) {
+            $('#new_supplier_document').val(data.nro_documento || $('#supplier_document').val());
+            $('#new_supplier_names').val(data.nombres || '');
+            $('#new_supplier_paternal').val(data.apellidoPaterno || '');
+            $('#new_supplier_maternal').val(data.apellidoMaterno || '');
+            $('#new_supplier_business').val(data.razonSocial || data.nombre || '');
+            
+            openSupplierModal();
+        }
+
+        // Modal de proveedor
+        function openSupplierModal() {
+            $('#createSupplierModal').removeClass('hidden');
+        }
+
+        function closeSupplierModal() {
+            $('#createSupplierModal').addClass('hidden');
+            $('#createSupplierForm')[0].reset();
+        }
+
+        function createSupplier(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            $.ajax({
+                url: '{{ route("buy.create-quick-supplier") }}',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Agregar al select
+                        const option = `<option value="${response.supplier.id}" selected>
+                            ${response.supplier.nombre_negocio} - ${response.supplier.nro_documento}
+                        </option>`;
+                        $('#supplier_id').append(option);
+                        
+                        closeSupplierModal();
+                        showAlert(response.message, 'success');
+                    }
+                },
+                error: function(xhr) {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        let errorMessage = '';
+                        Object.values(errors).forEach(error => {
+                            errorMessage += error[0] + '\n';
+                        });
+                        showAlert(errorMessage, 'error');
+                    } else {
+                        showAlert('Error al crear proveedor', 'error');
+                    }
+                }
+            });
+        }
+
+        // Modal de escaneo
+        function openScanModal(productId, productName) {
+            currentScanProduct = productId;
+            scannedCodes = [];
+            
+            const row = $(`#product_row_${productId}`);
+            const quantity = parseInt(row.find('.quantity-input').val());
+            
+            $('#scan_product_name').text(`Producto: ${productName}`);
+            $('#scan_expected_quantity').text(quantity);
+            $('#scan_total_needed').text(quantity);
+            $('#scan_current_count').text('0');
+            $('#codigosEscaneadosList').empty();
+            $('#inputCodigoEscaneado').val('');
+            
+            $('#scanCodesModal').removeClass('hidden');
+            
+            setTimeout(() => {
+                $('#inputCodigoEscaneado').focus();
+            }, 100);
+        }
+
+        function closeScanModal() {
+            $('#scanCodesModal').addClass('hidden');
+            currentScanProduct = null;
+            scannedCodes = [];
+        }
+
+        function addScannedCode() {
+            const code = $('#inputCodigoEscaneado').val().trim();
+            
+            if (!code) {
+                showAlert('Ingrese un código válido', 'error');
+                return;
+            }
+            
+            if (scannedCodes.includes(code)) {
+                showAlert('Este código ya fue escaneado', 'error');
+                $('#inputCodigoEscaneado').val('').focus();
+                return;
+            }
+            
+            scannedCodes.push(code);
+            
+            // Agregar a la lista visual
+            const codeHtml = `<div class="flex justify-between items-center mb-1">
+                <span>${scannedCodes.length}. ${code}</span>
+                <button type="button" onclick="removeScannedCode('${code}')" class="text-red-400 hover:text-red-600">
+                    <i class="fas fa-times"></i>
                 </button>
-            </td>
-        `;
-        orderTableBody.appendChild(orderRow);
-    }
-    // calcular subtotal igv y total
-    function updateInformationCalculos() {
-        let totalAmount = 0;
-        let igvAmount = 0;
-        let subtotalAmount = 0;
-        quotationItems.forEach(item => {
-            totalAmount += item.quantity * item.price;
-        })
-        services.forEach(item => {
-            totalAmount += parseFloat(item.price);
-        })
-        igvAmount = totalAmount * 0.18;
-        subtotalAmount = totalAmount - igvAmount;
-        document.getElementById("subtotalAmount").textContent = "S/ " + subtotalAmount.toFixed(2);
-        document.getElementById("igvAmount").textContent = "S/ " + igvAmount.toFixed(2);
-        document.getElementById("totalAmount").textContent = "S/ " + totalAmount.toFixed(2);
-    }
-    // eliminar producto
-    function deleteProduct(productId) {
-        quotationItems = quotationItems.filter(product => product.product_id != productId);
-        const row = document.querySelector(`tr[data-product-id="${productId}"]`);
-        if (row) {
-            row.remove();
+            </div>`;
+            $('#codigosEscaneadosList').append(codeHtml);
+            
+            // Actualizar contador
+            $('#scan_current_count').text(scannedCodes.length);
+            
+            // Limpiar input y enfocar
+            $('#inputCodigoEscaneado').val('').focus();
+            
+            // Reproducir sonido
+            reproducirSonidoEscaner();
+            
+            // Auto-confirmar si se completaron todos los códigos
+            const expectedQuantity = parseInt($('#scan_expected_quantity').text());
+            if (scannedCodes.length === expectedQuantity) {
+                setTimeout(confirmScannedCodes, 500);
+            }
         }
-        updateInformationCalculos();
 
-    }
-    // fin de eliminar
+        function removeScannedCode(code) {
+            scannedCodes = scannedCodes.filter(c => c !== code);
+            
+            // Regenerar lista
+            $('#codigosEscaneadosList').empty();
+            scannedCodes.forEach((c, index) => {
+                const codeHtml = `<div class="flex justify-between items-center mb-1">
+                    <span>${index + 1}. ${c}</span>
+                    <button type="button" onclick="removeScannedCode('${c}')" class="text-red-400 hover:text-red-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>`;
+                $('#codigosEscaneadosList').append(codeHtml);
+            });
+            
+            $('#scan_current_count').text(scannedCodes.length);
+        }
 
+        function confirmScannedCodes() {
+            const expectedQuantity = parseInt($('#scan_expected_quantity').text());
+            
+            if (scannedCodes.length !== expectedQuantity) {
+                showAlert(`Se requieren ${expectedQuantity} códigos, solo se escanearon ${scannedCodes.length}`, 'error');
+                return;
+            }
+            
+            // Guardar códigos en el input hidden
+            const row = $(`#product_row_${currentScanProduct}`);
+            row.find('.scanned-codes-input').val(JSON.stringify(scannedCodes));
+            
+            // Debug temporal
+            console.log('Códigos guardados en input hidden:', JSON.stringify(scannedCodes));
+            console.log('Valor del input:', row.find('.scanned-codes-input').val());
 
-    // // 🔹 Función para construir el objeto de orden
-    function buildOrderData() {
-        return {
-            ...getCustomerData(),
-            products: quotationItems,
-        };
-    }
+            // Actualizar botón
+            const scanBtn = row.find('.scan-codes-btn');
+            scanBtn.removeClass('bg-green-500 hover:bg-green-700').addClass('bg-blue-500 hover:bg-blue-700');
+            scanBtn.html(`<i class="fas fa-check mr-1"></i>Escaneado (${scannedCodes.length})`);
+            
+            closeScanModal();
+            showAlert('Códigos confirmados correctamente', 'success');
+        }
 
-    // // Extraer los datos del cliente
-    function getCustomerData() {
-        return {
-            customer_dni: document.getElementById("dni_personal").value.trim(),
-            customer_names_surnames: document.getElementById("nombres_apellidos").value.trim(),
-            customer_address: document.getElementById("direccion").value.trim(),
-            document_type_id: document.getElementById("documentType").value,
-            igv: parseAmount("igvAmount"),
-            total: parseAmount("totalAmount")
-        };
-    }
-    // // Convierte valores monetarios a números
-    function parseAmount(elementId) {
-        return parseFloat(document.getElementById(elementId).textContent.replace("S/ ", "")) || 0;
-    }
-    // api dni
-    const inputDni = document.getElementById('dni_personal');
+        // Métodos de pago
+        function toggleCreditFields() {
+            const paymentType = $('#payment_type').val();
+            $('.credit-fields').toggleClass('hidden', paymentType !== 'credit');
+        }
 
-    const token =
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InN5c3RlbWNyYWZ0LnBlQGdtYWlsLmNvbSJ9.yuNS5hRaC0hCwymX_PjXRoSZJWLNNBeOdlLRSUGlHGA';
-    // Función para buscar DNI
-    function buscarDNIRuc(DNIRuc) {
-        if (DNIRuc.length === 8) {
-            fetch(`https://dniruc.apisperu.com/api/v1/dni/${DNIRuc}?token=${token}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la solicitud');
+        function addPaymentMethod() {
+            const newMethodHtml = `
+                <div class="payment-method-row grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <select name="payment_methods[${paymentMethodIndex}][payment_method_id]" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                            <option value="">Seleccionar...</option>
+                            @foreach($paymentMethods as $method)
+                                <option value="{{ $method->id }}">{{ $method->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <input type="number" name="payment_methods[${paymentMethodIndex}][amount]" step="0.01" min="0" 
+                            class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 payment-amount-input" required>
+                    </div>
+                    
+                    <div class="credit-fields ${$('#payment_type').val() !== 'credit' ? 'hidden' : ''}">
+                        <div class="flex">
+                            <input type="number" name="payment_methods[${paymentMethodIndex}][installments]" min="1" 
+                                   class="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                            <button type="button" onclick="openInstallmentsModal(${paymentMethodIndex})" 
+                                    class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-r-md text-xs">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    
+                    <div class="credit-fields ${$('#payment_type').val() !== 'credit' ? 'hidden' : ''}">
+                        <input type="date" name="payment_methods[${paymentMethodIndex}][due_date]" 
+                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="md:col-span-4 text-right">
+                        <button type="button" onclick="$(this).closest('.payment-method-row').remove(); updatePaymentMethodsAmounts();" 
+                                class="text-red-600 hover:text-red-800 text-sm">
+                            <i class="fas fa-trash mr-1"></i>Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            $('#payment_methods_container').append(newMethodHtml);
+            paymentMethodIndex++;
+            updatePaymentMethodsAmounts();
+        }
+
+        // Envío del formulario
+        function submitPurchase(e) {
+            e.preventDefault();
+            
+            // Validar que hay productos
+            if ($('#products_tbody tr:not(#no_products_row)').length === 0) {
+                showAlert('Debe agregar al menos un producto', 'error');
+                return;
+            }
+            
+            // Validar códigos escaneados si es necesario
+            const deliveryStatus = $('#delivery_status').val();
+            if (deliveryStatus === 'received') {
+                let missingCodes = false;
+                $('#products_tbody tr:not(#no_products_row)').each(function() {
+                    const row = $(this);
+                    const productId = row.find('input[name*="[product_id]"]').val();
+                    const quantity = parseInt(row.find('.quantity-input').val());
+                    const scannedCodesInput = row.find('.scanned-codes-input');
+                    const scannedCodes = scannedCodesInput.val() ? JSON.parse(scannedCodesInput.val()) : [];
+                    
+                    // Verificar si el producto requiere códigos únicos
+                    const controlText = row.find('.text-xs.text-gray-400').text();
+                    if (controlText.includes('Código Único') && scannedCodes.length !== quantity) {
+                        missingCodes = true;
+                        showAlert(`El producto requiere escanear ${quantity} códigos únicos`, 'error');
+                        return false;
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    document.getElementById('nombres_apellidos').value = data.apellidoPaterno + ' ' +
-                        data.apellidoMaterno + ' ' + data.nombres;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('No se pudo encontrar el DNI');
                 });
-        }else{
-            document.getElementById('nombres_apellidos').value = '';
-        }
-        if (DNIRuc.length === 11) {
-            fetch(`https://dniruc.apisperu.com/api/v1/ruc/${DNIRuc}?token=${token}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la solicitud');
+                
+                if (missingCodes) return;
+            }
+            
+            // Validar configuración de cuotas para pagos a crédito
+            const paymentType = $('#payment_type').val();
+            if (paymentType === 'credit') {
+                let missingInstallmentsConfig = false;
+                $('.payment-method-row').each(function() {
+                    const installmentsInput = $(this).find('input[name*="[installments]"]');
+                    const installments = parseInt(installmentsInput.val()) || 0;
+                    const paymentIndex = $(this).index();
+                    
+                    // Validar que se haya ingresado número de cuotas
+                    if (installments <= 0) {
+                        missingInstallmentsConfig = true;
+                        showAlert(`Debe ingresar el número de cuotas para el método de pago #${paymentIndex + 1}`, 'error');
+                        installmentsInput.focus();
+                        return false;
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    document.getElementById('nombres_apellidos').value = data.razonSocial;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('No se pudo encontrar el ruc');
+                    
+                    // Si hay más de 1 cuota, validar que esté configurada
+                    if (installments > 1) {
+                        const installmentsConfig = $(`#payment_methods_container`).attr(`data-installments-${paymentIndex}`);
+                        if (!installmentsConfig) {
+                            missingInstallmentsConfig = true;
+                            showAlert(`Debe configurar las cuotas para el método de pago #${paymentIndex + 1}`, 'error');
+                            return false;
+                        }
+                    }
                 });
-        }else{
-            document.getElementById('nombres_apellidos').value = '';
+                
+                if (missingInstallmentsConfig) return;
+            }
+
+            const formData = new FormData(this);
+            
+            // Agregar códigos escaneados
+            let productIndex = 0;
+            $('#products_tbody tr:not(#no_products_row)').each(function() {
+                const scannedCodesInput = $(this).find('.scanned-codes-input');
+                const productId = $(this).find('input[name*="[product_id]"]').val();
+                
+                if (scannedCodesInput.val()) {
+                    console.log(`Enviando códigos para producto ${productId}:`, scannedCodesInput.val());
+                    formData.append(`products[${productIndex}][scanned_codes]`, scannedCodesInput.val());
+                }
+                productIndex++;
+            });
+
+            // Agregar configuraciones de cuotas si existen
+            $('.payment-method-row').each(function(index) {
+                const installmentsConfig = $(`#payment_methods_container`).attr(`data-installments-${index}`);
+                if (installmentsConfig) {
+                    formData.append(`installments_config[${index}]`, installmentsConfig);
+                }
+            });
+            
+            $.ajax({
+                url: '{{ route("buy.store-purchase") }}',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert(response.message, 'success');
+                        setTimeout(() => {
+                             window.location.href = '{{ route("buys.index") }}';
+                        }, 2000);
+                    }
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON;
+                    showAlert(response?.message || 'Error al guardar la compra', 'error');
+                },
+                complete: function() {
+                    $('button[type="submit"]').prop('disabled', false).html('<i class="fas fa-save mr-2"></i>Guardar Compra');
+                }
+            });
         }
-    }
 
-    // Evento cuando el usuario escribe en el campo DNI
-    inputDni.addEventListener('input', () => {
-        inputDni.value = inputDni.value.replace(/\s+/g, '');
+        // Funciones auxiliares
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
-        buscarDNIRuc(inputDni.value);
-    });
-</script>
+                // Funciones para modal de cuotas
+        function openInstallmentsModal(paymentMethodIndex) {
+            const installments = parseInt($(`input[name="payment_methods[${paymentMethodIndex}][installments]"]`).val()) || 1;
+            const amount = parseFloat($(`input[name="payment_methods[${paymentMethodIndex}][amount]"]`).val()) || 0;
+            
+            if (installments <= 1) {
+                showAlert('Configure más de 1 cuota para usar esta función', 'warning');
+                return;
+            }
+            
+            generateInstallmentsConfiguration(installments, amount, paymentMethodIndex);
+            $('#configureInstallmentsModal').removeClass('hidden');
+        }
+
+        function closeInstallmentsModal() {
+            $('#configureInstallmentsModal').addClass('hidden');
+        }
+
+        function generateInstallmentsConfiguration(installments, totalAmount, paymentMethodIndex) {
+            const installmentAmount = parseFloat((totalAmount / installments).toFixed(2)); // Redondear a 2 decimales
+            const baseDate = new Date();
+            
+            let html = `
+                <div class="mb-4 p-3 bg-blue-50 rounded">
+                    <p class="font-medium">Monto total: S/. ${totalAmount.toFixed(2)}</p>
+                    <p class="text-sm text-gray-600">Número de cuotas: ${installments}</p>
+                    <p class="text-sm text-gray-600">Monto sugerido por cuota: S/. ${installmentAmount.toFixed(2)}</p>
+                </div>
+                
+                <div class="mb-4 p-3 bg-green-50 rounded">
+                    <p class="font-medium text-green-800">Suma actual: <span id="current-sum" class="font-bold">S/. 0.00</span></p>
+                    <p class="text-sm text-green-600">Diferencia: <span id="difference" class="font-bold">S/. 0.00</span></p>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-300">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 px-4 py-2">Cuota</th>
+                                <th class="border border-gray-300 px-4 py-2">Monto</th>
+                                <th class="border border-gray-300 px-4 py-2">Fecha Vencimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+            
+            // Calcular montos para evitar problemas de redondeo
+            let remainingAmount = totalAmount;
+            let calculatedAmounts = [];
+            
+            for (let i = 1; i <= installments; i++) {
+                let amount;
+                if (i === installments) {
+                    // La última cuota lleva el resto para evitar diferencias por redondeo
+                    amount = remainingAmount;
+                } else {
+                    amount = installmentAmount;
+                    remainingAmount -= amount;
+                }
+                calculatedAmounts.push(amount);
+            }
+            
+            for (let i = 1; i <= installments; i++) {
+                const dueDate = new Date(baseDate);
+                dueDate.setMonth(dueDate.getMonth() + i);
+                const dueDateString = dueDate.toISOString().split('T')[0];
+                
+                html += `
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2 text-center font-medium">${i}</td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <input type="number" step="0.01" min="0" 
+                                class="installment-amount w-full rounded border-gray-300" 
+                                value="${calculatedAmounts[i-1].toFixed(2)}" data-installment="${i}">
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <input type="date" 
+                                class="installment-date w-full rounded border-gray-300" 
+                                value="${dueDateString}" data-installment="${i}">
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4 p-3 bg-yellow-50 rounded">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Puede modificar los montos y fechas según sus necesidades. 
+                        La suma total debe coincidir con el monto del método de pago.
+                    </p>
+                </div>
+            `;
+            
+            $('#installments_configuration').html(html);
+            $('#installments_configuration').attr('data-payment-index', paymentMethodIndex);
+            $('#installments_configuration').attr('data-expected-total', totalAmount.toFixed(2));
+            
+            // Agregar event listeners para actualizar la suma automáticamente
+            $('.installment-amount').on('input', updateInstallmentsSum);
+            
+            // Calcular suma inicial
+            updateInstallmentsSum();
+        }
+
+        // Función para actualizar la suma de las cuotas en tiempo real
+        function updateInstallmentsSum() {
+            const expectedTotal = parseFloat($('#installments_configuration').attr('data-expected-total')) || 0;
+            let currentSum = 0;
+            
+            $('.installment-amount').each(function() {
+                currentSum += parseFloat($(this).val()) || 0;
+            });
+            
+            const difference = currentSum - expectedTotal;
+            
+            $('#current-sum').text(`S/. ${currentSum.toFixed(2)}`);
+            $('#difference').text(`S/. ${difference.toFixed(2)}`);
+            
+            // Cambiar color según la diferencia
+            if (Math.abs(difference) < 0.01) { // Considerando diferencias mínimas por redondeo
+                $('#current-sum').parent().removeClass('bg-red-50 bg-yellow-50').addClass('bg-green-50');
+                $('#current-sum').removeClass('text-red-800 text-yellow-800').addClass('text-green-800');
+                $('#difference').removeClass('text-red-800 text-yellow-800').addClass('text-green-800');
+            } else {
+                $('#current-sum').parent().removeClass('bg-green-50 bg-yellow-50').addClass('bg-red-50');
+                $('#current-sum').removeClass('text-green-800 text-yellow-800').addClass('text-red-800');
+                $('#difference').removeClass('text-green-800 text-yellow-800').addClass('text-red-800');
+            }
+        }
+
+        function confirmInstallments() {
+            const paymentIndex = $('#installments_configuration').attr('data-payment-index');
+            const installmentsData = [];
+            let totalAmount = 0;
+            
+            $('.installment-amount').each(function() {
+                const installmentNumber = $(this).data('installment');
+                const amount = parseFloat($(this).val()) || 0;
+                const date = $(`.installment-date[data-installment="${installmentNumber}"]`).val();
+                
+                installmentsData.push({
+                    installment_number: installmentNumber,
+                    amount: amount,
+                    due_date: date
+                });
+                
+                totalAmount += amount;
+            });
+            
+            // Validar que la suma coincida (con tolerancia de 0.01 por redondeo)
+            const expectedAmount = parseFloat($(`input[name="payment_methods[${paymentIndex}][amount]"]`).val()) || 0;
+            if (Math.abs(totalAmount - expectedAmount) > 0.01) {
+                showAlert(`La suma de las cuotas (S/. ${totalAmount.toFixed(2)}) no coincide con el monto del método de pago (S/. ${expectedAmount.toFixed(2)})`, 'error');
+                return;
+            }
+            
+            // Guardar configuración
+            $(`#payment_methods_container`).attr(`data-installments-${paymentIndex}`, JSON.stringify(installmentsData));
+            
+            closeInstallmentsModal();
+            showAlert('Configuración de cuotas guardada correctamente', 'success');
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertClass = {
+                success: 'bg-green-100 border-green-400 text-green-700',
+                error: 'bg-red-100 border-red-400 text-red-700',
+                warning: 'bg-yellow-100 border-yellow-400 text-yellow-700',
+                info: 'bg-blue-100 border-blue-400 text-blue-700'
+            };
+            
+            const alert = $(`
+                <div class="fixed top-4 right-4 z-50 ${alertClass[type]} px-4 py-3 rounded border" role="alert">
+                    <span class="block sm:inline">${message}</span>
+                </div>
+            `);
+            
+            $('body').append(alert);
+            
+            setTimeout(() => {
+                alert.fadeOut(() => alert.remove());
+            }, 5000);
+        }
+
+        // Reproducir sonido de escáner
+        function reproducirSonidoEscaner() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            setTimeout(() => {
+                const inputEdit = $('#inputCodigoEscaneado');
+                if (inputEdit.length) {
+                    inputEdit.prop('readonly', false);
+                    inputEdit.prop('disabled', false);
+                    inputEdit.removeAttr('readonly');
+                    inputEdit.removeAttr('disabled');
+                    inputEdit.focus();
+                }
+            }, 100);
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = "square";
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+    </script>
+
+    <style>
+        /* Estilos adicionales para el módulo de compras */
+        .search-result-item:hover {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .scan-codes-btn {
+            transition: all 0.3s ease;
+        }
+
+        .scan-codes-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-price-checkbox:checked + label {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .payment-method-row {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9fafb;
+        }
+
+        .payment-method-row:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Animación para las alertas */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .fixed.top-4.right-4 {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        /* Efecto de código escaneado */
+        #codigosEscaneadosList {
+            background: linear-gradient(45deg, #000000, #1a1a1a);
+            border: 1px solid #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+
+        #codigosEscaneadosList div {
+            border-bottom: 1px solid #22c55e;
+            padding: 0.25rem 0;
+        }
+
+        #codigosEscaneadosList div:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilo para input de búsqueda activo */
+        #product_search:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        /* Estilo para productos con códigos únicos */
+        .codigo-unico-badge {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Transición suave para los modales */
+        .modal-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Estilo para el contador de códigos escaneados */
+        .scan-counter {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Efecto hover para botones de acción */
+        .action-button {
+            transition: all 0.2s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Estilo para filas de productos */
+        #products_tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Indicador visual para campos obligatorios */
+        .required-field label::after {
+            content: " *";
+            color: #ef4444;
+        }
+
+        /* Estilo para inputs con error */
+        .input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+        }
+
+        /* Loader personalizado */
+        .custom-loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsividad mejorada */
+        @media (max-width: 768px) {
+            .grid.grid-cols-1.md\\:grid-cols-2,
+            .grid.grid-cols-1.md\\:grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .scan-codes-btn {
+                margin-top: 0.5rem;
+                margin-left: 0;
+                display: block;
+                width: 100%;
+            }
+            
+            #scanCodesModal .relative {
+                width: 95%;
+                margin: 1rem auto;
+            }
+        }
+
+        /* Estilo para el badge de estado de entrega */
+        .delivery-status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .delivery-received {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .delivery-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Animación para el sonido del escáner */
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        .scanner-pulse {
+            animation: pulse-green 0.6s ease-out;
+        }
+
+        /* === MEJORAS VISUALES PARA EL MÓDULO DE COMPRAS === */
+
+        /* Mejoras para las cards principales */
+        .bg-blue-50 {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .bg-green-50 {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #bbf7d0;
+            box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1);
+        }
+
+        .bg-gray-50 {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.1);
+        }
+
+        .bg-yellow-50 {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+        }
+
+        /* Efectos hover para las cards */
+        .bg-blue-50:hover, .bg-green-50:hover, .bg-gray-50:hover, .bg-yellow-50:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        /* Mejoras para los títulos de sección */
+        .text-blue-800, .text-green-800, .text-gray-800, .text-yellow-800 {
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .text-blue-800 {
+            background: linear-gradient(45deg, #1e40af, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-green-800 {
+            background: linear-gradient(45deg, #166534, #16a34a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-yellow-800 {
+            background: linear-gradient(45deg, #92400e, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Mejoras para inputs y selects */
+        .rounded-md.border-gray-300 {
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        /* NUEVO: Padding específico solo para inputs de cantidad y precio en la tabla de productos */
+        #products_tbody .quantity-input, 
+        #products_tbody .price-input {
+            padding-left: 12px !important;
+            padding-right: 8px !important;
+            text-align: left;
+        }
+
+        /* NUEVO: Padding solo para los campos de totales en la sección de totales */
+        .bg-gray-100.p-4.rounded-lg #subtotal,
+        .bg-gray-100.p-4.rounded-lg #igv,
+        .bg-gray-100.p-4.rounded-lg #total_price {
+            padding-left: 16px !important;
+            padding-right: 12px !important;
+            text-align: left;
+        }
+
+        /* NUEVO: Padding solo para campos de monto en la sección de métodos de pago */
+        #payment_methods_container input[name*="[amount]"] {
+            padding-left: 12px !important;
+            padding-right: 8px !important;
+            text-align: left;
+        }
+
+        .rounded-md.border-gray-300:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
+        }
+
+        /* Mejoras para botones */
+        .bg-blue-500 {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+            transition: all 0.3s ease;
+        }
+
+        .bg-blue-500:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .bg-green-500 {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
+        }
+
+        .bg-green-500:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Mejoras para la tabla de productos */
+        .bg-white.border.rounded-lg {
+            border: 2px solid #f1f5f9;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .bg-gray-100 {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .bg-gray-50 thead th {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px;
+        }
+
+        /* Mejoras para el campo de búsqueda */
+        .relative input[type="text"] {
+            padding-left: 48px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .relative input[type="text"]:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+
+        .relative input[type="text"]:focus + .absolute .fa-search {
+            color: #3b82f6;
+        }
+
+        /* Mejoras para resultados de búsqueda */
+        #search_results {
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .search-result-item {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .search-result-item:hover {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left-color: #3b82f6;
+            transform: translateX(4px);
+        }
+
+        /* Mejoras para botones de acción */
+        .bg-red-500 {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
+        }
+
+        .bg-red-500:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Mejoras para el área de totales */
+        .bg-gray-100.p-4.rounded-lg {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        /* Mejoras para inputs readonly */
+        input[readonly] {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        /* Padding mínimo para el input del modal de escaneo */
+        #inputCodigoEscaneado {
+            padding-left: 8px !important;
+        }
+
+        /* Mejoras para modales */
+        .fixed.inset-0.bg-gray-600 {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        .relative.top-20.mx-auto.p-5.border.shadow-lg.rounded-md.bg-white,
+        .relative.top-10.mx-auto.p-5.border.shadow-lg.rounded-md.bg-white {
+            border-radius: 20px;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+        }
+
+        /* Animaciones mejoradas */
+        .bg-blue-50, .bg-green-50, .bg-gray-50, .bg-yellow-50,
+        .rounded-md.border-gray-300, button, .search-result-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Mejoras para el estado hover de filas de tabla */
+        #products_tbody tr:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Efectos de profundidad para elementos interactivos */
+        .scan-codes-btn, .action-button {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scan-codes-btn:hover, .action-button:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+        }
+
+        /* Mejoras para el texto de ayuda */
+        small.text-gray-500 {
+            color: #6b7280;
+            font-style: italic;
+            font-weight: 500;
+        }
+        </style>
+</x-app-layout>

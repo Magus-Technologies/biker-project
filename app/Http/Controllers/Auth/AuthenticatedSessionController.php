@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Tienda;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $tiendas = Tienda::where('status', 1)->get();
+        return view('auth.login', compact('tiendas'));
     }
 
     /**
@@ -27,7 +29,15 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $request->validate([
+            'tienda_id' => ['required', 'exists:tiendas,id'],
+        ]);
+
         $request->session()->regenerate();
+        $request->session()->put('tienda_id', $request->tienda_id);
+
+        // Asegurar que la sesión se guarde
+        $request->session()->save();
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
@@ -37,12 +47,17 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Verificar token CSRF antes del logout
+        if (!$request->hasValidSignature() && !$request->session()->token() === $request->input('_token')) {
+            // Si hay problema con CSRF, regenerar token y redirigir
+            $request->session()->regenerateToken();
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login'); // Cambiar a /login en lugar de /
     }
 }

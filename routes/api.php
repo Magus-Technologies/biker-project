@@ -61,3 +61,23 @@ Route::get('/services', function (Request $request) {
 });
 Route::get('/provinces/{regionId}', [LocationController::class, 'getProvinces']);
 Route::get('/districts/{provinceId}', [LocationController::class, 'getDistricts']);
+
+Route::get('/api/suppliers/search', function (Request $request) {
+    $query = $request->input('query');
+    $suppliers = App\Models\Supplier::where('nombres', 'LIKE', "%$query%")
+        ->orWhere('nombre_negocio', 'LIKE', "%$query%")
+        ->orWhere('nro_documento', 'LIKE', "%$query%")
+        ->limit(10)
+        ->get();
+    return response()->json($suppliers);
+});
+
+Route::get('/api/tiendas', function () {
+    $tiendas = App\Models\Tienda::where('status', 1)->get();
+    return response()->json($tiendas);
+});
+
+Route::get('/api/payment-methods', function () {
+    $methods = App\Models\PaymentMethod::where('status', 1)->get();
+    return response()->json($methods);
+});

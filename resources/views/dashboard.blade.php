@@ -1,3 +1,4 @@
+<!-- resources\views\dashboard.blade.php -->
 <x-app-layout>
     <x-slot name="header">
         <!-- <div class="bg-blue-600 text-white py-3 px-6 rounded-lg shadow-lg">
