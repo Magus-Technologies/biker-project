@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ClienteMayoristaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
@@ -24,10 +25,10 @@ use App\Http\Controllers\BuyController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('/', function () {
-    return view('auth.login');
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
 });
+Route::get('/', [AuthenticatedSessionController::class, 'create']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'role:administrador|mecanico|ventas'])
@@ -73,6 +74,12 @@ Route::group(
 
         // Busca la sección de productos y agrega esta línea después:
         Route::get('/warehouses/by-tienda', [App\Http\Controllers\ProductController::class, 'getWarehousesByTienda'])->name('warehouses.by-tienda');
+        
+        // PRECIOS DE PRODUCTOS
+        Route::get('/precios-productos', [App\Http\Controllers\PreciosProductosController::class, 'index'])->name('precios-productos.index');
+        Route::get('/precios-productos/export-excel', [App\Http\Controllers\PreciosProductosController::class, 'exportExcel'])->name('precios-productos.export-excel');
+        Route::get('/precios-productos/export-pdf', [App\Http\Controllers\PreciosProductosController::class, 'exportPdf'])->name('precios-productos.export-pdf');
+        Route::get('/precios-productos/detalles', [App\Http\Controllers\PreciosProductosController::class, 'getDetallesPrecio'])->name('precios-productos.detalles');
         
         //SERVICIOS
         Route::resource('services', App\Http\Controllers\ServiceController::class);
