@@ -15,7 +15,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $drives = Drive::where('status', 1)->get();
+        $drives = Drive::where('status', 1)->paginate(10);
         return view('driver.index', compact('drives'));
     }
 
