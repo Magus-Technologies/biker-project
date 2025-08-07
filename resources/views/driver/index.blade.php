@@ -36,103 +36,94 @@
             </div>
         @endif
 
-        <!-- Tabla de registros -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-5">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Código
-                        </th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nombres y Apellidos
-                        </th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº Motor
-                        </th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº Placa
-                        </th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Teléfono
-                        </th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estado
-                        </th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acciones
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($drives as $drive)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $drive->codigo }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $drive->nombres }} {{ $drive->apellido_paterno }} {{ $drive->apellido_materno }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $drive->nro_motor ?? 'N/A' }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $drive->nro_placa ?? 'N/A' }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $drive->telefono ?? 'N/A' }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <button type="button" id="btn-{{ $drive->id }}"
-                                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow-md {{ $drive->status == 1 ? 'bg-green-200 text-green-700' : 'text-red-700 bg-red-200' }}"
-                                    onclick="confirmDelete({{ $drive->id }}, '{{ $drive->status == 1 ? '¿Está seguro de desactivar este registro?' : '¿Está seguro de activar este registro?' }}')">
-                                    @if ($drive->status == 1)
-                                        Activado
-                                    @else
-                                        Deshabilitado
-                                    @endif
-                                </button>
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <!-- Botón Ver Detalles -->
-                                    <button onclick="showDriverDetails({{ $drive->id }})"
-                                        class="inline-flex items-center px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition-colors duration-200"
-                                        title="Ver detalles">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </button>
-                                    
-                                    @can('actualizar-conductores')
-                                        <!-- Botón Editar -->
-                                        <a href="{{ route('drives.edit', $drive->id) }}"
-                                            class="inline-flex items-center px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 rounded-md transition-colors duration-200"
-                                            title="Editar">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                            </svg>
-                                        </a>
-                                    @endcan
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
+        <!-- Tabla de registros mejorada y responsiva -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
                         <tr>
-                            <td colspan="7" class="px-3 py-8 text-center text-gray-500">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                                    <p class="text-lg font-medium">No hay conductores registrados</p>
-                                    <p class="text-sm text-gray-400">Comienza agregando un nuevo conductor</p>
-                                </div>
-                            </td>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Código
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Nombres y Apellidos
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Nº Motor
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Nº Placa
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Teléfono
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Estado
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Acciones
+                            </th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($drives as $drive)
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-700">
+                                    {{ $drive->codigo }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $drive->nombres }} {{ $drive->apellido_paterno }} {{ $drive->apellido_materno }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                                    {{ $drive->nro_motor ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    {{ $drive->nro_placa ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    {{ $drive->telefono ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $drive->status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $drive->status ? 'Activado' : 'Deshabilitado' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                    <div class="flex items-center justify-center space-x-3">
+                                        <button onclick="showDriverDetails({{ $drive->id }})" 
+                                                class="text-blue-600 hover:text-blue-900 transition-transform duration-200 transform hover:scale-110" 
+                                                title="Ver detalles">
+                                            <i class="bi bi-eye-fill text-lg"></i>
+                                        </button>
+                                        @can('actualizar-conductores')
+                                            <a href="{{ route('drives.edit', $drive->id) }}" 
+                                               class="text-indigo-600 hover:text-indigo-900 transition-transform duration-200 transform hover:scale-110" 
+                                               title="Editar">
+                                                <i class="bi bi-pencil-fill text-lg"></i>
+                                            </a>
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                    <div class="flex flex-col items-center">
+                                        <i class="bi bi-person-badge text-6xl text-gray-300 mb-4"></i>
+                                        <h3 class="text-xl font-semibold text-gray-700">No hay conductores registrados</h3>
+                                        <p class="text-gray-400 mt-1">Comienza agregando un nuevo conductor para verlo aquí.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        <div class="mt-6">
+            {{ $drives->links() }}
         </div>
     </div>
 

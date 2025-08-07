@@ -16,7 +16,7 @@ class ClienteMayoristaController extends Controller
      */
     public function index()
     {
-        $clientes = ClienteMayorista::where('status', 1)->get();
+        $clientes = ClienteMayorista::where('status', 1)->paginate(10);
         return view('clientes-mayoristas.index', compact('clientes'));
     }
 
