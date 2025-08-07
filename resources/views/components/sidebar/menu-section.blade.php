@@ -1,3 +1,4 @@
+<!-- resources\views\components\sidebar\menu-section.blade.php -->
 @props(['key', 'icon', 'title', 'routes'])
 
 <div class="nav-section">

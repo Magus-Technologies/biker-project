@@ -1,3 +1,4 @@
+<!-- resources\views\components\sidebar\mobile-menu-section.blade.php -->
 @props(['key', 'icon', 'title', 'routes'])
 
 <div class="mobile-menu-item" @click="toggleSubmenu('{{ $key }}')">

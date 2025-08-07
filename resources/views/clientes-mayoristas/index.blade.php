@@ -6,6 +6,11 @@
         </h2>
     </x-slot>
 
+    <!-- CDN Bootstrap y Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <div class="max-w-7xl mx-auto px-4 py-12">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-gray-800">Lista de Clientes Mayoristas</h2>
@@ -131,128 +136,335 @@
         </div>
     </div>
 
-    <!-- Modal de Detalles del Cliente Mayorista - Responsive -->
-    <div id="clienteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <!-- Contenedor del Modal - Responsive -->
-        <div class="relative
-                    md:top-20 md:mx-auto md:p-5 md:border md:w-11/12 md:max-w-2xl md:shadow-lg md:rounded-md md:bg-white
-                    top-0 mx-0 p-0 border-0 w-full max-w-none shadow-none rounded-none bg-white">
-            <!-- Header del Modal -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200
-                        md:static sticky top-0 bg-white z-10">
-                <h3 class="text-xl font-semibold text-gray-900">
-                    Detalles del Cliente Mayorista
-                </h3>
-                <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+@push('modals')
+<!-- Modal mejorado y responsive para detalles del cliente mayorista - Estilo Bootstrap -->
+<div class="modal fade" id="clienteDetailsModal" tabindex="-1" aria-labelledby="clienteDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-to-r from-green-600 to-green-800 text-white">
+                <h5 class="modal-title d-flex align-items-center" id="clienteDetailsModalLabel">
+                    <i class="bi bi-shop me-2"></i>
+                    <span>Detalles del Cliente Mayorista</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-
-            <!-- Contenido del Modal -->
-            <div id="modalContent" class="p-4 md:p-6 md:max-h-[70vh] overflow-y-auto">
-                <!-- Loading spinner -->
-                <div id="loadingSpinner" class="flex justify-center items-center py-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div class="modal-body p-0">
+                <div id="clienteDetailsContent" class="h-100 overflow-auto">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <h6 class="text-muted">Cargando detalles del cliente mayorista...</h6>
+                        <p class="text-muted mb-0">Por favor espere un momento</p>
+                    </div>
                 </div>
-                <!-- Contenido dinámico se cargará aquí -->
-                <div id="clienteDetails" class="hidden"></div>
             </div>
-
-            <!-- Footer del Modal - Sticky en móviles -->
-            <div class="flex items-center justify-end p-4 border-t border-gray-200 space-x-2
-                        md:static sticky bottom-0 bg-white z-10">
-                <button onclick="cerrarModal()"
-                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                    Cerrar
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cerrar
                 </button>
-                <button id="editClienteBtn"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors hidden">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                    Editar
+                <button type="button" id="editClienteBtn" class="btn btn-success" style="display: none;">
+                    <i class="bi bi-pencil-square me-1"></i>Editar
                 </button>
             </div>
         </div>
     </div>
+</div>
+@endpush
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Función para mostrar detalles del cliente mayorista
-        function mostrarDetallesCliente(clienteId) {
-            const modal = document.getElementById('clienteModal');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const clienteDetails = document.getElementById('clienteDetails');
-            const editBtn = document.getElementById('editClienteBtn');
-            
-            // Mostrar modal y loading
-            modal.classList.remove('hidden');
-            loadingSpinner.classList.remove('hidden');
-            clienteDetails.classList.add('hidden');
-            editBtn.classList.add('hidden');
-            
-            // Prevenir scroll del body en móviles
-            document.body.style.overflow = 'hidden';
-            
-            // Hacer petición AJAX
-            // fetch(`/clientes-mayoristas/${clienteId}/detalles`)
-         fetch(`{{ route('clientes-mayoristas.detalles', ['id' => '__clienteId__']) }}`.replace('__clienteId__', clienteId))
-            
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        loadingSpinner.classList.add('hidden');
-                        clienteDetails.innerHTML = data.html;
-                        clienteDetails.classList.remove('hidden');
-                        
-                        // Mostrar botón editar
-                        editBtn.classList.remove('hidden');
-                        editBtn.onclick = () => {
-                            window.location.href = `/clientes-mayoristas/${clienteId}/edit`;
-                        };
-                    } else {
-                        throw new Error(data.message || 'Error al cargar los detalles');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    loadingSpinner.classList.add('hidden');
-                    clienteDetails.innerHTML = `
-                        <div class="text-center py-8">
-                            <div class="text-red-500 mb-4">
-                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <p class="text-gray-600">Error al cargar los detalles del cliente mayorista</p>
-                        </div>
-                    `;
-                    clienteDetails.classList.remove('hidden');
-                });
-        }
+<style>
+/* Estilos específicos para el modal de cliente mayorista */
+.modal-header {
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+}
 
-        // Función para cerrar modal
-        function cerrarModal() {
-            document.getElementById('clienteModal').classList.add('hidden');
-            // Restaurar scroll del body
-            document.body.style.overflow = 'auto';
-        }
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
 
-        // Cerrar modal al hacer clic fuera de él (solo en desktop)
-        document.getElementById('clienteModal').addEventListener('click', function(e) {
-            if (e.target === this && window.innerWidth >= 768) {
-                cerrarModal();
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 0;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+/* Contenido del cliente con diseño mejorado */
+.cliente-details-container {
+    padding: 1.5rem;
+}
+
+.cliente-header {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.cliente-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+.cliente-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid white;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.info-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.info-section h4 {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.info-section h4 i {
+    margin-right: 0.5rem;
+    color: #059669;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #6b7280;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-align: right;
+    max-width: 60%;
+    word-break: break-word;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Grid responsive para las secciones */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .cliente-header {
+        padding: 2.5rem;
+    }
+    
+    .cliente-details-container {
+        padding: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .info-row {
+        flex-direction: row;
+        text-align: left;
+    }
+    
+    .info-value {
+        text-align: right;
+    }
+}
+
+/* Loading state */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: #6b7280;
+}
+
+/* Error state */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: #dc2626;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* Scrollbar personalizada */
+#clienteDetailsContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+#clienteDetailsContent::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+#clienteDetailsContent::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-radius: 4px;
+}
+
+#clienteDetailsContent::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+</style>
+
+<script>
+// Función para mostrar detalles del cliente mayorista - Versión Bootstrap Modal
+function mostrarDetallesCliente(clienteId) {
+    const modal = new bootstrap.Modal(document.getElementById('clienteDetailsModal'), {
+        backdrop: 'static',
+        keyboard: true
+    });
+    const content = document.getElementById('clienteDetailsContent');
+    const editBtn = document.getElementById('editClienteBtn');
+    
+    // Mostrar loading
+    content.innerHTML = `
+        <div class="loading-container">
+            <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h6 class="text-muted">Cargando detalles del cliente mayorista...</h6>
+            <p class="text-muted mb-0">Por favor espere un momento</p>
+        </div>
+    `;
+    
+    // Ocultar botón de editar
+    editBtn.style.display = 'none';
+    
+    modal.show();
+    
+    // Cargar detalles
+    fetch(`{{ route('clientes-mayoristas.detalles', ['id' => '__clienteId__']) }}`.replace('__clienteId__', clienteId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                content.innerHTML = data.html;
+                
+                // Mostrar botón editar si tiene permisos
+                {{-- @can('actualizar-clientes-mayoristas') --}}
+                    editBtn.style.display = 'inline-block';
+                    editBtn.onclick = () => {
+                        window.location.href = `/clientes-mayoristas/${clienteId}/edit`;
+                    };
+                {{-- @endcan --}}
+            } else {
+                throw new Error(data.message || 'Error al cargar los detalles');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            content.innerHTML = `
+                <div class="error-container">
+                    <div class="text-danger mb-4">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="text-danger">Error al cargar los detalles</h6>
+                    <p class="text-muted mb-3">${error.message}</p>
+                    <button class="btn btn-outline-success" onclick="mostrarDetallesCliente(${clienteId})">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+                    </button>
+                </div>
+            `;
         });
+}
 
-        // Cerrar modal con tecla Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                cerrarModal();
-            }
+// Inicializar tooltips de Bootstrap si están disponibles
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si Bootstrap Tooltip está disponible
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    </script>
+    }
+});
+
+// Función para cerrar modal (mantener compatibilidad)
+function cerrarModal() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('clienteDetailsModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+</script>
 
 </x-app-layout>
