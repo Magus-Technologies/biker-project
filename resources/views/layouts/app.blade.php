@@ -1,3 +1,4 @@
+<!-- resources\views\layouts\app.blade.php -->
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -87,20 +88,10 @@
         <i :class="sidebarOpen ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
     </button>
 
-    <!-- Page Heading -->
-    @if (isset($header))
-        <div class="lg:ml-0 transition-all duration-300" 
-             :style="window.innerWidth >= 1025 ? 'margin-left: ' + (sidebarOpen ? '280px' : '60px') : 'margin-left: 0'">
-            {{ $header }}
-        </div>
-    @endif
-
-  <!-- Page Content -->
-<main class="main-content transition-all duration-300 min-h-screen"
-      :style="window.innerWidth >= 1025 ? 'margin-left: ' + (sidebarOpen ? '280px' : '60px') : (mobileMenuOpen ? 'margin-left: 280px' : 'margin-left: 0')">
-        <div class="container mx-auto px-4 py-6">
-            {{ $slot }}
-        </div>
+    <!-- Page Content - OPTIMIZADO PARA RESPONSIVE -->
+    <main class="main-content transition-all duration-300 min-h-screen"
+          :style="window.innerWidth >= 1025 ? 'margin-left: ' + (sidebarOpen ? '280px' : '60px') : (mobileMenuOpen ? 'margin-left: 280px' : 'margin-left: 0')">
+        {{ $slot }}
     </main>
 
     <!-- Loading Overlay -->
@@ -154,6 +145,8 @@
             </div>
         </template>
     </div>
+
+    @stack('modals')
 
 </body>
 </html>

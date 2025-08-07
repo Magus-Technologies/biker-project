@@ -514,7 +514,8 @@
     background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%);
 }
 
-/* Responsive Breakpoints mejorados */
+/* CONFIGURACIÓN RESPONSIVE OPTIMIZADA */
+/* Pantallas pequeñas (móviles y tablets) - SIN márgenes laterales */
 @media (max-width: 1024px) {
     .desktop-sidebar,
     .sidebar-toggle-btn,
@@ -529,10 +530,21 @@
     .main-content {
         margin-left: 0 !important;
         margin-top: 70px !important;
-        padding-top: 1rem !important;
+        padding: 0.75rem 0 1rem 0 !important; /* Solo padding arriba y abajo, CERO laterales */
+        background: transparent !important; /* Mantener fondo transparente para mostrar el rosado */
+    }
+
+    /* Asegurar que los modales tengan z-index correcto */
+    nav[x-show="mobileMenuOpen"] {
+        z-index: 1100 !important;
+    }
+    
+    div[x-show="mobileMenuOpen"][class*="bg-black"] {
+        z-index: 1050 !important;
     }
 }
 
+/* Pantallas grandes (desktop) - CON márgenes laterales */
 @media (min-width: 1025px) {
     .mobile-header {
         display: none !important;
@@ -548,7 +560,7 @@
 
     .main-content {
         margin-top: 70px;
-        padding-top: 1rem;
+        padding: 1rem 2rem 1.5rem 2rem; /* Mantener márgenes laterales en desktop */
         transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
@@ -632,6 +644,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
+
 /* Arreglar inputs del perfil */
 .profile-input {
     border: 1px solid #d1d5db !important;
@@ -657,36 +670,4 @@ input[type="password"]:focus {
     outline: none;
     border-color: #10b981;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-/* COMPORTAMIENTO CORRECTO PARA TABLET */
-@media (max-width: 1024px) {
-    /* Mobile header */
-    .mobile-header {
-        z-index: 1000 !important;
-    }
-    
-    /* Sidebar móvil con z-index alto */
-    nav[x-show="mobileMenuOpen"] {
-        z-index: 1100 !important;
-    }
-    
-    /* Overlay del menú móvil */
-    div[x-show="mobileMenuOpen"][class*="bg-black"] {
-        z-index: 1050 !important;
-    }
-    
-    /* IMPORTANTE: El contenido NO debe tener z-index bajo */
-    .main-content {
-        position: relative;
-        z-index: auto !important; /* Cambio clave */
-        transition: margin-left 0.3s ease !important;
-    }
-    
-    /* Remover z-index forzado de inputs */
-    .main-content input,
-    .main-content form,
-    .main-content section,
-    .main-content div {
-        z-index: auto !important; /* Cambio clave */
-    }
 }

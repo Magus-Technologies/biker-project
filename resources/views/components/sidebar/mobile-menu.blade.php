@@ -11,8 +11,9 @@
      x-transition:leave-end="-translate-x-full">
     
     <div class="mobile-menu-header">
-        <div class="mobile-logo">
-            {{ config('app.name', 'Laravel') }}
+        <div class="mobile-logo flex items-center">
+            <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-12 mr-3">
+            <span class="text-lg font-bold">{{ config('app.name', 'Laravel') }}</span>
         </div>
         <button @click="mobileMenuOpen = false" class="mobile-close-btn" type="button">
             <i class="bi bi-x"></i>
