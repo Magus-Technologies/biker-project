@@ -26,12 +26,12 @@
 
         @auth
             <!-- Rol del usuario -->
-            <div class="hidden md:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-100">
+            <!-- <div class="hidden md:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-100">
                 <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span class="text-sm font-semibold text-blue-800">
                     {{ Auth::user()->roles->first() ? Auth::user()->roles->first()->name : 'Sin rol' }}
                 </span>
-            </div>
+            </div> -->
 
             <!-- Menú de usuario -->
             <div x-data="{ open: false }" class="relative">
