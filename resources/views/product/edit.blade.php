@@ -250,7 +250,7 @@
             const csrfToken = document.querySelector('input[name="_token"]').value;
 
             try {
-                const response = await fetch(`/products/{{ $product->id }}`, {
+                const response = await fetch(`{{ route('products.update', $product->id) }}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -306,7 +306,7 @@
                 dropdown.classList.add("hidden");
                 return;
             }
-            fetch(`/units?query=${this.value}`)
+            fetch(`{{ route('units.search') }}?query=${this.value}`)
                 .then(response => response.json())
                 .then(data => {
                     suggestionsList.innerHTML = "";
@@ -341,7 +341,7 @@
                 dropdown.classList.add("hidden");
                 return;
             }
-            fetch(`/api/brands?query=${this.value}`)
+            fetch(`{{ route('api.brands.search') }}?query=${this.value}`)
                 .then(response => response.json())
                 .then(data => {
                     suggestionsList.innerHTML = "";
@@ -815,7 +815,7 @@
                     }
                 }
                 
-                fetch(`/products/${productId}/manage-stock`, {
+                fetch(`{{ route('products.manage-stock', ['product' => $product->id]) }}`, {
                     method: 'POST',
                     body: formData
                 })
@@ -847,7 +847,7 @@
                     codeSelectionArea.classList.remove('hidden');
                     
                     // Cargar códigos existentes
-                    fetch(`/products/${productId}/stock-codes?tienda_id=${tiendaId}`)
+                    fetch(`{{ route('products.getStockCodes', ['productId' => $product->id]) }}?tienda_id=${tiendaId}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -1272,7 +1272,7 @@
                     });
                 }
                 
-                fetch(`/products/${productId}/manage-stock`, {
+                fetch(`{{ route('products.manage-stock', ['product' => $product->id]) }}`, {
                     method: 'POST',
                     body: formData
                 })

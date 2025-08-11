@@ -405,6 +405,17 @@
     </style>
 
     <script>
+        window.routes = {
+            productsSearch: '{{ route("products.search") }}',
+            productsExport: '{{ route("products.export") }}',
+            productsImport: '{{ route("products.import") }}',
+            productsShow: '{{ route("products.show", ['product' => '__ID__']) }}',
+            productsEdit: '{{ route("products.edit", ['product' => '__ID__']) }}',
+            productsDestroy: '{{ route("products.destroy", ['product' => '__ID__']) }}',
+            productsImages: '{{ route("products.images", ['id' => '__ID__']) }}',
+            csrfToken: '{{ csrf_token() }}'
+        };
+
         let currentView = 'tabla';
         let allProducts = [];
         let currentPage = 1;
@@ -610,13 +621,13 @@
 
                 const actions = `
                     <div class="flex items-center justify-center space-x-2">
-                        <a href="/products/${product.id}" class="action-button view" title="Ver detalles">
+                        <a href="${window.routes.productsShow.replace('__ID__', product.id)}" class="action-button view" title="Ver detalles">
                             <i class="fas fa-eye text-blue-600 text-xs"></i>
                         </a>
-                        <a href="/products/${product.id}/edit" class="action-button edit" title="Editar">
+                        <a href="${window.routes.productsEdit.replace('__ID__', product.id)}" class="action-button edit" title="Editar">
                             <i class="fas fa-edit text-yellow-600 text-xs"></i>
                         </a>
-                        <form action="/products/${product.id}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                        <form action="${window.routes.productsDestroy.replace('__ID__', product.id)}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="_method" value="DELETE">
                             <button type="submit" class="action-button delete" title="Eliminar">
@@ -714,7 +725,7 @@
                             </div>
                             
                             <div class="flex space-x-2">
-                                <a href="/products/${product.id}/edit" class="flex-1 bg-blue-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded text-center transition-colors">
+                                <a href="${window.routes.productsEdit.replace('__ID__', product.id)}" class="flex-1 bg-blue-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded text-center transition-colors">
                                     <i class="fas fa-edit mr-1"></i>
                                     Editar
                                 </a>
@@ -791,7 +802,7 @@
         }
 
         function openModal(productId) {
-            fetch(`/productos/${productId}/imagenes`)
+            fetch(window.routes.productsImages.replace('__ID__', productId))
                 .then(response => response.json())
                 .then(images => {
                     const swiperWrapper = document.getElementById("swiperWrapper");
@@ -935,17 +946,5 @@
             }
         });
     </script>
-
-@push('scripts')
-<script>
-    window.routes = {
-        productsSearch: '{{ route("products.search") }}',
-        productsImages: '/productos/{productId}/imagenes',
-        productsExport: '{{ route("products.export") }}',
-        productsImport: '{{ route("products.import") }}',
-        csrfToken: '{{ csrf_token() }}'
-    };
-</script>
-@endpush
 
 </x-app-layout>

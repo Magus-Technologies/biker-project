@@ -190,7 +190,7 @@
             dropdown.classList.add("hidden");
             return;
         }
-        fetch(`/api/brands?query=${this.value}`)
+        fetch(`{{ route('api.brands.search') }}?query=${this.value}`)
             .then(response => response.json())
             .then(data => {
                 suggestionsList.innerHTML = "";
@@ -237,7 +237,7 @@
             dropdown.classList.add("hidden");
             return;
         }
-        fetch(`/units?query=${this.value}`)
+        fetch(`{{ route('units.search') }}?query=${this.value}`)
             .then(response => response.json())
             .then(data => {
                 suggestionsList.innerHTML = "";
