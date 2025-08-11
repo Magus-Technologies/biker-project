@@ -166,7 +166,7 @@
         // Cargar tiendas
         async function loadTiendas() {
             try {
-                const response = await fetch('/biker-project/public/tiendas');
+                const response = await fetch('/tiendas');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -212,7 +212,7 @@
             const formData = new FormData(this);
             
             try {
-                const response = await fetch('/biker-project/public/tiendas', {
+                const response = await fetch('/tiendas', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -262,7 +262,7 @@
         // Toggle estado de tienda
         async function toggleTienda(id) {
             try {
-                const response = await fetch(`/biker-project/public/tiendas/${id}/toggle`, {
+                const response = await fetch(`/tiendas/${id}/toggle`, {
                     method: 'PATCH',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Warehouse;
+use App\Models\Tienda;
 use App\Models\Brand;
 use App\Models\Unit;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -18,8 +18,8 @@ class ImportTemplateExport implements FromArray, WithHeadings, WithColumnWidths
             'Código de barras',           // Código del producto
             'Descripción',      // Nombre o descripción
             'Modelo',           // Modelo del producto
-            'Localización',     // Ubicación en el almacén
-            'Almacén',          // Nombre del almacén
+            'Localización',     // Ubicación en la tienda
+            'Tienda',          // Nombre de la tienda
             'Marca',            // Marca del producto
             'Unidad',           // Unidad de medida
             'Precio Compra',    // Precio de compra
@@ -34,7 +34,7 @@ class ImportTemplateExport implements FromArray, WithHeadings, WithColumnWidths
     public function array(): array
     {
         // Obtener opciones de la base de datos para orientar al usuario
-        $warehouses = Warehouse::pluck('name')->implode(', ');
+        $tiendas = Tienda::pluck('nombre')->implode(', ');
         $brands = Brand::pluck('name')->implode(', ');
         $units = Unit::pluck('name')->implode(', ');
 
@@ -46,7 +46,7 @@ class ImportTemplateExport implements FromArray, WithHeadings, WithColumnWidths
                 'Ej: Shampoo Hidratante 500ml',
                 'Ej: XYZ-123',
                 'Ej: Pasillo 3, Estante 2',
-                "Ej: $warehouses",
+                "Ej: $tiendas",
                 "Ej: $brands",
                 "Ej: $units",
                 'Ej: 100.00',   // Precio Compra
@@ -69,7 +69,7 @@ class ImportTemplateExport implements FromArray, WithHeadings, WithColumnWidths
             'C' => 35, // Descripción
             'D' => 20, // Modelo
             'E' => 25, // Localización
-            'F' => 50, // Almacén
+            'F' => 50, // Tienda
             'G' => 40, // Marca
             'H' => 40, // Unidad
             'I' => 20, // Precio Compra

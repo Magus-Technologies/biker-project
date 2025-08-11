@@ -33,10 +33,28 @@ class AuthenticatedSessionController extends Controller
             'tienda_id' => ['required', 'exists:tiendas,id'],
         ]);
 
-        $request->session()->regenerate();
-        $request->session()->put('tienda_id', $request->tienda_id);
+        $user = $request->user();
+        $requestedTiendaId = $request->tienda_id;
 
-        // Asegurar que la sesión se guarde
+        // VERIFICACIÓN DE ACCESO POR ROL Y TIENDA
+        // Si el usuario no es Admin, se valida que la tienda seleccionada sea la suya.
+        if (!$user->hasRole('administrador')) {
+            if ($user->tienda_id != $requestedTiendaId) {
+                // Si el vendedor intenta acceder a una tienda que no es la suya,
+                // cerramos la sesión y lo devolvemos con un error.
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect('/login')->withErrors([
+                    'tienda_id' => 'No tiene permiso para acceder a esta tienda.',
+                ]);
+            }
+        }
+
+        // Si la validación pasa (es Admin o es su tienda correcta), procedemos.
+        $request->session()->regenerate();
+        $request->session()->put('tienda_id', $requestedTiendaId);
         $request->session()->save();
 
         return redirect()->intended(RouteServiceProvider::HOME);

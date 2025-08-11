@@ -8,7 +8,7 @@ use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\Stock;
 use App\Models\Unit;
-use App\Models\Warehouse;
+// use App\Models\Warehouse; // Obsoleto
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException as ValidationValidationException;
@@ -30,10 +30,9 @@ class ProductController extends Controller
     // Reemplaza la función index() existente
     public function index()
     {
-        $warehouses = Warehouse::with('tienda')->get();
         $tiendas = Tienda::where('status', 1)->get();
         $products = Product::where('status', 1)->with('brand', 'unit', 'prices', 'stocks.tienda')->get();
-        return view('product.index', compact('products', 'warehouses', 'tiendas'));
+        return view('product.index', compact('products', 'tiendas'));
     }
     public function export(Request $request)
     {
@@ -42,7 +41,7 @@ class ProductController extends Controller
 
         if ($filter === 'productos') {
             // Opción "Exportar por Productos": Exporta todos los productos (con relaciones)
-            $query = Product::query()->with('brand', 'unit', 'warehouse');
+            $query = Product::query()->with('brand', 'unit', 'tienda');
 
             return Excel::download(new class($query) implements FromQuery, WithHeadings, WithMapping {
                 protected $query;
@@ -61,7 +60,7 @@ class ProductController extends Controller
                         'description',
                         'model',
                         'location',
-                        'warehouse_id',
+                        'tienda_id',
                         'brand_id',
                         'unit_id',
                         'status'
@@ -76,7 +75,7 @@ class ProductController extends Controller
                         'Descripción',
                         'Modelo',
                         'Localización',
-                        'Almacén',
+                        'Tienda',
                         'Marca',
                         'Unidad',
                         'Estado',
@@ -91,7 +90,7 @@ class ProductController extends Controller
                         $product->description,
                         $product->model,
                         $product->location,
-                        $product->warehouse->name ?? '',
+                        $product->tienda->nombre ?? '',
                         $product->brand->name ?? '',
                         $product->unit->name ?? '',
                         $product->status,
@@ -189,9 +188,9 @@ class ProductController extends Controller
             });
         }
         
-        // Comenté esta parte porque no tienes warehouse_id en products
-        // if ($request->has('almacen') && $request->almacen !== 'todos') {
-        //     $query->where('warehouse_id', $request->almacen);
+        // Filtro de ejemplo por si se quiere buscar por tienda en el futuro
+        // if ($request->has('tienda_id') && $request->tienda_id !== 'todos') {
+        //     $query->where('tienda_id', $request->tienda_id);
         // }
 
         $products = $query->get();
@@ -293,22 +292,21 @@ class ProductController extends Controller
         $messages = [
             'description.string' => 'La descripción debe ser un texto.',
             'model.required' => 'El modelo es obligatorio.',
-            'warehouse_id.required' => 'El almacén es obligatorio.',
-            'warehouse_id.exists' => 'El almacén seleccionado no es válido.',
+            'tienda_id.required' => 'La tienda es obligatoria.',
+            'tienda_id.exists' => 'La tienda seleccionada no es válida.',
             'brand.required' => 'La marca es obligatoria.',
             'unit_name.required' => 'La unidad es obligatoria.',
             'code_sku.required' => 'El código es obligatorio.',
             'code_sku.unique' => 'El código SKU ya está registrado.',
             'code_bar.unique' => 'El código de barras ya está registrado.',
-            'code_bar.unique' => 'El código de barra ya está registrado para este almacén y código SKU.',
             'prices.array' => 'Los precios deben ser una lista.',
             'prices.*.numeric' => 'Cada precio debe ser un número válido.',
             'prices.*.min' => 'Cada precio debe ser mayor o igual a 0.',
         ];
 
-        // Determinar si se necesita validar almacén y tienda
+        // Determinar si se necesita validar tienda
         $quantity = $request->quantity ?? 0;
-        $needsWarehouse = $quantity > 0;
+        $needsTienda = $quantity > 0;
         
         $validationRules = [
             'description' => 'nullable|string',
@@ -326,7 +324,7 @@ class ProductController extends Controller
         ];
         
         // Solo agregar validaciones de tienda si la cantidad es mayor a 0
-        if ($needsWarehouse) {
+        if ($needsTienda) {
             $validationRules['tienda_id'] = 'required|exists:tiendas,id';
         }
         
@@ -479,8 +477,8 @@ class ProductController extends Controller
         $messages = [
             'description.string' => 'La descripción debe ser un texto.',
             'model.required' => 'El modelo es obligatorio.',
-            'warehouse_id.required' => 'El almacén es obligatorio.',
-            'warehouse_id.exists' => 'El almacén seleccionado no es válido.',
+            'tienda_id.required' => 'La tienda es obligatoria.',
+            'tienda_id.exists' => 'La tienda seleccionada no es válida.',
             'brand.required' => 'La marca es obligatoria.',
             'unit_name.required' => 'La unidad es obligatoria.',
             'code_sku.required' => 'El código  es obligatorio.',

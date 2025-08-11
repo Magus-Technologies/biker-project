@@ -27,7 +27,7 @@ return new class extends Migration
             $table->foreign('user_update')->references('id')->on('users')->onDelete('cascade');
             $table->timestamp('fecha_registro')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('fecha_actualizacion')->default(DB::raw('CURRENT_TIMESTAMP'))->onUpdate(DB::raw('CURRENT_TIMESTAMP'));
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('cascade')->nullable();
+            $table->foreignId('tienda_id')->nullable()->constrained('tiendas')->onDelete('set null');
             $table->foreignId('brand_id')->constrained('brands')->onDelete('cascade')->nullable();
             $table->foreignId('unit_id')->constrained('units')->onDelete('cascade')->nullable();
 

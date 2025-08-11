@@ -18,6 +18,7 @@ class Product extends Model
         'location',
         'brand_id',
         'unit_id',
+        'tienda_id', // Añadido
         'code_sku',
         'status',
         'control_type',
@@ -38,6 +39,20 @@ class Product extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    // Relación obsoleta comentada
+    /*
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+    */
+
+    // Nueva relación correcta
+    public function tienda()
+    {
+        return $this->belongsTo(Tienda::class);
     }
     public function images()
     {

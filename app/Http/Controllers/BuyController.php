@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Warehouse;
+// use App\Models\Warehouse; // Obsoleto
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\Buy;
@@ -33,10 +33,9 @@ class BuyController extends Controller
      */
     public function index()
     {
-        $warehouses = Warehouse::all();
         $products = Product::where('status', 1)->with('brand', 'unit', 'prices', 'stocks')->get();
         $suppliers = Supplier::where('status', 1)->get();  // ← Agregar esta línea
-        return view('buy.index', compact('products', 'warehouses', 'suppliers'));  // ← Agregar 'suppliers' al compact
+        return view('buy.index', compact('products', 'suppliers'));  // ← Agregar 'suppliers' al compact
     }
     public function search(Request $request)
     {
@@ -160,13 +159,12 @@ class BuyController extends Controller
     public function create()
     {
         $documentTypes = DocumentType::whereIn('name', ['NOTA DE VENTA'])->get();
-        $warehouses = Warehouse::all();
         $suppliers = Supplier::where('status', 1)->get();
         $tiendas = Tienda::where('status', 1)->get();  // ← Línea agregada
 
         $paymentMethods = PaymentMethod::where('status', 1)->get();  // ← Línea agregada
 
-        return view('buy.create',compact('documentTypes','warehouses','suppliers','tiendas','paymentMethods')); 
+        return view('buy.create',compact('documentTypes','suppliers','tiendas','paymentMethods')); 
 
     }
 

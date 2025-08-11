@@ -90,12 +90,12 @@
                                     id="btnBuscarProduct">Buscar</button>
                             </div>
                             <div class="w-3/12">
-                                <label for="almacen" class="block font-medium text-gray-700"></label>
-                                <select id="almacen" name="almacen"
+                                <label for="tienda_id" class="block font-medium text-gray-700">Tienda</label>
+                                <select id="tienda_id" name="tienda_id"
                                     class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                                    <option value="todos">Todos</option>
-                                    @foreach ($warehouses as $warehouse => $almacen)
-                                        <option value="{{ $almacen->id }}">{{ $almacen->name }}</option>
+                                    <option value="todos">Todas</option>
+                                    @foreach ($tiendas as $tienda)
+                                        <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
                                     @endforeach
                                 </select>
 
@@ -528,10 +528,10 @@
     })
 
     function fetchProducts() {
-        const almacen = document.getElementById("almacen").value;
+        const tiendaId = document.getElementById("tienda_id").value;
         const search = searchInput.value;
         // Realizar la solicitud a la API
-        fetch('/api/product?almacen=' + almacen + '&search=' + search)
+        fetch('/api/product?tienda_id=' + tiendaId + '&search=' + search)
             .then(res => res.json())
             .then(data => {
                 let allProducts = data
