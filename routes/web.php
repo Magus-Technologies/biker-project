@@ -60,13 +60,13 @@ Route::group(
         // PRODUCTOS
         Route::resource('products', App\Http\Controllers\ProductController::class);
         Route::post('/products/{product}/manage-stock', [App\Http\Controllers\ProductController::class, 'manageStock'])->name('products.manage-stock');
-        Route::get('/products/{productId}/stock-codes', [App\Http\Controllers\ProductController::class, 'getStockCodes']);
+        Route::get('/products/{productId}/stock-codes', [App\Http\Controllers\ProductController::class, 'getStockCodes'])->name('products.getStockCodes');
         Route::get('product/search', [App\Http\Controllers\ProductController::class, 'search'])->name('products.search');
         Route::get('product/export', [App\Http\Controllers\ProductController::class, 'export'])->name('products.export');
         Route::get('/productos/{id}/imagenes', function ($id) {
             $product = Product::findOrFail($id);
             return response()->json($product->images);
-        });
+        })->name('products.images');
         
         // Route::get('product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
         Route::get('/plantilla-descargar', [App\Http\Controllers\ProductController::class, 'descargarPlantilla'])->name('plantilla.descargar');
@@ -105,7 +105,7 @@ Route::group(
         Route::post('/sale/enviar-sunat/{id}', [SaleController::class, 'enviarSunat'])->name('sales.enviarSunat');
         //UNIDAD MEDIDA
         Route::resource('units', App\Http\Controllers\UnitController::class);
-        Route::get('/units', [UnitController::class, 'search']);
+        Route::get('/units/search-api', [UnitController::class, 'search'])->name('units.search');
         // COTIZACIONES
         Route::resource('quotations', QuotationController::class);
         Route::get('/quotation/listado', [QuotationController::class, 'filtroPorfecha'])->name('quotations.filtroPorfecha');

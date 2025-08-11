@@ -52,7 +52,7 @@ Route::get('/brands', function (Request $request) {
     $query = $request->input('query');
     $brands = Brand::where('name', 'LIKE', "%$query%")->limit(5)->get(['name']);
     return response()->json($brands);
-});
+})->name('api.brands.search');
 
 Route::get('/services', function (Request $request) {
     $query = $request->input('query');

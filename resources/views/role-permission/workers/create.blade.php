@@ -220,7 +220,7 @@
             // Cargar tiendas activas
             async function loadTiendas() {
                 try {
-                    const response = await fetch('/tiendas/activas');
+                    const response = await fetch('{{ route('tiendas.activas') }}');
                     const data = await response.json();
                     
                     if (data.success) {
