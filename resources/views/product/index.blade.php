@@ -36,13 +36,13 @@
 
             <!-- Filtros y controles -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
-                <!-- Selector de almacén -->
+                <!-- Selector de tienda -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Almacén</label>
-                    <select name="almacen" id="almacen" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="todos">Todos los almacenes</option>
-                        @foreach ($warehouses as $warehouse)
-                            <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tienda</label>
+                    <select name="tienda_id" id="tienda_id" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="todos">Todas las tiendas</option>
+                        @foreach ($tiendas as $tienda)
+                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -167,7 +167,7 @@
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
                                 <div class="flex items-center space-x-1">
                                     <i class="fas fa-warehouse text-gray-500"></i>
-                                    <span>Almacén</span>
+                                    <span>Tienda</span>
                                 </div>
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
@@ -468,8 +468,8 @@
                 }
             });
 
-            // Cambio de almacén
-            document.getElementById('almacen').addEventListener('change', () => {
+            // Cambio de tienda
+            document.getElementById('tienda_id').addEventListener('change', () => {
                 loadAllProducts();
             });
 
@@ -532,9 +532,9 @@
 
         function loadAllProducts() {
             const buscarValue = document.getElementById('buscar').value;
-            const almacen = document.getElementById('almacen').value;
+            const tiendaId = document.getElementById('tienda_id').value;
             
-            fetch(`{{ route('products.search') }}?buscar=${encodeURIComponent(buscarValue)}&almacen=${encodeURIComponent(almacen)}`)
+            fetch(`{{ route('products.search') }}?buscar=${encodeURIComponent(buscarValue)}&tienda_id=${encodeURIComponent(tiendaId)}`)
                 .then(response => response.json())
                 .then(products => {
                     allProducts = products;
@@ -636,7 +636,7 @@
                      </div>`,
                     `<span class="text-gray-700 font-medium">${product.model || '-'}</span>`,
                     `<span class="text-gray-600">${product.location || '-'}</span>`,
-                    `<span class="text-gray-700 font-medium">${product.warehouse?.name || '-'}</span>`,
+                    `<span class="text-gray-700 font-medium">${product.tienda?.nombre || '-'}</span>`,
                     `<span class="text-gray-700 font-medium">${product.brand?.name || '-'}</span>`,
                     `<span class="text-gray-600">${product.unit?.name || '-'}</span>`,
                     priceSelect,

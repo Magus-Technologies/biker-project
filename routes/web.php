@@ -72,8 +72,7 @@ Route::group(
         Route::get('/plantilla-descargar', [App\Http\Controllers\ProductController::class, 'descargarPlantilla'])->name('plantilla.descargar');
         Route::post('/product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
 
-        // Busca la sección de productos y agrega esta línea después:
-        Route::get('/warehouses/by-tienda', [App\Http\Controllers\ProductController::class, 'getWarehousesByTienda'])->name('warehouses.by-tienda');
+        
         
         // PRECIOS DE PRODUCTOS
         Route::get('/precios-productos', [App\Http\Controllers\PreciosProductosController::class, 'index'])->name('precios-productos.index');

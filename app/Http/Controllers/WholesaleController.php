@@ -7,7 +7,7 @@ use App\Models\ProductPrice;
 use App\Models\Region;
 use App\Models\ServiceSale;
 use App\Models\Stock;
-use App\Models\Warehouse;
+// use App\Models\Warehouse; // Obsoleto
 use App\Models\Wholesaler;
 use App\Models\WholesalerItem;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -28,9 +28,8 @@ class WholesaleController extends Controller
      */
     public function create()
     {
-        $warehouses = Warehouse::all();
         $regions = Region::all();
-        return view('wholesaler.create', compact('warehouses', 'regions'));
+        return view('wholesaler.create', compact('regions'));
     }
     public function detallesWholesaler($id)
     {
@@ -158,9 +157,8 @@ class WholesaleController extends Controller
     public function edit(string $id)
     {
         $mayorista = Wholesaler::with('wholesalerItems')->find($id);
-        $warehouses = Warehouse::all();
         $regions = Region::all();
-        return view('wholesaler.edit', compact('mayorista', 'warehouses', 'regions'));
+        return view('wholesaler.edit', compact('mayorista', 'regions'));
     }
     public function generatePDF($id)
     {

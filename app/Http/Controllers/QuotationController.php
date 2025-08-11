@@ -22,7 +22,7 @@ use App\Models\Service;
 use App\Models\ServiceSale;
 use App\Models\Stock;
 use App\Models\User;
-use App\Models\Warehouse;
+// use App\Models\Warehouse; // Obsoleto
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Dom\Document;
@@ -47,13 +47,12 @@ class QuotationController extends Controller
      */
     public function create()
     {
-        $warehouses = Warehouse::all();
         $paymentsMethod = PaymentMethod::where('status', 1)->get();
         $paymentsType = Payment::all();
         $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
         $companies = Company::all();
         $regions = Region::all();
-        return view('quotation.create', compact('paymentsMethod', 'paymentsType', 'warehouses', 'documentTypes', 'companies', 'regions'));
+        return view('quotation.create', compact('paymentsMethod', 'paymentsType', 'documentTypes', 'companies', 'regions'));
     }
     public function MecanicosDisponibles()
     {
@@ -309,9 +308,8 @@ class QuotationController extends Controller
     public function getCotizacion($id)
     {
         try {
-            $warehouses = Warehouse::all();
             $payments = PaymentMethod::where('status', 1)->get();
-            return view('quotation.show', compact('warehouses', 'payments'));
+            return view('quotation.show', compact('payments'));
             // return response()->json(['success' => "Cotizacion encontrada", 'quotation' => $quotation], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -323,13 +321,12 @@ class QuotationController extends Controller
     public function edit($id)
     {
         $quotation = Quotation::with('quotationItems', 'quotationPaymentMethod')->find($id);
-        $warehouses = Warehouse::all();
         $paymentsMethod = PaymentMethod::where('status', 1)->get();
         $paymentsType = Payment::all();
         $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
         $companies = Company::all();
         $regions = Region::all();
-        return view('quotation.edit', compact('quotation', 'warehouses', 'paymentsType', 'documentTypes', 'companies', 'paymentsMethod', 'regions'));
+        return view('quotation.edit', compact('quotation', 'paymentsType', 'documentTypes', 'companies', 'paymentsMethod', 'regions'));
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Product;
-use App\Models\Warehouse;
+// use App\Models\Warehouse; // Obsoleto
 use App\Models\Brand;
 use App\Models\Unit;
 use App\Models\ProductPrice;
@@ -100,7 +100,7 @@ class ProductsImport implements OnEachRow, WithStartRow, WithValidation, SkipsOn
             'description'   => $rowData[2],
             'model'         => $rowData[3],
             'location'      => $rowData[4],
-            'warehouse_id'  => Warehouse::where('name', $rowData[5])->value('id'),
+            'tienda_id'     => \App\Models\Tienda::where('nombre', $rowData[5])->value('id'), // Usar Tienda
             'brand_id'      => $brand->id,
             'unit_id'       => $unit->id,
             // Se asume que tienes definido el método generateCode() en el modelo Product
@@ -131,6 +131,7 @@ class ProductsImport implements OnEachRow, WithStartRow, WithValidation, SkipsOn
         if ((isset($rowData[12]) && $rowData[12] !== '') || (isset($rowData[13]) && $rowData[13] !== '')) {
             Stock::create([
                 'product_id'    => $product->id,
+                'tienda_id'     => \App\Models\Tienda::where('nombre', $rowData[5])->value('id'), // Usar Tienda
                 'quantity'      => isset($rowData[12]) ? $rowData[12] : 0,
                 'minimum_stock' => isset($rowData[13]) ? $rowData[13] : 0,
             ]);
@@ -143,7 +144,7 @@ class ProductsImport implements OnEachRow, WithStartRow, WithValidation, SkipsOn
             // Validación de las columnas obligatorias
             '0' => 'required|unique:products,code_sku',
             '1' => 'required|unique:products,code_bar',
-            '5' => 'required|exists:warehouses,name',
+            '5' => 'required|exists:tiendas,nombre',
             // '6' => 'required|exists:brands,name',
             // '7' => 'required|exists:units,name',
         ];
@@ -156,7 +157,7 @@ class ProductsImport implements OnEachRow, WithStartRow, WithValidation, SkipsOn
             '0.unique'     => 'El SKU ya existe en la base de datos.',
             '1.required'   => 'El codigo de barras del producto es obligatorio.',
             '1.unique'     => 'El codigo de barras  ya existe en la base de datos.',
-            '5.exists'     => 'El almacén ingresado no existe. Verifica el nombre correcto.',
+            '5.exists'     => 'La tienda ingresada no existe. Verifica el nombre correcto.',
             // '6.exists'     => 'La marca ingresada no es válida.',
             // '7.exists'     => 'La unidad ingresada no es válida.',
         ];

@@ -33,17 +33,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return response()->json($productos);
 // });
 Route::get('/product', function (Request $request) {
-    $almacen = $request->input('almacen');
+    $tiendaId = $request->input('tienda_id');
     $query = $request->input('search');
 
-    $productos = Product::with('brand', 'unit', 'warehouse', 'prices', 'stock')
+    $productos = Product::with('brand', 'unit', 'tienda', 'prices', 'stock')
         ->where(function ($q) use ($query) {
             $q->where('code_sku', 'like', "%{$query}%")
                 ->orWhere('code_bar', 'like', "%{$query}%");
         });
 
-    if ($almacen !== 'todos') {
-        $productos->where('warehouse_id', $almacen);
+    if ($tiendaId !== 'todos') {
+        $productos->where('tienda_id', $tiendaId);
     }
 
     return response()->json($productos->get());
