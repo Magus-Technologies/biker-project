@@ -36,17 +36,25 @@ Route::get('/product', function (Request $request) {
     $tiendaId = $request->input('tienda_id');
     $query = $request->input('search');
 
-    $productos = Product::with('brand', 'unit', 'tienda', 'prices', 'stock')
+    $productosQuery = Product::with('brand', 'unit', 'tienda', 'prices') // Removed 'stock' eager load
         ->where(function ($q) use ($query) {
             $q->where('code_sku', 'like', "%{$query}%")
-                ->orWhere('code_bar', 'like', "%{$query}%");
+                ->orWhere('code_bar', 'like', "%{$query}%")
+                ->orWhere('description', 'like', "%{$query}%"); // Added description search
         });
 
     if ($tiendaId !== 'todos') {
-        $productos->where('tienda_id', $tiendaId);
+        $productosQuery->where('tienda_id', $tiendaId);
     }
 
-    return response()->json($productos->get());
+    $productos = $productosQuery->get();
+
+    // Manually attach the correct stock for the given tiendaId
+    $productos->each(function ($product) use ($tiendaId) {
+        $product->stock = $product->getStockByTienda($tiendaId);
+    });
+
+    return response()->json($productos);
 });
 Route::get('/brands', function (Request $request) {
     $query = $request->input('query');

@@ -584,8 +584,8 @@
                     <td class="px-2 py-1 border">${product.code_sku}</td>
                     <td class="px-2 py-1 border">${product.description}</td>
                     <td class="px-2 py-1 border">${product.location}</td>
-                    <td class="px-2 py-1 border">${product.stock.quantity}</td>
-                    <td class="px-2 py-1 border">${product.stock.minimum_stock}</td>
+                    <td class="px-2 py-1 border">${product.stock ? product.stock.quantity : 0}</td>
+                    <td class="px-2 py-1 border">${product.stock ? product.stock.minimum_stock : 0}</td>
                     <td class="px-2 py-1 border">
                         <input type="number" class="p-2 border rounded data-quantity-id-${product.id} value="1" min="1" max="${product.stock.quantity}" data-product-id="${product.id}">
                     </td>
