@@ -16,6 +16,7 @@ use App\Models\SalesSunat;
 use App\Models\Service;
 use App\Models\ServiceSale;
 use App\Models\Stock;
+use App\Models\Tienda; // Added
 // use App\Models\Warehouse; // Obsoleto
 use App\Services\GenerarQR;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -106,8 +107,9 @@ class SaleController extends Controller
         $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
         $companies = Company::all();
         $regions = Region::all();
+        $tiendas = Tienda::all(); // Added
 
-        return view('sales.create', compact('regions', 'paymentsMethod', 'documentTypes', 'companies', 'paymentsType'));
+        return view('sales.create', compact('regions', 'paymentsMethod', 'documentTypes', 'companies', 'paymentsType', 'tiendas')); // Added 'tiendas'
     }
 
     /**

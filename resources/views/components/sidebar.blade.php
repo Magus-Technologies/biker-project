@@ -25,21 +25,19 @@
 
             <!-- SECCIÓN PRODUCTOS -->
             <x-sidebar.menu-section key="productos" icon="bi-box" title="Productos" :routes="[
-        ['route' => 'precios-productos.index', 'permission' => null, 'icon' => 'bi-currency-dollar', 'title' => 'Precios'],
+        ['route' => 'precios-productos.index', 'permission' => null, 'icon' => '<span style=\'display: inline-block; width: 1.25rem; text-align: center; font-weight: bold; margin-right: 0.5rem;\'>S/</span>', 'title' => 'Precios'],
         ['route' => 'products.index', 'permission' => 'ver-productos', 'icon' => 'bi-box', 'title' => 'Inventario'],
         ['route' => 'garantines.index', 'permission' => 'ver-garantias', 'icon' => 'bi-shield-check', 'title' => 'Garantías']
     ]" />
 
-            <!-- SECCIÓN COMPRAS -->
-            <x-sidebar.menu-section key="compras" icon="bi-cart" title="Compras" :routes="[
-        ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart', 'title' => 'Ventas'],
-        ['route' => 'quotations.index', 'permission' => null, 'icon' => 'bi-file-earmark-text', 'title' => 'Cotizaciones'],
-        ['route' => 'buys.index', 'permission' => null, 'icon' => 'bi-bag', 'title' => 'Compras'],
-        ['route' => 'services.index', 'permission' => 'ver-servicios', 'icon' => 'bi-tools', 'title' => 'Servicios'],
-        ['route' => 'mechanics.index', 'permission' => 'ver-mecanicos', 'icon' => 'bi-wrench', 'title' => 'Mecánicos'],
-        ['route' => 'cars.index', 'permission' => 'ver-vehiculos', 'icon' => 'bi-car-front-fill', 'title' => 'Vehículos'],
-        ['route' => 'workers.index', 'permission' => 'ver-trabajadores', 'icon' => 'bi-people', 'title' => 'Trabajadores']
-    ]" />
+            <!-- MÓDULOS DE COMPRAS (INDIVIDUALES) -->
+            <x-sidebar.menu-item route="buys.index" icon="bi-bag" title="Compras" />
+            <x-sidebar.menu-item route="sales.index" icon="bi-cart" title="Ventas" />
+            <x-sidebar.menu-item route="quotations.index" icon="bi-file-earmark-text" title="Cotizaciones" />
+            <x-sidebar.menu-item route="services.index" icon="bi-tools" title="Servicios" permission="ver-servicios" />
+            <x-sidebar.menu-item route="mechanics.index" icon="bi-wrench" title="Mecánicos" permission="ver-mecanicos" />
+            <x-sidebar.menu-item route="cars.index" icon="bi-car-front-fill" title="Vehículos" permission="ver-vehiculos" />
+            <x-sidebar.menu-item route="workers.index" icon="bi-people" title="Trabajadores" permission="ver-trabajadores" />
 
             <!-- SECCIÓN AUTENTICACIÓN -->
             <div class="nav-section logout-section">

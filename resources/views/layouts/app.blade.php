@@ -37,8 +37,7 @@
           mobileMenuOpen: false,
           submenus: {
               clientes: false,
-              productos: false,
-              compras: false
+              productos: false
           },
           toggleSubmenu(key) {
               this.submenus[key] = !this.submenus[key];
@@ -49,7 +48,7 @@
           toggleSidebar() {
               this.sidebarOpen = !this.sidebarOpen;
               if (!this.sidebarOpen) {
-                  this.submenus = { clientes: false, productos: false, compras: false };
+                  this.submenus = { clientes: false, productos: false };
               }
           },
           init() {

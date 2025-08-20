@@ -79,7 +79,12 @@ Route::group(
         Route::get('/precios-productos/export-excel', [App\Http\Controllers\PreciosProductosController::class, 'exportExcel'])->name('precios-productos.export-excel');
         Route::get('/precios-productos/export-pdf', [App\Http\Controllers\PreciosProductosController::class, 'exportPdf'])->name('precios-productos.export-pdf');
         Route::get('/precios-productos/detalles', [App\Http\Controllers\PreciosProductosController::class, 'getDetallesPrecio'])->name('precios-productos.detalles');
-        
+
+        // STOCK MINIMO
+     // STOCK MINIMO
+Route::get('/stock-minimo', [App\Http\Controllers\StockMinController::class, 'index'])->name('stock-minimo.index');
+Route::get('/stock-minimo/export', [App\Http\Controllers\StockMinController::class, 'exportExcel'])->name('stock-minimo.export');
+
         //SERVICIOS
         Route::resource('services', App\Http\Controllers\ServiceController::class);
         Route::get('/service/listado', [ServiceController::class, 'filtroPorfecha'])->name('service.filtroPorfecha');

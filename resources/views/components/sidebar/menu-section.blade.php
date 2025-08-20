@@ -14,14 +14,22 @@
                 @can($route['permission'])
                     <a class="nav-link submenu-link {{ request()->routeIs($route['route']) ? 'active' : '' }}" 
                        href="{{ route($route['route']) }}">
-                        <i class="{{ $route['icon'] }}"></i>
+                        @if (str_starts_with($route['icon'], '<'))
+                            {!! $route['icon'] !!}
+                        @else
+                            <i class="{{ $route['icon'] }}"></i>
+                        @endif
                         <span class="nav-text">{{ $route['title'] }}</span>
                     </a>
                 @endcan
             @else
                 <a class="nav-link submenu-link {{ request()->routeIs($route['route']) ? 'active' : '' }}" 
                    href="{{ route($route['route']) }}">
-                    <i class="{{ $route['icon'] }}"></i>
+                    @if (str_starts_with($route['icon'], '<'))
+                        {!! $route['icon'] !!}
+                    @else
+                        <i class="{{ $route['icon'] }}"></i>
+                    @endif
                     <span class="nav-text">{{ $route['title'] }}</span>
                 </a>
             @endif
