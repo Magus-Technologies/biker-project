@@ -27,8 +27,13 @@
             <x-sidebar.menu-section key="productos" icon="bi-box" title="Productos" :routes="[
         ['route' => 'precios-productos.index', 'permission' => null, 'icon' => '<span style=\'display: inline-block; width: 1.25rem; text-align: center; font-weight: bold; margin-right: 0.5rem;\'>S/</span>', 'title' => 'Precios'],
         ['route' => 'products.index', 'permission' => 'ver-productos', 'icon' => 'bi-box', 'title' => 'Inventario'],
-        ['route' => 'garantines.index', 'permission' => 'ver-garantias', 'icon' => 'bi-shield-check', 'title' => 'Garantías']
+        ['route' => 'stock-minimo.index', 'permission' => null, 'icon' => 'bi-exclamation-triangle-fill', 'title' => 'Stock Mínimo']
     ]" />
+    <a class="nav-link {{ request()->routeIs('garantines.index') ? 'active' : '' }}"
+                    href="{{ route('garantines.index') }}">
+                    <i class="bi bi-shield-check"></i>
+                    <span class="nav-text" x-show="sidebarOpen">Garantías</span>
+                </a>
 
             <!-- MÓDULOS DE COMPRAS (INDIVIDUALES) -->
             <x-sidebar.menu-item route="buys.index" icon="bi-bag" title="Compras" />
