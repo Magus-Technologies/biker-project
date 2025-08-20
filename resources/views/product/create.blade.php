@@ -12,7 +12,7 @@
             <h5 class="text-lg font-semibold mb-4">Datos del Producto</h5>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4  ">
-                <!-- Control Type Switch -->
+            
                 <!-- Control Type Switch -->
                 <div class="col-span-full mb-4">
                     <label class="block font-medium text-gray-700 mb-3">Tipo de Control</label>
