@@ -29,20 +29,26 @@
         ['route' => 'products.index', 'permission' => 'ver-productos', 'icon' => 'bi-box', 'title' => 'Inventario'],
         ['route' => 'stock-minimo.index', 'permission' => null, 'icon' => 'bi-exclamation-triangle-fill', 'title' => 'Stock Mínimo']
     ]" />
-    <a class="nav-link {{ request()->routeIs('garantines.index') ? 'active' : '' }}"
-                    href="{{ route('garantines.index') }}">
-                    <i class="bi bi-shield-check"></i>
-                    <span class="nav-text" x-show="sidebarOpen">Garantías</span>
-                </a>
+            <a class="nav-link {{ request()->routeIs('garantines.index') ? 'active' : '' }}"
+                href="{{ route('garantines.index') }}">
+                <i class="bi bi-shield-check"></i>
+                <span class="nav-text" x-show="sidebarOpen">Garantías</span>
+            </a>
 
             <!-- MÓDULOS DE COMPRAS (INDIVIDUALES) -->
             <x-sidebar.menu-item route="buys.index" icon="bi-bag" title="Compras" />
-            <x-sidebar.menu-item route="sales.index" icon="bi-cart" title="Ventas" />
+            <x-sidebar.menu-section key="ventas" icon="bi-cart" title="Ventas" :routes="[
+                ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart-check', 'title' => 'Ventas'],
+                ['route' => 'devoluciones.index', 'permission' => null, 'icon' => 'bi-arrow-return-left', 'title' => 'Devoluciones']
+            ]" />
             <x-sidebar.menu-item route="quotations.index" icon="bi-file-earmark-text" title="Cotizaciones" />
             <x-sidebar.menu-item route="services.index" icon="bi-tools" title="Servicios" permission="ver-servicios" />
-            <x-sidebar.menu-item route="mechanics.index" icon="bi-wrench" title="Mecánicos" permission="ver-mecanicos" />
-            <x-sidebar.menu-item route="cars.index" icon="bi-car-front-fill" title="Vehículos" permission="ver-vehiculos" />
-            <x-sidebar.menu-item route="workers.index" icon="bi-people" title="Trabajadores" permission="ver-trabajadores" />
+            <x-sidebar.menu-item route="mechanics.index" icon="bi-wrench" title="Mecánicos"
+                permission="ver-mecanicos" />
+            <x-sidebar.menu-item route="cars.index" icon="bi-car-front-fill" title="Vehículos"
+                permission="ver-vehiculos" />
+            <x-sidebar.menu-item route="workers.index" icon="bi-people" title="Trabajadores"
+                permission="ver-trabajadores" />
 
             <!-- SECCIÓN AUTENTICACIÓN -->
             <div class="nav-section logout-section">

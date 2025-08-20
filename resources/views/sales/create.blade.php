@@ -584,10 +584,10 @@
                     <td class="px-2 py-1 border">${product.code_sku}</td>
                     <td class="px-2 py-1 border">${product.description}</td>
                     <td class="px-2 py-1 border">${product.location}</td>
-                    <td class="px-2 py-1 border">${product.stock ? product.stock.quantity : 0}</td>
-                    <td class="px-2 py-1 border">${product.stock ? product.stock.minimum_stock : 0}</td>
+                    <td class="px-2 py-1 border">${product.stock?.quantity || 0}</td>
+<td class="px-2 py-1 border">${product.stock?.minimum_stock || 0}</td>
                     <td class="px-2 py-1 border">
-                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id} value="1" min="1" max="${product.stock.quantity}" data-product-id="${product.id}">
+                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id}" value="1" min="1" max="${product.stock?.quantity || 0}" data-product-id="${product.id}">
                     </td>
                     <td class="px-2 py-1 border">
                         <select class="p-2 border rounded data-price-id-${product.id}" data-product-id="${product.id}">
@@ -640,7 +640,7 @@
                 unit_price: priceSelect.value,
                 prices: response.prices,
                 quantity: quantity,
-                maximum_stock: response.stock.quantity,
+                maximum_stock: response.stock?.quantity || 0,
             }
             const productCopy = {
                 ...product
