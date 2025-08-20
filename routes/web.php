@@ -67,23 +67,29 @@ Route::group(
             $product = Product::findOrFail($id);
             return response()->json($product->images);
         })->name('products.images');
-        
+
         // Route::get('product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
         Route::get('/plantilla-descargar', [App\Http\Controllers\ProductController::class, 'descargarPlantilla'])->name('plantilla.descargar');
         Route::post('/product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
 
-        
-        
+
+
         // PRECIOS DE PRODUCTOS
         Route::get('/precios-productos', [App\Http\Controllers\PreciosProductosController::class, 'index'])->name('precios-productos.index');
         Route::get('/precios-productos/export-excel', [App\Http\Controllers\PreciosProductosController::class, 'exportExcel'])->name('precios-productos.export-excel');
         Route::get('/precios-productos/export-pdf', [App\Http\Controllers\PreciosProductosController::class, 'exportPdf'])->name('precios-productos.export-pdf');
         Route::get('/precios-productos/detalles', [App\Http\Controllers\PreciosProductosController::class, 'getDetallesPrecio'])->name('precios-productos.detalles');
 
+
         // STOCK MINIMO
-     // STOCK MINIMO
-Route::get('/stock-minimo', [App\Http\Controllers\StockMinController::class, 'index'])->name('stock-minimo.index');
-Route::get('/stock-minimo/export', [App\Http\Controllers\StockMinController::class, 'exportExcel'])->name('stock-minimo.export');
+        Route::get('/stock-minimo', [App\Http\Controllers\StockMinController::class, 'index'])->name('stock-minimo.index');
+        Route::get('/stock-minimo/export', [App\Http\Controllers\StockMinController::class, 'exportExcel'])->name('stock-minimo.export');
+
+        // devoluciones
+        Route::get('/devoluciones', [App\Http\Controllers\DevolucionesController::class, 'index'])->name('devoluciones.index');
+        Route::post('/devoluciones/filtro-por-fecha', [App\Http\Controllers\DevolucionesController::class, 'filtroPorfecha'])->name('devoluciones.filtroPorfecha');
+        Route::get('/devoluciones/sale/{id}', [App\Http\Controllers\DevolucionesController::class, 'getSaleDetails'])->name('devoluciones.getSaleDetails');
+        Route::post('/devoluciones', [App\Http\Controllers\DevolucionesController::class, 'store'])->name('devoluciones.store');
 
         //SERVICIOS
         Route::resource('services', App\Http\Controllers\ServiceController::class);
@@ -157,15 +163,15 @@ Route::get('/stock-minimo/export', [App\Http\Controllers\StockMinController::cla
         Route::get('/buy/supplier-report', [BuyController::class, 'supplierReport'])->name('buy.supplier-report');
         Route::get('/buy/top-products-report', [BuyController::class, 'topProductsReport'])->name('buy.top-products-report');
 
-        Route::get('/buy/receive/{buyId}', function($buyId) {
+        Route::get('/buy/receive/{buyId}', function ($buyId) {
             $buy = App\Models\Buy::with(['supplier', 'tienda', 'buyItems.product'])->findOrFail($buyId);
-            
+
             if ($buy->delivery_status === 'received') {
                 return redirect()->route('buys.index')->with('error', 'Esta compra ya fue recepcionada');
             }
-            
+
             $tiendas = App\Models\Tienda::where('status', 1)->get();
-            
+
             return view('buy.receive', compact('buy', 'tiendas'));
         })->name('buy.receive');
 
@@ -176,19 +182,19 @@ Route::get('/stock-minimo/export', [App\Http\Controllers\StockMinController::cla
 
         Route::resource('clientes-mayoristas', ClienteMayoristaController::class);
         Route::get('/clientes-mayoristas/{id}/detalles', [ClienteMayoristaController::class, 'obtenerDetalles'])
-        ->name('clientes-mayoristas.detalles');
+            ->name('clientes-mayoristas.detalles');
 
-        Route::get('/buy/receive/{buyId}', function($buyId) {
-        $buy = App\Models\Buy::with(['supplier', 'tienda', 'buyItems.product'])->findOrFail($buyId);
-        
-        if ($buy->delivery_status === 'received') {
-            return redirect()->route('buys.index')->with('error', 'Esta compra ya fue recepcionada');
-        }
-        
-        $tiendas = App\Models\Tienda::where('status', 1)->get();
-        
-        return view('buy.receive', compact('buy', 'tiendas'));
-    })->name('buy.receive');
+        Route::get('/buy/receive/{buyId}', function ($buyId) {
+            $buy = App\Models\Buy::with(['supplier', 'tienda', 'buyItems.product'])->findOrFail($buyId);
+
+            if ($buy->delivery_status === 'received') {
+                return redirect()->route('buys.index')->with('error', 'Esta compra ya fue recepcionada');
+            }
+
+            $tiendas = App\Models\Tienda::where('status', 1)->get();
+
+            return view('buy.receive', compact('buy', 'tiendas'));
+        })->name('buy.receive');
     }
 );
 require __DIR__ . '/auth.php';

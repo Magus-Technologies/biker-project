@@ -45,3 +45,35 @@ ADD CONSTRAINT `products_tienda_id_foreign`
 
 -- Paso 3: Eliminar la tabla 'warehouses' que ya no es necesaria.
 DROP TABLE IF EXISTS `warehouses`;
+
+
+-- tablas de hoy hora 4 de la tarde dia 20 
+-- Eliminar tablas si existen (para recrearlas)
+DROP TABLE IF EXISTS devolucion_items;
+DROP TABLE IF EXISTS devoluciones;
+
+-- Tabla principal de devoluciones
+CREATE TABLE IF NOT EXISTS devoluciones (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(20) NOT NULL,
+    sale_id BIGINT UNSIGNED NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    reason TEXT NULL,
+    user_register INT NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE
+);
+
+-- Tabla de items devueltos
+CREATE TABLE IF NOT EXISTS devolucion_items (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    devolucion_id BIGINT UNSIGNED NOT NULL,
+    sale_item_id BIGINT UNSIGNED NOT NULL,
+    quantity_returned INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (devolucion_id) REFERENCES devoluciones(id) ON DELETE CASCADE,
+    FOREIGN KEY (sale_item_id) REFERENCES sale_items(id) ON DELETE CASCADE
+);

@@ -1,3 +1,4 @@
+<!-- resources\views\sales\index.blade.php -->
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -30,7 +31,7 @@
                 Agregar
             </a>
         </div>
-        <!-- Mensajes de éxito o error -->
+        <!-- Mensajes de ï¿½xito o error -->
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
                 {{ session('success') }}
@@ -47,7 +48,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº
+                            Nï¿½
                         </th>
                         <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Documento
@@ -86,7 +87,7 @@
                 </tbody>
             </table>
         </div>
-        <!-- Mostrar los enlaces de paginación -->
+        <!-- Mostrar los enlaces de paginaciï¿½n -->
         {{-- @if ($registros instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
             {{ $registros->links() }}
         @endif --}}
@@ -94,7 +95,7 @@
     <!-- Modal -->
     <div id="detalleModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex justify-center items-center p-4">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-5 border border-gray-300 relative">
-            <!-- Botón de Cierre -->
+            <!-- Botï¿½n de Cierre -->
             <button onclick="cerrarModal()"
                 class="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-lg font-semibold transition">
                 ?
@@ -105,7 +106,7 @@
                 Detalles de la Venta
             </h2>
 
-            <!-- Información General -->
+            <!-- Informaciï¿½n General -->
             <div class="mt-3 p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-xs space-y-1">
                 <p><strong>Cliente:</strong> <span id="ventaCliente"></span></p>
                 <p><strong>DNI:</strong> <span id="ventaDni"></span></p>
@@ -122,14 +123,14 @@
                         <thead class="bg-gray-100 text-gray-800 uppercase text-xs">
                             <tr>
                                 <th class="py-2 px-2 border-r border-gray-300">Tipo</th>
-                                <th class="py-2 px-2 border-r border-gray-300">Descripción</th>
+                                <th class="py-2 px-2 border-r border-gray-300">Descripciï¿½n</th>
                                 <th class="py-2 px-2 text-center border-r border-gray-300">Cantidad</th>
                                 <th class="py-2 px-2 text-center border-r border-gray-300">Precio Unitario</th>
                                 <th class="py-2 px-2 text-center">Total</th>
                             </tr>
                         </thead>
                         <tbody id="listaDetalles" class="divide-y divide-gray-300">
-                            <!-- Aquí se insertarán los productos y servicios -->
+                            <!-- Aquï¿½ se insertarï¿½n los productos y servicios -->
                         </tbody>
                     </table>
                 </div>
@@ -233,7 +234,7 @@
             event.preventDefault();
             finAllSales();
         })
-        // Función para obtener los detalles de la venta
+        // Funciï¿½n para obtener los detalles de la venta
         async function verDetalles(saleId) {
             try {
                 let url = `{{ route('sale.detallesVenta', ':id') }}`.replace(':id', saleId);
@@ -256,7 +257,7 @@
                 let listaDetalles = document.getElementById("listaDetalles");
                 listaDetalles.innerHTML = "";
 
-                // Recorrer los ítems de la venta y agregarlos a la tabla
+                // Recorrer los ï¿½tems de la venta y agregarlos a la tabla
                 data.sale.sale_items.forEach(item => {
                     let fila = document.createElement("tr");
                     fila.innerHTML = `
@@ -278,13 +279,13 @@
         async function deleteSale(saleId) {
 
             const result = await Swal.fire({
-                title: '¿Estás seguro?',
-                text: "No podrás revertir esta acción",
+                title: 'ï¿½Estï¿½s seguro?',
+                text: "No podrï¿½s revertir esta acciï¿½n",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, eliminar',
+                confirmButtonText: 'Sï¿½, eliminar',
                 cancelButtonText: 'Cancelar'
             });
             if (!result.isConfirmed) {
