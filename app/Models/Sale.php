@@ -53,6 +53,12 @@ class Sale extends Model
     {
         return $this->hasMany(SalesItem::class, 'sale_id');
     }
+
+    public function devoluciones()
+    {
+        return $this->hasMany(Devolucion::class, 'sale_id');
+    }
+
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);
