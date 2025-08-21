@@ -17,25 +17,25 @@ use App\Models\Tienda;
 
 class BuyTemplateExport implements WithMultipleSheets
 {
+    // Busca el método sheets() en la clase BuyTemplateExport (alrededor de línea 15) y reemplázalo:
     public function sheets(): array
     {
         return [
             'Plantilla' => new BuyTemplateSheet(),
             'Métodos de Pago' => new PaymentMethodsSheet(),
             'Estados de Entrega' => new DeliveryStatusSheet(),
-            'Tiendas' => new TiendasSheet(),
+            // Eliminado: 'Tiendas' => new TiendasSheet(), // Ya no se necesita hoja de tiendas
         ];
     }
 }
 
 class BuyTemplateSheet implements FromArray, WithHeadings, WithStyles, WithTitle, WithColumnWidths
 {
+    // Busca el método array() en la clase BuyTemplateSheet (alrededor de línea 25) y reemplázalo:
     public function array(): array
     {
         return [
             [
-                '20123456789',
-                'Proveedor Ejemplo SAC',
                 '2024-01-15',
                 'NOTA DE VENTA',
                 'SKU001',
@@ -43,12 +43,9 @@ class BuyTemplateSheet implements FromArray, WithHeadings, WithStyles, WithTitle
                 '25.50',
                 'Efectivo',
                 'Productos Recibidos',
-                '1',
                 'Compra de productos varios'
             ],
             [
-                '12345678',
-                'Juan Pérez López',
                 '2024-01-16',
                 'NOTA DE VENTA',
                 'SKU002',
@@ -56,17 +53,15 @@ class BuyTemplateSheet implements FromArray, WithHeadings, WithStyles, WithTitle
                 '15.00',
                 'Transferencia',
                 'Productos Pendientes',
-                '1',
                 'Compra urgente'
             ]
         ];
     }
 
+    // Busca el método headings() en la clase BuyTemplateSheet (alrededor de línea 45) y reemplázalo:
     public function headings(): array
     {
         return [
-            'RUC/DNI Proveedor*',
-            'Nombre/Razón Social*',
             'Fecha Compra (YYYY-MM-DD)*',
             'Tipo Documento*',
             'SKU Producto*',
@@ -74,7 +69,6 @@ class BuyTemplateSheet implements FromArray, WithHeadings, WithStyles, WithTitle
             'Precio Unitario*',
             'Método de Pago*',
             'Estado de Entrega*',
-            'ID Tienda*',
             'Observación'
         ];
     }
@@ -114,20 +108,18 @@ class BuyTemplateSheet implements FromArray, WithHeadings, WithStyles, WithTitle
         ];
     }
 
+    // Busca el método columnWidths() en la clase BuyTemplateSheet (alrededor de línea 90) y reemplázalo:
     public function columnWidths(): array
     {
         return [
-            'A' => 18,  // RUC/DNI
-            'B' => 30,  // Nombre
-            'C' => 15,  // Fecha
-            'D' => 18,  // Tipo Doc
-            'E' => 12,  // SKU
-            'F' => 10,  // Cantidad
-            'G' => 15,  // Precio
-            'H' => 18,  // Método Pago
-            'I' => 20,  // Estado
-            'J' => 10,  // Tienda
-            'K' => 25,  // Observación
+            'A' => 15,  // Fecha
+            'B' => 18,  // Tipo Doc
+            'C' => 12,  // SKU
+            'D' => 10,  // Cantidad
+            'E' => 15,  // Precio
+            'F' => 18,  // Método Pago
+            'G' => 20,  // Estado
+            'H' => 25,  // Observación
         ];
     }
 
@@ -209,40 +201,3 @@ class DeliveryStatusSheet implements FromArray, WithHeadings, WithStyles, WithTi
     }
 }
 
-class TiendasSheet implements FromArray, WithHeadings, WithStyles, WithTitle
-{
-    public function array(): array
-    {
-        $tiendas = Tienda::where('status', 1)->get();
-        $data = [];
-        
-        foreach ($tiendas as $tienda) {
-            $data[] = [$tienda->id, $tienda->nombre];
-        }
-        
-        return $data;
-    }
-
-    public function headings(): array
-    {
-        return ['ID', 'Nombre Tienda'];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            1 => [
-                'font' => ['bold' => true],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'color' => ['rgb' => 'FF6600']
-                ]
-            ]
-        ];
-    }
-
-    public function title(): string
-    {
-        return 'Tiendas';
-    }
-}

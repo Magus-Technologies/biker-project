@@ -7,17 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Warehouse extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'name',
+        'code', 
+        'address',
+        'type',
+        'status'
+    ];
 
-    protected $fillable = ['name', 'tienda_id'];
-
-    public function tienda()
+    public function buys()
     {
-        return $this->belongsTo(Tienda::class);
+        return $this->hasMany(Buy::class);
     }
 
-    public function stocks()
+    public function buyItems()
     {
-        return $this->hasMany(Stock::class);
+        return $this->hasMany(BuyItem::class);
+    }
+
+    public static function getCentral()
+    {
+        return self::where('type', 'central')->where('status', 1)->first();
     }
 }

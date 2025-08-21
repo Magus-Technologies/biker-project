@@ -28,6 +28,7 @@ class Buy extends Model
         'fecha_actualizacion',
         // NUEVOS CAMPOS:
         'supplier_id',
+        'warehouse_id', 
         'payment_type', // 'cash' o 'credit'
         'delivery_status', // 'received' o 'pending'
         'received_date',
@@ -82,4 +83,11 @@ class Buy extends Model
             $model->fecha_actualizacion = now();
         });
     }
+
+    // En app/Models/Buy.php - agregar relación
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
 }

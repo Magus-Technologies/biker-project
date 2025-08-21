@@ -199,12 +199,8 @@
         <div class="summary-title"> RESUMEN EJECUTIVO</div>
         <div class="summary-grid">
             <div class="summary-item">
-                <div class="summary-value">{{ $totalCompras }}</div>
-                <div class="summary-label">Total de Compras</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-value">S/ {{ number_format($montoTotal, 2) }}</div>
-                <div class="summary-label">Monto Total</div>
+                <div class="summary-value">1</div>
+                <div class="summary-label">Almacén Central</div>
             </div>
             <div class="summary-item">
                 <div class="summary-value">S/ {{ number_format($igvTotal, 2) }}</div>
@@ -221,62 +217,55 @@
                 <div class="summary-label">Productos Pendientes</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value">{{ count($estadisticasProveedores) }}</div>
-                <div class="summary-label">Proveedores Activos</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-value">{{ count($estadisticasTiendas) }}</div>
-                <div class="summary-label">Tiendas Involucradas</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-value">S/ {{ $montoTotal > 0 ? number_format($montoTotal / $totalCompras, 2) : '0.00' }}</div>
-                <div class="summary-label">Promedio por Compra</div>
+                <div class="summary-value">1</div>
+                <div class="summary-label">Almacén Central</div>
             </div>
         </div>
     </div>
 
-    <!-- Estadísticas por Proveedor y Tienda -->
+    <!-- Estadísticas por Mes -->
     <div class="stats-grid">
         <div>
-            <div class="section-title">TOP PROVEEDORES</div>
+            <div class="section-title">COMPRAS POR MES</div>
             <table class="stats-table">
                 <thead>
                     <tr>
-                        <th>Proveedor</th>
+                        <th>Mes</th>
                         <th class="text-center">Compras</th>
                         <th class="text-right">Monto Total</th>
+                        <th class="text-center">Recibidos</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach(array_slice($estadisticasProveedores, 0, 8) as $stat)
-                    <tr>
-                        <td>{{ Str::limit($stat['proveedor'], 25) }}</td>
-                        <td class="text-center">{{ $stat['total_compras'] }}</td>
-                        <td class="text-right">S/ {{ number_format($stat['monto_total'], 2) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
+                
             </table>
         </div>
         
         <div>
-            <div class="section-title">COMPRAS POR TIENDA</div>
+            <div class="section-title">ALMACÉN CENTRAL</div>
             <table class="stats-table">
                 <thead>
                     <tr>
-                        <th>Tienda</th>
-                        <th class="text-center">Compras</th>
-                        <th class="text-right">Monto Total</th>
+                        <th>Concepto</th>
+                        <th class="text-right">Valor</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($estadisticasTiendas as $stat)
                     <tr>
-                        <td>{{ $stat['tienda'] }}</td>
-                        <td class="text-center">{{ $stat['total_compras'] }}</td>
-                        <td class="text-right">S/ {{ number_format($stat['monto_total'], 2) }}</td>
+                        <td>Total de Compras</td>
+                        <td class="text-right">{{ $totalCompras }}</td>
                     </tr>
-                    @endforeach
+                    <tr>
+                        <td>Monto Total</td>
+                        <td class="text-right">S/ {{ number_format($montoTotal, 2) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Productos Recibidos</td>
+                        <td class="text-right">{{ $comprasRecibidas }}</td>
+                    </tr>
+                    <tr>
+                        <td>Productos Pendientes</td>
+                        <td class="text-right">{{ $comprasPendientes }}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -317,13 +306,13 @@
         <thead>
             <tr>
                 <th style="width: 8%">Serie/Núm.</th>
-                <th style="width: 20%">Proveedor</th>
+                <th style="width: 20%">Almacén</th>
                 <th style="width: 10%">Fecha</th>
                 <th style="width: 8%">Doc.</th>
                 <th style="width: 10%" class="text-right">Total</th>
                 <th style="width: 8%">Pago</th>
                 <th style="width: 10%">Estado</th>
-                <th style="width: 12%">Tienda</th>
+                <th style="width: 12%">Destino</th>
                 <th style="width: 12%">Usuario</th>
                 <th style="width: 2%">Items</th>
             </tr>
@@ -332,7 +321,7 @@
             @foreach($compras as $compra)
             <tr>
                 <td class="font-bold">{{ $compra->serie }}-{{ $compra->number }}</td>
-                <td>{{ $compra->supplier ? Str::limit($compra->supplier->nombre_negocio, 20) : 'Sin Proveedor' }}</td>
+                <td>Almacén Central</td>
                 <td>{{ date('d/m/Y', strtotime($compra->fecha_registro)) }}</td>
                 <td class="text-small">{{ $compra->documentType ? Str::limit($compra->documentType->name, 8) : 'N/A' }}</td>
                 <td class="text-right font-bold">S/ {{ number_format($compra->total_price, 2) }}</td>
@@ -346,7 +335,7 @@
                         {{ $compra->delivery_status === 'received' ? 'Recibidos' : 'Pendientes' }}
                     </span>
                 </td>
-                <td>{{ $compra->tienda ? Str::limit($compra->tienda->nombre, 12) : 'N/A' }}</td>
+                <td>Almacén Central</td>
                 <td>{{ $compra->userRegister ? Str::limit($compra->userRegister->name, 12) : 'N/A' }}</td>
                 <td class="text-center font-bold">{{ $compra->buyItems->count() }}</td>
             </tr>
@@ -438,18 +427,17 @@
                 @if(request('fecha_hasta'))
                     Hasta: {{ date('d/m/Y', strtotime(request('fecha_hasta'))) }}<br>
                 @endif
-                @if(request('supplier_id'))
-                    Proveedor filtrado<br>
-                @endif
                 @if(request('products_status'))
                     Estado: {{ request('products_status') }}<br>
                 @endif
+                Almacén: Central (ID: 1)
             </div>
             
             <div style="text-align: center;">
                 <strong>Resumen Final:</strong><br>
                 Total Facturado: S/ {{ number_format($montoTotal, 2) }}<br>
                 Compras Procesadas: {{ $totalCompras }}<br>
+                Almacén Central: {{ $totalCompras }} compras<br>
                 Efectividad de Recepción: {{ $totalCompras > 0 ? number_format(($comprasRecibidas / $totalCompras) * 100, 1) : 0 }}%
             </div>
             

@@ -47,6 +47,7 @@ ADD CONSTRAINT `products_tienda_id_foreign`
 DROP TABLE IF EXISTS `warehouses`;
 
 
+<<<<<<< HEAD
 -- tablas de hoy hora 4 de la tarde dia 20 
 -- Eliminar tablas si existen (para recrearlas)
 DROP TABLE IF EXISTS devolucion_items;
@@ -77,3 +78,36 @@ CREATE TABLE IF NOT EXISTS devolucion_items (
     FOREIGN KEY (devolucion_id) REFERENCES devoluciones(id) ON DELETE CASCADE,
     FOREIGN KEY (sale_item_id) REFERENCES sale_items(id) ON DELETE CASCADE
 );
+=======
+
+---- CAMBIOS ALEXANDER ----  -
+CREATE TABLE `warehouses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `code` varchar(50) UNIQUE NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `type` enum('central','sucursal') NOT NULL DEFAULT 'central',
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
+-- Insertar almacén central
+INSERT INTO `warehouses` (`name`, `code`, `type`, `status`) 
+VALUES ('Almacén Central', 'ALM-CENTRAL', 'central', 1);
+
+USE clticomd_biker;
+-- Agregar columna warehouse_id y quitar tienda_id de compras
+ALTER TABLE `buys` ADD COLUMN `warehouse_id` bigint(20) unsigned NULL AFTER `supplier_id`;
+ALTER TABLE `buys` ADD FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses`(`id`);
+
+-- Las compras ya NO deben tener tienda_id, solo warehouse_id
+-- ALTER TABLE `buys` DROP COLUMN `tienda_id`; -- Solo si quieres eliminarla completamente
+
+-- Los items de compra también van al almacén, no a tienda específica
+ALTER TABLE `buy_items` ADD COLUMN `warehouse_id` bigint(20) unsigned NULL AFTER `product_id`;
+ALTER TABLE `buy_items` ADD FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses`(`id`);
+
+-- ALTER TABLE `buy_items` DROP COLUMN `tienda_id`; -- Solo si quieres eliminarla
+>>>>>>> bikerv3

@@ -12,6 +12,7 @@ class BuyItem extends Model
     protected $fillable = [
         'product_id',
         'buy_id',
+        'warehouse_id', // Agregar esta línea
         'quantity',
         'user_register',
         'fecha_registro',
@@ -50,5 +51,10 @@ class BuyItem extends Model
             $model->user_register = auth()->id();
             $model->fecha_registro = now();
         });
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 }
