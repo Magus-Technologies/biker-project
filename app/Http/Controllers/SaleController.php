@@ -37,11 +37,8 @@ class SaleController extends Controller
     }
     public function detallesVenta($id)
     {
-        $sale = Sale::with('saleItems.item', 'userRegister')->find($id);
-
-        return response()->json([
-            'sale' => $sale,
-        ]);
+        $sale = Sale::with('saleItems.item', 'userRegister', 'mechanic', 'devoluciones.items.saleItem.item', 'devoluciones.userRegister')->find($id);
+        return response()->json(['sale' => $sale]);
     }
     public function generatePDF($id)
     {

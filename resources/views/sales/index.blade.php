@@ -31,7 +31,7 @@
                 Agregar
             </a>
         </div>
-        <!-- Mensajes de �xito o error -->
+        <!-- Mensajes de xito o error -->
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
                 {{ session('success') }}
@@ -48,7 +48,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            N�
+                            N
                         </th>
                         <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Documento
@@ -87,7 +87,7 @@
                 </tbody>
             </table>
         </div>
-        <!-- Mostrar los enlaces de paginaci�n -->
+        <!-- Mostrar los enlaces de paginacin -->
         {{-- @if ($registros instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
             {{ $registros->links() }}
         @endif --}}
@@ -95,7 +95,7 @@
     <!-- Modal -->
     <div id="detalleModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex justify-center items-center p-4">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-5 border border-gray-300 relative">
-            <!-- Bot�n de Cierre -->
+            <!-- Botn de Cierre -->
             <button onclick="cerrarModal()"
                 class="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-lg font-semibold transition">
                 ?
@@ -106,7 +106,7 @@
                 Detalles de la Venta
             </h2>
 
-            <!-- Informaci�n General -->
+            <!-- Informacin General -->
             <div class="mt-3 p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-xs space-y-1">
                 <p><strong>Cliente:</strong> <span id="ventaCliente"></span></p>
                 <p><strong>DNI:</strong> <span id="ventaDni"></span></p>
@@ -123,14 +123,14 @@
                         <thead class="bg-gray-100 text-gray-800 uppercase text-xs">
                             <tr>
                                 <th class="py-2 px-2 border-r border-gray-300">Tipo</th>
-                                <th class="py-2 px-2 border-r border-gray-300">Descripci�n</th>
+                                <th class="py-2 px-2 border-r border-gray-300">Descripcin</th>
                                 <th class="py-2 px-2 text-center border-r border-gray-300">Cantidad</th>
                                 <th class="py-2 px-2 text-center border-r border-gray-300">Precio Unitario</th>
                                 <th class="py-2 px-2 text-center">Total</th>
                             </tr>
                         </thead>
                         <tbody id="listaDetalles" class="divide-y divide-gray-300">
-                            <!-- Aqu� se insertar�n los productos y servicios -->
+                            <!-- Aqu se insertarn los productos y servicios -->
                         </tbody>
                     </table>
                 </div>
@@ -156,6 +156,29 @@
                             class="border border-gray-500 px-2 py-1 w-20  rounded bg-white focus:outline-none"
                             oninput="calcularSubtotal()">
                     </div>
+                </div>
+            </div>
+
+            <!-- Devoluciones -->
+            <div id="devolucionesContainer" class="mt-4 hidden">
+                <h3 class="text-xs font-semibold border-b pb-1 text-gray-700 uppercase">
+                    Devoluciones
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border border-gray-300 mt-2 rounded-lg overflow-hidden">
+                        <thead class="bg-gray-100 text-gray-800 uppercase text-xs">
+                            <tr>
+                                <th class="py-2 px-2 border-r border-gray-300">Producto Devuelto</th>
+                                <th class="py-2 px-2 text-center border-r border-gray-300">Cantidad Devuelta</th>
+                                <th class="py-2 px-2 border-r border-gray-300">Fecha</th>
+                                <th class="py-2 px-2 border-r border-gray-300">Registrado por</th>
+                                <th class="py-2 px-2 border-r border-gray-300">Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaDevoluciones" class="divide-y divide-gray-300">
+                            <!-- Devoluciones will be inserted here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -234,7 +257,7 @@
             event.preventDefault();
             finAllSales();
         })
-        // Funci�n para obtener los detalles de la venta
+        // Funcin para obtener los detalles de la venta
         async function verDetalles(saleId) {
             try {
                 let url = `{{ route('sale.detallesVenta', ':id') }}`.replace(':id', saleId);
@@ -257,7 +280,7 @@
                 let listaDetalles = document.getElementById("listaDetalles");
                 listaDetalles.innerHTML = "";
 
-                // Recorrer los �tems de la venta y agregarlos a la tabla
+                // Recorrer los tems de la venta y agregarlos a la tabla
                 data.sale.sale_items.forEach(item => {
                     let fila = document.createElement("tr");
                     fila.innerHTML = `
@@ -270,6 +293,31 @@
                     listaDetalles.appendChild(fila);
                 });
 
+                // Limpiar la tabla de devoluciones
+                let listaDevoluciones = document.getElementById("listaDevoluciones");
+                let devolucionesContainer = document.getElementById("devolucionesContainer");
+                listaDevoluciones.innerHTML = "";
+
+                // Llenar la tabla de devoluciones si existen
+                if (data.sale.devoluciones && data.sale.devoluciones.length > 0) {
+                    devolucionesContainer.classList.remove("hidden");
+                    data.sale.devoluciones.forEach(devolucion => {
+                        devolucion.items.forEach(item => {
+                            let fila = document.createElement("tr");
+                            fila.innerHTML = `
+                                <td class="py-2 px-3">${item.sale_item.item.description || item.sale_item.item.name}</td>
+                                <td class="py-2 px-3 text-center">${item.quantity_returned}</td>
+                                <td class="py-2 px-3">${new Date(devolucion.created_at).toLocaleString()}</td>
+                                <td class="py-2 px-3">${devolucion.user_register ? devolucion.user_register.name : 'N/A'}</td>
+                                <td class="py-2 px-3">${devolucion.reason || 'Sin motivo'}</td>
+                            `;
+                            listaDevoluciones.appendChild(fila);
+                        });
+                    });
+                } else {
+                    devolucionesContainer.classList.add("hidden");
+                }
+
                 // Mostrar el modal
                 document.getElementById("detalleModal").classList.remove("hidden");
             } catch (error) {
@@ -279,13 +327,13 @@
         async function deleteSale(saleId) {
 
             const result = await Swal.fire({
-                title: '�Est�s seguro?',
-                text: "No podr�s revertir esta acci�n",
+                title: 'Ests seguro?',
+                text: "No podrs revertir esta accin",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'S�, eliminar',
+                confirmButtonText: 'S, eliminar',
                 cancelButtonText: 'Cancelar'
             });
             if (!result.isConfirmed) {
