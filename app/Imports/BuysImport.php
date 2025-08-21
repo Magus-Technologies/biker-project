@@ -20,11 +20,9 @@ class BuysImport implements ToArray, WithHeadingRow
         return $array;
     }
     
-
+    // Busca el método processRow() (alrededor de línea 20) y reemplázalo completamente:
     private function processRow($row, $rowNumber)
     {
-
-        // AGREGAR ESTE FILTRO AL INICIO:
         // Saltar filas completamente vacías
         $hasData = false;
         foreach ($row as $value) {
@@ -38,29 +36,33 @@ class BuysImport implements ToArray, WithHeadingRow
             return null; // Retornar null para filas vacías
         }
         
-    
-        // ... resto del código
+        // Campos requeridos actualizados (sin proveedor ni tienda)
         $requiredFields = [
-            'nombrerazon_social' => 'Nombre/Razón Social',
             'fecha_compra_yyyy_mm_dd' => 'Fecha Compra',
             'tipo_documento' => 'Tipo Documento',
-            'sku_producto' => 'SKU Producto',
+            'sku_producto' => 'SKU Producto', 
             'cantidad' => 'Cantidad',
             'precio_unitario' => 'Precio Unitario',
             'metodo_de_pago' => 'Método de Pago',
-            'estado_de_entrega' => 'Estado de Entrega',
-            'id_tienda' => 'ID Tienda'
+            'estado_de_entrega' => 'Estado de Entrega'
         ];
         
-        // VOLVER A LA VALIDACIÓN NORMAL (sin debug):
+        // Convertir nombres de columnas a snake_case para coincidir con WithHeadingRow
+        $normalizedRow = [];
+        foreach ($row as $key => $value) {
+            // Convertir espacios y caracteres especiales
+            $normalizedKey = strtolower(str_replace([' ', '(', ')', '-', '*'], ['_', '', '', '_', ''], $key));
+            $normalizedRow[$normalizedKey] = $value;
+        }
+        $row = $normalizedRow;
+        
+        // Validar campos requeridos
         foreach ($requiredFields as $key => $label) {
             if (!isset($row[$key]) || $row[$key] === null || $row[$key] === '') {
                 throw new \Exception("El campo '{$label}' es requerido");
             }
         }        
 
-        $supplier = $this->validateSupplier($row['rucdni_proveedor'] ?? '', $row['nombrerazon_social']);
-        
         // Validar producto
         $product = $this->validateProduct($row['sku_producto']);
         
@@ -70,55 +72,28 @@ class BuysImport implements ToArray, WithHeadingRow
         // Validar estado de entrega
         $deliveryStatus = $this->validateDeliveryStatus($row['estado_de_entrega']);
         
-        // Validar tienda
-        $tienda = $this->validateTienda($row['id_tienda']);
-        
         // Validar tipo de documento
         $documentType = $this->validateDocumentType($row['tipo_documento']);
         
         // Validar fecha
-       $fecha = $this->validateDate($row['fecha_compra_yyyy_mm_dd']);
+        $fecha = $this->validateDate($row['fecha_compra_yyyy_mm_dd']);
         
         // Validar cantidad y precio
         $cantidad = $this->validateNumber($row['cantidad'], 'Cantidad');
         $precio = $this->validateNumber($row['precio_unitario'], 'Precio Unitario');
         
         return [
-            'supplier' => $supplier,
             'product' => $product,
             'payment_method' => $paymentMethod,
             'delivery_status' => $deliveryStatus,
-            'tienda' => $tienda,
             'document_type' => $documentType,
             'fecha' => $fecha,
             'cantidad' => $cantidad,
             'precio' => $precio,
             'observacion' => $row['observacion'] ?? '',
             'row_data' => $row
+            // Eliminado: 'supplier', 'tienda' ya que no se necesitan
         ];
-    }
-    
-    private function validateSupplier($documento, $nombre)
-    {
-        // Buscar por nombre si no hay documento
-        if (empty($documento)) {
-            $supplier = Supplier::where('nombre_negocio', $nombre)->first();
-        } else {
-            $supplier = Supplier::where('nro_documento', $documento)->first();
-        }
-        
-        if (!$supplier) {
-            // Crear proveedor automáticamente usando nombre como documento temporal
-            $supplier = Supplier::create([
-                'nro_documento' => $documento ?: 'TEMP-' . time(),
-                'nombres' => $nombre,
-                'nombre_negocio' => $nombre,
-                'tipo_doc' => 'RUC', // Por defecto
-                'status' => 1
-            ]);
-        }
-        
-        return $supplier;
     }
     
     private function validateProduct($sku)
@@ -156,18 +131,7 @@ class BuysImport implements ToArray, WithHeadingRow
         
         return $statusMap[$status];
     }
-    
-    private function validateTienda($id)
-    {
-        $tienda = Tienda::where('id', $id)->where('status', 1)->first();
-        
-        if (!$tienda) {
-            throw new \Exception("No se encontró la tienda con ID: {$id}");
-        }
-        
-        return $tienda;
-    }
-    
+      
     private function validateDocumentType($name)
     {
         $documentType = DocumentType::where('name', $name)->first();

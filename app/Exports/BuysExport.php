@@ -30,8 +30,6 @@ class BuysExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         return [
             'ID',
             'Serie/Número',
-            'Proveedor',
-            'RUC/DNI Proveedor',
             'Fecha Registro',
             'Tipo Documento',
             'Subtotal',
@@ -40,7 +38,7 @@ class BuysExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             'Tipo Pago',
             'Estado Productos',
             'Fecha Recepción',
-            'Tienda',
+            'Almacén',
             'Usuario Registro',
             'Observaciones'
         ];
@@ -51,8 +49,6 @@ class BuysExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         return [
             $compra->id,
             $compra->serie . '-' . $compra->number,
-            $compra->supplier ? $compra->supplier->nombre_negocio : 'Sin Proveedor',
-            $compra->supplier ? $compra->supplier->nro_documento : 'N/A',
             $compra->fecha_registro,
             $compra->documentType ? $compra->documentType->name : 'N/A',
             number_format($compra->total_price - $compra->igv, 2),
@@ -61,7 +57,7 @@ class BuysExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $compra->payment_type === 'cash' ? 'Contado' : 'Crédito',
             $compra->delivery_status === 'received' ? 'Recibidos' : 'Pendientes',
             $compra->received_date ? date('d/m/Y', strtotime($compra->received_date)) : 'N/A',
-            $compra->tienda ? $compra->tienda->nombre : 'Sin Tienda',
+            'Almacén Central',
             $compra->userRegister ? $compra->userRegister->name : 'N/A',
             $compra->observation ?? ''
         ];

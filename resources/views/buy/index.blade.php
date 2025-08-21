@@ -40,6 +40,7 @@
                             </select>
                         </div>
                         
+                        <!--
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Proveedor</label>
                             <select id="supplier_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -49,6 +50,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        -->
                     </div>
                     
                     <!-- Botones de Acción - Responsive -->
@@ -156,9 +158,11 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <i class="fas fa-hashtag mr-1"></i>Serie/Número
                                     </th>
+                                    <!-- 
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <i class="fas fa-building mr-1"></i>Proveedor
                                     </th>
+                                    -->
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <i class="fas fa-calendar mr-1"></i>Fecha
                                     </th>
@@ -168,9 +172,11 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <i class="fas fa-info-circle mr-1"></i>Estado Productos
                                     </th>
+                                    <!--
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <i class="fas fa-store mr-1"></i>Tienda
                                     </th>
+                                    -->
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <i class="fas fa-cogs mr-1"></i>Acciones
                                     </th>
@@ -181,10 +187,32 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- Controles de Paginación -->
+                    <div id="paginationContainer" class="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span id="paginationInfo" class="text-sm text-gray-700">
+                                Mostrando 1 a 15 de 100 resultados
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <select id="perPageSelect" class="border-gray-300 rounded-md shadow-sm text-sm" onchange="changePerPage()">
+                                <option value="15">15 por página</option>
+                                <option value="25">25 por página</option>
+                                <option value="50">50 por página</option>
+                                <option value="100">100 por página</option>
+                            </select>
+                            
+                            <div id="paginationButtons" class="flex space-x-1">
+                                <!-- Los botones se generarán dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    
 
     <!-- Modal de Importación -->
     <div id="importModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
@@ -253,7 +281,6 @@
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         <input type="checkbox" id="selectAllCheckbox" onchange="toggleAllBuys()">
                                     </th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
@@ -754,6 +781,28 @@
     }
 }
 
+/* Grid para una sola sección - ancho completo */
+.info-grid-single {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 100%;
+}
+
+@media (min-width: 768px) {
+    .info-grid-single {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .info-grid-single {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+}
+
 /* Loading state */
 .loading-container {
     display: flex;
@@ -924,7 +973,9 @@ document.addEventListener('DOMContentLoaded', function() {
         processImportFile();
     });
 
-  
+    // Configurar selector de elementos por página
+    document.getElementById('perPageSelect').value = perPage;
+
  // Cerrar dropdown al hacer clic fuera
 document.addEventListener('click', function(event) {
     const dropdown = document.getElementById('mobileDropdownMenu');
@@ -960,18 +1011,28 @@ function toggleMobileDropdown() {
     }
 }
 
-function filterBuys() {
+// Variables globales para paginación
+let currentPage = 1;
+let perPage = 15;
+let totalPages = 1;
+
+// Reemplaza la función filterBuys() completa:
+function filterBuys(page = 1) {
+    currentPage = page;
+    
     const filters = {
         fecha_desde: document.getElementById('fecha_desde').value,
         fecha_hasta: document.getElementById('fecha_hasta').value,
         products_status: document.getElementById('products_status').value,
-        supplier_id: document.getElementById('supplier_id').value
+        page: currentPage,
+        per_page: perPage
     };
     
     fetch('{{ route("buy.filteredList") }}?' + new URLSearchParams(filters))
         .then(response => response.json())
         .then(data => {
-            renderBuysTable(data);
+            renderBuysTable(data.data);
+            updatePagination(data);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -979,6 +1040,101 @@ function filterBuys() {
         });
 }
 
+// Función nueva para actualizar la paginación
+function updatePagination(paginationData) {
+    const { current_page, last_page, per_page, total, from, to } = paginationData;
+    
+    totalPages = last_page;
+    currentPage = current_page;
+    
+    // Actualizar información de paginación
+    const paginationInfo = document.getElementById('paginationInfo');
+    if (total === 0) {
+        paginationInfo.textContent = 'No se encontraron resultados';
+    } else {
+        paginationInfo.textContent = `Mostrando ${from} a ${to} de ${total} resultados`;
+    }
+    
+    // Generar botones de paginación
+    generatePaginationButtons();
+}
+
+// Función nueva para generar botones de paginación
+function generatePaginationButtons() {
+    const paginationButtons = document.getElementById('paginationButtons');
+    paginationButtons.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Botón anterior
+    if (currentPage > 1) {
+        const prevButton = createPaginationButton('Anterior', currentPage - 1, false, 'fas fa-chevron-left');
+        paginationButtons.appendChild(prevButton);
+    }
+    
+    // Números de página
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    if (startPage > 1) {
+        paginationButtons.appendChild(createPaginationButton('1', 1));
+        if (startPage > 2) {
+            const dots = document.createElement('span');
+            dots.className = 'px-3 py-2 text-gray-500';
+            dots.textContent = '...';
+            paginationButtons.appendChild(dots);
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const button = createPaginationButton(i, i, i === currentPage);
+        paginationButtons.appendChild(button);
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const dots = document.createElement('span');
+            dots.className = 'px-3 py-2 text-gray-500';
+            dots.textContent = '...';
+            paginationButtons.appendChild(dots);
+        }
+        paginationButtons.appendChild(createPaginationButton(totalPages, totalPages));
+    }
+    
+    // Botón siguiente
+    if (currentPage < totalPages) {
+        const nextButton = createPaginationButton('Siguiente', currentPage + 1, false, 'fas fa-chevron-right');
+        paginationButtons.appendChild(nextButton);
+    }
+}
+
+// Función nueva para crear botones de paginación
+function createPaginationButton(text, page, isActive = false, iconClass = null) {
+    const button = document.createElement('button');
+    button.className = isActive 
+        ? 'px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md'
+        : 'px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50';
+    
+    if (iconClass) {
+        button.innerHTML = `<i class="${iconClass} mr-1"></i>${text}`;
+    } else {
+        button.textContent = text;
+    }
+    
+    if (!isActive) {
+        button.onclick = () => filterBuys(page);
+    }
+    
+    return button;
+}
+
+// Función nueva para cambiar elementos por página
+function changePerPage() {
+    perPage = parseInt(document.getElementById('perPageSelect').value);
+    filterBuys(1); // Volver a la primera página
+}
+
+// Reemplaza la función renderBuysTable completa con esta versión modificada:
 function renderBuysTable(buys) {
     const tbody = document.getElementById('buysTableBody');
     tbody.innerHTML = '';
@@ -986,7 +1142,7 @@ function renderBuysTable(buys) {
     if (buys.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
                     <i class="fas fa-inbox mr-2"></i>No se encontraron compras
                 </td>
             </tr>
@@ -1002,9 +1158,6 @@ function renderBuysTable(buys) {
                     ${buy.serie}-${buy.number}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${buy.supplier ? buy.supplier.nombre_negocio : 'N/A'}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${new Date(buy.fecha_registro).toLocaleDateString()}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1012,9 +1165,6 @@ function renderBuysTable(buys) {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     ${statusBadge}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${buy.tienda ? buy.tienda.nombre : 'N/A'}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex space-x-2">
@@ -1039,10 +1189,11 @@ function renderBuysTable(buys) {
     });
 }
 
+// Reemplaza la función getStatusBadge completa:
 function getStatusBadge(status) {
     const badges = {
         'recibidos': '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i>Recibidos</span>',
-        'pendientes': '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock mr-1"></i>Pendientes</span>'
+        'pendientes': '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-truck mr-1"></i>Carretera</span>'
     };
     return badges[status] || status;
 }
@@ -1051,16 +1202,16 @@ function clearFilters() {
     document.getElementById('fecha_desde').value = '';
     document.getElementById('fecha_hasta').value = '';
     document.getElementById('products_status').value = '';
-    document.getElementById('supplier_id').value = '';
     filterBuys();
 }
 
+// Reemplaza la función exportReports() completa:
 function exportReports(format) {
     const filters = {
         fecha_desde: document.getElementById('fecha_desde').value,
         fecha_hasta: document.getElementById('fecha_hasta').value,
         products_status: document.getElementById('products_status').value,
-        supplier_id: document.getElementById('supplier_id').value,
+        // supplier_id: document.getElementById('supplier_id').value,  // Eliminado: campo ya no existe
         format: format
     };
     
@@ -1128,6 +1279,7 @@ function resetImportData() {
    document.getElementById('selectedCount').textContent = '0 compras seleccionadas';
 }
 
+// Busca la función processImportFile() y reemplázala completamente:
 function processImportFile() {
    const formData = new FormData(document.getElementById('uploadForm'));
    
@@ -1146,24 +1298,34 @@ function processImportFile() {
    })
    .then(response => response.json())
    .then(data => {
+       console.log('Response data:', data); // Para debug
+       
        if (data.success) {
-           importData = data.data;
+           importData = data.data || [];
            selectedBuys = [...importData]; // Seleccionar todo por defecto
            
+           // Mostrar errores solo si existen
            if (data.errors && data.errors.length > 0) {
                showErrors(data.errors);
+           } else {
+               // Ocultar div de errores si no hay errores
+               document.getElementById('importErrors').classList.add('hidden');
            }
            
-           renderPreviewTable();
-           updateSelectedCount();
-           showStep2();
+           if (importData.length > 0) {
+               renderPreviewTable();
+               updateSelectedCount();
+               showStep2();
+           } else {
+               alert('No se encontraron datos válidos para importar en el archivo.');
+           }
        } else {
-           alert('Error: ' + data.message);
+           alert('Error: ' + (data.message || 'Error desconocido'));
        }
    })
    .catch(error => {
        console.error('Error:', error);
-       alert('Error al procesar el archivo');
+       alert('Error al procesar el archivo: ' + error.message);
    })
    .finally(() => {
        submitButton.innerHTML = originalText;
@@ -1185,77 +1347,80 @@ function showErrors(errors) {
    errorsDiv.classList.remove('hidden');
 }
 
+// Busca la función renderPreviewTable() y reemplázala completamente:
 function renderPreviewTable() {
-   const tbody = document.getElementById('previewTableBody');
-   tbody.innerHTML = '';
-   
-   importData.forEach((item, index) => {
-       const isSelected = selectedBuys.includes(item);
-       const total = (item.cantidad * item.precio).toFixed(2);
-       const statusText = item.delivery_status === 'received' ? 'Recibidos' : 'Pendientes';
-       const statusClass = item.delivery_status === 'received' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-       
-       const row = `
-           <tr class="hover:bg-gray-50">
-               <td class="px-4 py-2">
-                   <input type="checkbox" 
-                          data-index="${index}" 
-                          ${isSelected ? 'checked' : ''} 
-                          onchange="toggleBuySelection(${index})">
-               </td>
-               <td class="px-4 py-2 text-sm">${item.supplier.nombre_negocio}</td>
-               <td class="px-4 py-2 text-sm">${item.fecha}</td>
-               <td class="px-4 py-2 text-sm">${item.product.description}</td>
-               <td class="px-4 py-2 text-sm">${item.cantidad}</td>
-               <td class="px-4 py-2 text-sm">S/ ${parseFloat(item.precio).toFixed(2)}</td>
-               <td class="px-4 py-2 text-sm font-semibold">S/ ${total}</td>
-               <td class="px-4 py-2">
-                   <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
-                       ${statusText}
-                   </span>
-               </td>
-           </tr>
-       `;
-       tbody.innerHTML += row;
-   });
+    const tbody = document.getElementById('previewTableBody');
+    tbody.innerHTML = '';
+    
+    importData.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const total = (item.cantidad * item.precio).toFixed(2);
+        
+        row.innerHTML = `
+            <td class="px-4 py-2">
+                <input type="checkbox" 
+                       onchange="toggleBuySelection(${index})" 
+                       ${selectedBuys.includes(item) ? 'checked' : ''}>
+            </td>
+            <td class="px-4 py-2">${new Date(item.fecha).toLocaleDateString()}</td>
+            <td class="px-4 py-2">${item.product.description}</td>
+            <td class="px-4 py-2">${item.cantidad}</td>
+            <td class="px-4 py-2">S/ ${item.precio}</td>
+            <td class="px-4 py-2">S/ ${total}</td>
+            <td class="px-4 py-2">
+                <span class="px-2 py-1 text-xs rounded ${item.delivery_status === 'received' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                    ${item.delivery_status === 'received' ? 'Recibido' : 'Pendiente'}
+                </span>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
 }
 
 function toggleBuySelection(index) {
-   const item = importData[index];
-   const selectedIndex = selectedBuys.indexOf(item);
-   
-   if (selectedIndex > -1) {
-       selectedBuys.splice(selectedIndex, 1);
-   } else {
-       selectedBuys.push(item);
-   }
-   
-   updateSelectedCount();
-   updateSelectAllCheckbox();
+    const item = importData[index];
+    const itemIndex = selectedBuys.findIndex(selected => selected === item);
+    
+    if (itemIndex > -1) {
+        selectedBuys.splice(itemIndex, 1);
+    } else {
+        selectedBuys.push(item);
+    }
+    
+    updateSelectedCount();
+    updateSelectAllCheckbox();
 }
 
 function toggleAllBuys() {
-   const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-   
-   if (selectAllCheckbox.checked) {
-       selectAllBuys();
-   } else {
-       deselectAllBuys();
-   }
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox.checked) {
+        selectAllBuys();
+    } else {
+        deselectAllBuys();
+    }
 }
 
 function selectAllBuys() {
-   selectedBuys = [...importData];
-   updateSelectedCount();
-   updateCheckboxes();
-   document.getElementById('selectAllCheckbox').checked = true;
+    selectedBuys = [...importData];
+    updatePreviewCheckboxes();
+    updateSelectedCount();
+    updateSelectAllCheckbox();
 }
 
 function deselectAllBuys() {
-   selectedBuys = [];
-   updateSelectedCount();
-   updateCheckboxes();
-   document.getElementById('selectAllCheckbox').checked = false;
+    selectedBuys = [];
+    updatePreviewCheckboxes();
+    updateSelectedCount();
+    updateSelectAllCheckbox();
+}
+
+function updatePreviewCheckboxes() {
+    const checkboxes = document.querySelectorAll('#previewTableBody input[type="checkbox"]');
+    checkboxes.forEach((checkbox, index) => {
+        const item = importData[index];
+        checkbox.checked = selectedBuys.includes(item);
+    });
 }
 
 function updateCheckboxes() {
@@ -1267,12 +1432,14 @@ function updateCheckboxes() {
 }
 
 function updateSelectAllCheckbox() {
-   const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-   selectAllCheckbox.checked = selectedBuys.length === importData.length;
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = selectedBuys.length === importData.length;
+    }
 }
 
 function updateSelectedCount() {
-   document.getElementById('selectedCount').textContent = `${selectedBuys.length} compras seleccionadas`;
+    document.getElementById('selectedCount').textContent = `${selectedBuys.length} compras seleccionadas`;
 }
 
 function importSelectedBuys() {
@@ -1408,9 +1575,7 @@ function populateBuyDetailsModalResponsive(buy) {
                         <h2 class="mb-2 fw-bold" style="font-size: 1.5rem;">
                             Compra ${buy.serie}-${buy.number}
                         </h2>
-                        <p class="mb-2 opacity-75" style="font-size: 1.1rem;">
-                            <i class="fas fa-building me-1"></i>${buy.supplier ? buy.supplier.nombre_negocio : 'N/A'}
-                        </p>
+                        
                         <p class="mb-2 opacity-75" style="font-size: 1rem;">
                             <i class="fas fa-calendar me-1"></i>${new Date(buy.fecha_registro).toLocaleDateString()}
                         </p>
@@ -1426,7 +1591,7 @@ function populateBuyDetailsModalResponsive(buy) {
             </div>
 
             <!-- Grid de información -->
-            <div class="info-grid">
+            <div class="info-grid-single">
                 <!-- Información de la Compra -->
                 <div class="info-section">
                     <h4>
@@ -1448,22 +1613,6 @@ function populateBuyDetailsModalResponsive(buy) {
                     <div class="info-row">
                         <span class="info-label">Tipo de Pago:</span>
                         <span class="info-value">${buy.payment_type === 'cash' ? 'Contado' : 'Crédito'}</span>
-                    </div>
-                </div>
-
-                <!-- Información del Proveedor -->
-                <div class="info-section">
-                    <h4>
-                        <i class="fas fa-building"></i>
-                        Proveedor
-                    </h4>
-                    <div class="info-row">
-                        <span class="info-label">Nombre:</span>
-                        <span class="info-value">${buy.supplier ? buy.supplier.nombre_negocio : 'N/A'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Documento:</span>
-                        <span class="info-value">${buy.supplier && buy.supplier.nro_documento ? buy.supplier.nro_documento : 'N/A'}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Tienda:</span>

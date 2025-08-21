@@ -17,47 +17,15 @@
                     @csrf
                     
                     <!-- Información del Proveedor -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h3 class="text-lg font-semibold mb-4 text-blue-800">
-                                <i class="fas fa-truck mr-2"></i>Información del Proveedor
-                            </h3>
-                            
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Documento del Proveedor</label>
-                                <div class="flex">
-                                    <input type="text" id="supplier_document" class="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-4" 
-                                        placeholder="DNI o RUC" maxlength="11">
-                                    <button type="button" id="searchSupplierBtn" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-r-md">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                                <small class="text-gray-500">Ingrese DNI (8 dígitos) o RUC (11 dígitos)</small>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Proveedor</label>
-                                <select id="supplier_id" name="supplier_id" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Seleccionar proveedor...</option>
-                                    @foreach($suppliers as $supplier)
-                                        <option value="{{ $supplier->id }}" data-document="{{ $supplier->nro_documento }}">
-                                            {{ $supplier->nombre_negocio }} - {{ $supplier->nro_documento }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="button" id="createSupplierBtn" class="mt-2 text-sm text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-plus mr-1"></i>Crear nuevo proveedor
-                                </button>
-                            </div>
-                        </div>
-                        
+                    <div class="w-full mb-6">
+                                                
                         <!-- Información de la Compra -->
-                        <div class="bg-green-50 p-4 rounded-lg">
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
                             <h3 class="text-lg font-semibold mb-4 text-green-800">
                                 <i class="fas fa-file-invoice mr-2"></i>Información de la Compra
                             </h3>
                             
-                            <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento</label>
                                     <select name="document_type_id" id="document_type_id" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
@@ -69,18 +37,6 @@
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tienda</label>
-                                    <select name="tienda_id" id="tienda_id" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
-                                        <option value="">Seleccionar tienda...</option>
-                                        @foreach($tiendas as $tienda)
-                                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Pago</label>
                                     <select name="payment_type" id="payment_type" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
                                         <option value="cash">Contado</option>
@@ -90,10 +46,10 @@
                                 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Estado de Productos</label>
-                                    <select name="delivery_status" id="delivery_status" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
-                                        <option value="received">Productos Recibidos</option>
-                                        <option value="pending">En Espera de Productos</option>
-                                    </select>
+                                    <!-- <CHANGE> Modificado: readonly y valor fijo -->
+                                    <input type="text" value="En Espera de Productos" readonly 
+                                        class="w-full rounded-md border-gray-300 bg-gray-100 text-gray-600 cursor-not-allowed">
+                                    <input type="hidden" name="delivery_status" value="pending">
                                 </div>
                             </div>
                         </div>
@@ -240,77 +196,6 @@
         </div>
     </div>
 
-    <!-- Modal Crear Proveedor -->
-    <div id="createSupplierModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Crear Nuevo Proveedor</h3>
-                    <button type="button" onclick="closeSupplierModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form id="createSupplierForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Documento *</label>
-                        <input type="text" id="new_supplier_document" name="nro_documento" required 
-                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombres *</label>
-                        <input type="text" id="new_supplier_names" name="nombres" required 
-                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Apellido Paterno</label>
-                            <input type="text" id="new_supplier_paternal" name="apellido_paterno" 
-                                   class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Apellido Materno</label>
-                            <input type="text" id="new_supplier_maternal" name="apellido_materno" 
-                                   class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Negocio *</label>
-                        <input type="text" id="new_supplier_business" name="nombre_negocio" required 
-                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                        <input type="tel" name="telefono" 
-                               class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
-                        <textarea name="direccion_detalle" rows="2" 
-                                  class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"></textarea>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="closeSupplierModal()" 
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded">
-                            Cancelar
-                        </button>
-                        <button type="submit" 
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
-                            Crear Proveedor
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Escanear Códigos -->
     <div id="scanCodesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
         <div class="relative top-10 mx-auto p-5 border w-2/3 max-w-2xl shadow-lg rounded-md bg-white">
@@ -431,19 +316,6 @@
                 }
             });
 
-            // Búsqueda de proveedor
-            $('#searchSupplierBtn').on('click', searchSupplierByDocument);
-            $('#supplier_document').on('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    searchSupplierByDocument();
-                }
-            });
-
-            // Crear proveedor
-            $('#createSupplierBtn').on('click', openSupplierModal);
-            $('#createSupplierForm').on('submit', createSupplier);
-
             // Tipo de pago
             $('#payment_type').on('change', toggleCreditFields);
 
@@ -540,10 +412,11 @@
                 return;
             }
 
-            // Remover fila de "no hay productos"
             $('#no_products_row').remove();
 
-            const scanButtonHtml = product.control_type === 'codigo_unico' 
+            // Modificado: Mostrar botón de escanear solo si delivery_status no es 'pending'
+            const deliveryStatus = $('input[name="delivery_status"]').val();
+            const scanButtonHtml = product.control_type === 'codigo_unico' && deliveryStatus !== 'pending'
                 ? `<button type="button" class="scan-codes-btn bg-green-500 hover:bg-green-700 text-white px-2 py-1 rounded text-xs ml-2" 
                           onclick="openScanModal(${product.id}, '${product.description}')">
                       <i class="fas fa-barcode mr-1"></i>Escanear
@@ -670,100 +543,6 @@
                     });
                 }
             }
-        }
-
-        // Búsqueda de proveedor
-        function searchSupplierByDocument() {
-            const document = $('#supplier_document').val().trim();
-            
-            if (!document || (document.length !== 8 && document.length !== 11)) {
-                showAlert('Ingrese un DNI (8 dígitos) o RUC (11 dígitos) válido', 'error');
-                return;
-            }
-
-            // Buscar si ya existe en el select
-            const existingOption = $(`#supplier_id option[data-document="${document}"]`);
-            if (existingOption.length) {
-                $('#supplier_id').val(existingOption.val());
-                showAlert('Proveedor encontrado en el sistema', 'success');
-                return;
-            }
-
-            // Buscar en la API
-            $.ajax({
-                url: `{{ url('buy/buscar-documento') }}/${document}`,
-                method: 'GET',
-                success: function(data) {
-                    fillSupplierData(data);
-                    showAlert('Datos encontrados. Complete la información faltante.', 'info');
-                },
-                error: function() {
-                    showAlert('No se encontró información del documento. Crear proveedor manualmente.', 'warning');
-                    openSupplierModal();
-                    $('#new_supplier_document').val(document);
-                }
-            });
-        }
-
-        function fillSupplierData(data) {
-            $('#new_supplier_document').val(data.nro_documento || $('#supplier_document').val());
-            $('#new_supplier_names').val(data.nombres || '');
-            $('#new_supplier_paternal').val(data.apellidoPaterno || '');
-            $('#new_supplier_maternal').val(data.apellidoMaterno || '');
-            $('#new_supplier_business').val(data.razonSocial || data.nombre || '');
-            
-            openSupplierModal();
-        }
-
-        // Modal de proveedor
-        function openSupplierModal() {
-            $('#createSupplierModal').removeClass('hidden');
-        }
-
-        function closeSupplierModal() {
-            $('#createSupplierModal').addClass('hidden');
-            $('#createSupplierForm')[0].reset();
-        }
-
-        function createSupplier(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            
-            $.ajax({
-                url: '{{ route("buy.create-quick-supplier") }}',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Agregar al select
-                        const option = `<option value="${response.supplier.id}" selected>
-                            ${response.supplier.nombre_negocio} - ${response.supplier.nro_documento}
-                        </option>`;
-                        $('#supplier_id').append(option);
-                        
-                        closeSupplierModal();
-                        showAlert(response.message, 'success');
-                    }
-                },
-                error: function(xhr) {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        let errorMessage = '';
-                        Object.values(errors).forEach(error => {
-                            errorMessage += error[0] + '\n';
-                        });
-                        showAlert(errorMessage, 'error');
-                    } else {
-                        showAlert('Error al crear proveedor', 'error');
-                    }
-                }
-            });
         }
 
         // Modal de escaneo
@@ -941,30 +720,7 @@
                 showAlert('Debe agregar al menos un producto', 'error');
                 return;
             }
-            
-            // Validar códigos escaneados si es necesario
-            const deliveryStatus = $('#delivery_status').val();
-            if (deliveryStatus === 'received') {
-                let missingCodes = false;
-                $('#products_tbody tr:not(#no_products_row)').each(function() {
-                    const row = $(this);
-                    const productId = row.find('input[name*="[product_id]"]').val();
-                    const quantity = parseInt(row.find('.quantity-input').val());
-                    const scannedCodesInput = row.find('.scanned-codes-input');
-                    const scannedCodes = scannedCodesInput.val() ? JSON.parse(scannedCodesInput.val()) : [];
-                    
-                    // Verificar si el producto requiere códigos únicos
-                    const controlText = row.find('.text-xs.text-gray-400').text();
-                    if (controlText.includes('Código Único') && scannedCodes.length !== quantity) {
-                        missingCodes = true;
-                        showAlert(`El producto requiere escanear ${quantity} códigos únicos`, 'error');
-                        return false;
-                    }
-                });
-                
-                if (missingCodes) return;
-            }
-            
+                        
             // Validar configuración de cuotas para pagos a crédito
             const paymentType = $('#payment_type').val();
             if (paymentType === 'credit') {

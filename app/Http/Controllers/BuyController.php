@@ -18,6 +18,7 @@ use App\Models\PaymentMethod;  // ← Agregar esta línea
 use Illuminate\Support\Facades\Http;  // ← AGREGAR esta línea
 use App\Models\ScannedCode;           // ← AGREGAR esta línea
 use App\Models\BuyPaymentMethod;      // ← AGREGAR esta línea (si no existe ya)
+use App\Models\Warehouse; 
 use App\Models\ProductPriceHistory;  
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -64,6 +65,12 @@ class BuyController extends Controller
     DB::beginTransaction();
 
     try {
+        // Obtener almacén central
+        $centralWarehouse = Warehouse::getCentral();
+        if (!$centralWarehouse) {
+            throw new \Exception("No se encontró almacén central configurado");
+        }
+
         // Crear la compra
         $buy = Buy::create([
             'total_price' => $request->total,
@@ -72,10 +79,10 @@ class BuyController extends Controller
             'customer_dni' => $request->customer_dni,
             'igv' => $request->igv,
             'document_type_id' => $request->document_type_id,
+            'warehouse_id' => $centralWarehouse->id, // Agregar warehouse_id
             'serie' => $this->generateSerie($request->document_type_id),
             'number' => $this->generateNumero($request->document_type_id),
         ]);
-
 
         // Procesar cada producto
         foreach ($request->products as $productData) {
@@ -107,6 +114,7 @@ class BuyController extends Controller
             BuyItem::create([
                 'buy_id' => $buy->id,
                 'product_id' => $producto->id,
+                'warehouse_id' => $centralWarehouse->id, // Agregar warehouse_id
                 'quantity' => $productData['quantity'],
                 'price' => $productData['price'],
             ]);
@@ -159,13 +167,17 @@ class BuyController extends Controller
     public function create()
     {
         $documentTypes = DocumentType::whereIn('name', ['NOTA DE VENTA'])->get();
-        $suppliers = Supplier::where('status', 1)->get();
-        $tiendas = Tienda::where('status', 1)->get();  // ← Línea agregada
 
-        $paymentMethods = PaymentMethod::where('status', 1)->get();  // ← Línea agregada
+        $paymentMethods = PaymentMethod::where('status', 1)->get();
 
-        return view('buy.create',compact('documentTypes','suppliers','tiendas','paymentMethods')); 
+        // Verificar que existe almacén central
+        $centralWarehouse = Warehouse::getCentral();
+        if (!$centralWarehouse) {
+            return redirect()->back()->with('error', 'No se encontró almacén central configurado');
+        }
 
+        // Eliminado: 'tiendas' del compact() porque no se debe usar
+        return view('buy.create', compact('documentTypes', 'paymentMethods'));
     }
 
     private function generateSerie($documentTypeId)
@@ -264,8 +276,6 @@ class BuyController extends Controller
     {
         $query = Buy::with([
             'userRegister', 
-            'supplier', 
-            'tienda', 
             'documentType',
             'buyItems.product',
             'paymentMethods.paymentMethod'
@@ -282,51 +292,13 @@ class BuyController extends Controller
         if (!empty($filters['delivery_status'])) {
             $query->where('delivery_status', $filters['delivery_status']);
         }
-        
-        if (!empty($filters['supplier_id'])) {
-            $query->where('supplier_id', $filters['supplier_id']);
-        }
-        
-        if (!empty($filters['tienda_id'])) {
-            $query->where('tienda_id', $filters['tienda_id']);
-        }
+
+        // Eliminados: filtros por supplier_id y tienda_id ya que no se usarán
 
         return $query->orderBy('fecha_registro', 'desc')->get();
     }
 
-    /**
-     * Crear o actualizar proveedor automáticamente
-     */
-    private function createOrUpdateSupplier($supplierData)
-    {
-        $supplier = Supplier::where('nro_documento', $supplierData['document'])
-            ->first();
-
-        if (!$supplier) {
-            $supplier = Supplier::create([
-                'nro_documento' => $supplierData['document'],
-                'nombres' => $supplierData['names'] ?? '',
-                'apellido_paterno' => $supplierData['paternal_surname'] ?? '',
-                'apellido_materno' => $supplierData['maternal_surname'] ?? '',
-                'nombre_negocio' => $supplierData['business_name'] ?? $supplierData['names'],
-                'tipo_doc' => strlen($supplierData['document']) == 8 ? 'DNI' : 'RUC',
-                'telefono' => $supplierData['phone'] ?? '',
-                'direccion_detalle' => $supplierData['address'] ?? '',
-                'status' => 1
-            ]);
-        } else {
-            // Actualizar información si es necesario
-            $supplier->update([
-                'nombres' => $supplierData['names'] ?? $supplier->nombres,
-                'nombre_negocio' => $supplierData['business_name'] ?? $supplier->nombre_negocio,
-                'telefono' => $supplierData['phone'] ?? $supplier->telefono,
-                'direccion_detalle' => $supplierData['address'] ?? $supplier->direccion_detalle
-            ]);
-        }
-
-        return $supplier;
-    }
-
+    
     /**
      * Validar códigos únicos escaneados
      */
@@ -357,40 +329,7 @@ class BuyController extends Controller
         return true;
     }
 
-    /**
-     * Generar reporte de compras por proveedor
-     */
-    public function supplierReport(Request $request)
-    {
-        $supplierId = $request->supplier_id;
-        $dateFrom = $request->fecha_desde;
-        $dateTo = $request->fecha_hasta;
-
-        $supplier = Supplier::findOrFail($supplierId);
-        
-        $compras = Buy::with(['buyItems.product', 'tienda'])
-            ->where('supplier_id', $supplierId)
-            ->whereDate('fecha_registro', '>=', $dateFrom)
-            ->whereDate('fecha_registro', '<=', $dateTo)
-            ->get();
-
-        $totalCompras = $compras->sum('total_price');
-        $totalProductos = $compras->sum(function($compra) {
-            return $compra->buyItems->sum('quantity');
-        });
-
-        $pdf = Pdf::loadView('buy.supplier_report', compact(
-            'supplier', 
-            'compras', 
-            'totalCompras', 
-            'totalProductos',
-            'dateFrom',
-            'dateTo'
-        ));
-
-        return $pdf->download("reporte_proveedor_{$supplier->nro_documento}.pdf");
-    }
-
+    
     /**
      * Reporte de productos más comprados
      */
@@ -515,9 +454,10 @@ class BuyController extends Controller
     /**
      * Obtener lista filtrada de compras
      */
+    // Reemplaza el método filteredList() completo:
     public function filteredList(Request $request)
     {
-       $query = Buy::with(['supplier', 'tienda', 'documentType', 'userRegister']);
+        $query = Buy::with(['documentType', 'userRegister']);
 
         if ($request->fecha_desde) {
             $query->whereDate('fecha_registro', '>=', $request->fecha_desde);
@@ -530,15 +470,14 @@ class BuyController extends Controller
         if ($request->products_status) {
             $query->where('delivery_status', $request->products_status === 'recibidos' ? 'received' : 'pending');
         }
-        
-        if ($request->supplier_id) {
-            $query->where('supplier_id', $request->supplier_id);
-        }
 
-        $buys = $query->orderBy('fecha_registro', 'desc')->get();
+        // Eliminado: filtro por supplier_id ya que no se usa
 
+        // Agregar paginación
+        $perPage = $request->per_page ?? 15;
+        $buys = $query->orderBy('fecha_registro', 'desc')->paginate($perPage);  
         // Agregar status de productos para la vista
-        $buys->each(function($buy) {
+        $buys->getCollection()->each(function($buy) {
             $buy->products_status = $buy->delivery_status === 'received' ? 'recibidos' : 'pendientes';
         });
 
@@ -653,63 +592,13 @@ class BuyController extends Controller
     }
 
     /**
-     * Crear proveedor rápido
-     */
-    public function createQuickSupplier(Request $request)
-    {
-        $request->validate([
-            'nro_documento' => 'required|unique:clientes_mayoristas,nro_documento',
-            'nombres' => 'required|string|max:255',
-            'apellido_paterno' => 'nullable|string|max:255',
-            'apellido_materno' => 'nullable|string|max:255',
-            'nombre_negocio' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion_detalle' => 'nullable|string|max:500'
-        ]);
-        
-        try {
-            $supplier = Supplier::create([
-                'codigo' => 'PROV' . str_pad(Supplier::count() + 1, 3, '0', STR_PAD_LEFT),
-                'nro_documento' => $request->nro_documento,
-                'nombres' => $request->nombres,
-                'apellido_paterno' => $request->apellido_paterno,
-                'apellido_materno' => $request->apellido_materno,
-                'nombre_negocio' => $request->nombre_negocio,
-                'tipo_doc' => strlen($request->nro_documento) == 8 ? 'DNI' : 'RUC',
-                'telefono' => $request->telefono,
-                'direccion_detalle' => $request->direccion_detalle,
-                'departamento' => null,
-                'provincia' => null,
-                'distrito' => null,
-                'user_register' => auth()->id(),
-                'status' => 1
-            ]);
-            
-            return response()->json([
-                'success' => true,
-                'supplier' => $supplier,
-                'message' => 'Proveedor creado exitosamente'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear proveedor: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * Registrar nueva compra con validaciones completas
      */
     public function storePurchase(Request $request)
     {
         $request->validate([
-            'supplier_id' => 'required|exists:clientes_mayoristas,id',
             'document_type_id' => 'required|exists:document_types,id',
-            'tienda_id' => 'required|exists:tiendas,id',
             'payment_type' => 'required|in:cash,credit',
-            'delivery_status' => 'required|in:received,pending',
             'total_price' => 'required|numeric|min:0',
             'igv' => 'required|numeric|min:0',
             'products' => 'required|array|min:1',
@@ -722,19 +611,22 @@ class BuyController extends Controller
         DB::beginTransaction();
         
         try {
+
+            $centralWarehouse = Warehouse::getCentral();
+
             // Crear la compra
             $buy = Buy::create([
-                'supplier_id' => $request->supplier_id,
+                'supplier_id' => null,
+                'warehouse_id' => $centralWarehouse->id,
                 'document_type_id' => $request->document_type_id,
-                'tienda_id' => $request->tienda_id,
                 'payment_type' => $request->payment_type,
-                'delivery_status' => $request->delivery_status,
+                'delivery_status' => 'pending',
                 'total_price' => $request->total_price,
                 'igv' => $request->igv,
                 'observation' => $request->observation,
                 'serie' => $this->generateSerie($request->document_type_id),
                 'number' => $this->generateNumero($request->document_type_id),
-                'received_date' => $request->delivery_status === 'received' ? now() : null,
+                'received_date' => null,
                 'customer_dni' => '', // Campo requerido por el modelo
                 'customer_names_surnames' => '', // Campo requerido por el modelo
                 'customer_address' => '' // Campo requerido por el modelo
@@ -774,7 +666,7 @@ class BuyController extends Controller
                 $buyItem = BuyItem::create([
                     'buy_id' => $buy->id,
                     'product_id' => $product->id,
-                    'tienda_id' => $request->tienda_id,
+                    'warehouse_id' => $centralWarehouse->id,
                     'quantity' => $productData['quantity'],
                     'price' => $productData['price'],
                     'custom_price' => isset($productData['use_custom_price']) && $productData['use_custom_price'] ? $productData['price'] : null,
@@ -913,42 +805,18 @@ class BuyController extends Controller
         $comprasRecibidas = $compras->where('delivery_status', 'received')->count();
         $comprasPendientes = $compras->where('delivery_status', 'pending')->count();
         
-        // Estadísticas por proveedor
-        $estadisticasProveedores = $compras->groupBy('supplier_id')->map(function($comprasProveedor) {
-            $primeraCompra = $comprasProveedor->first();
-            $supplier = $primeraCompra ? $primeraCompra->supplier : null;
-            $nombreProveedor = $supplier ? $supplier->nombre_negocio : 'Sin Proveedor';
-            $totalCompras = $comprasProveedor->count();
-            $montoTotal = $comprasProveedor->sum('total_price');
-            $productosRecibidos = $comprasProveedor->where('delivery_status', 'received')->count();
-            $productosPendientes = $comprasProveedor->where('delivery_status', 'pending')->count();
-            
-            $estadistica = [
-                'proveedor' => $nombreProveedor,
-                'total_compras' => $totalCompras,
-                'monto_total' => $montoTotal,
-                'productos_recibidos' => $productosRecibidos,
-                'productos_pendientes' => $productosPendientes
+        $estadisticasPorMes = $compras->groupBy(function($compra) {
+            return \Carbon\Carbon::parse($compra->fecha_registro)->format('Y-m');
+        })->map(function($comprasMes, $mes) {
+            return [
+                'mes' => $mes,
+                'total_compras' => $comprasMes->count(),
+                'monto_total' => $comprasMes->sum('total_price'),
+                'productos_recibidos' => $comprasMes->where('delivery_status', 'received')->count(),
+                'productos_pendientes' => $comprasMes->where('delivery_status', 'pending')->count()
             ];
-            return $estadistica;
         })->sortByDesc('monto_total');
-        
-        // Estadísticas por tienda
-        $estadisticasTiendas = $compras->groupBy('tienda_id')->map(function($comprasTienda) {
-            $primeraCompra = $comprasTienda->first();
-            $tienda = $primeraCompra ? $primeraCompra->tienda : null;
-            $nombreTienda = $tienda ? $tienda->nombre : 'Sin Tienda';
-            $totalCompras = $comprasTienda->count();
-            $montoTotal = $comprasTienda->sum('total_price');
-            
-            $estadistica = [
-                'tienda' => $nombreTienda,
-                'total_compras' => $totalCompras,
-                'monto_total' => $montoTotal
-            ];
-            return $estadistica;
-        })->sortByDesc('monto_total');
-        
+
         // Productos más comprados
         $productosComprados = [];
         foreach($compras as $compra) {
@@ -974,9 +842,7 @@ class BuyController extends Controller
         // Convertir a collection solo para ordenar y luego volver a array
         $productosComprados = collect($productosComprados)->sortByDesc('cantidad_total')->take(15)->values()->toArray();
 
-        // Convertir Collections a arrays para evitar errores en PHP 8.4
-        $estadisticasProveedores = $estadisticasProveedores->values()->toArray();
-        $estadisticasTiendas = $estadisticasTiendas->values()->toArray();
+        $estadisticasPorMes = $estadisticasPorMes->values()->toArray();
         // $productosComprados ya es array, no necesita conversión adicional
 
         $datos = compact(
@@ -986,8 +852,7 @@ class BuyController extends Controller
             'igvTotal',
             'comprasRecibidas', 
             'comprasPendientes',
-            'estadisticasProveedores',
-            'estadisticasTiendas',
+            'estadisticasPorMes',
             'productosComprados'
         );
 
@@ -1008,6 +873,10 @@ class BuyController extends Controller
     /**
      * Procesar archivo de importación y mostrar preview
      */
+    // Busca el método processImportFile() y reemplázalo completamente:
+    /**
+     * Procesar archivo de importación y mostrar preview
+     */
     public function processImportFile(Request $request)
     {
         $request->validate([
@@ -1018,7 +887,7 @@ class BuyController extends Controller
             $import = new \App\Imports\BuysImport();
             $rawData = Excel::toArray($import, $request->file('file'));
             
-            // Procesar los datos usando el nuevo método
+            // Procesar los datos usando el método de la clase import
             $result = $import->processImportData($rawData[0]);
             
             return response()->json([
@@ -1028,6 +897,7 @@ class BuyController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Error procesando archivo de importación: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error al procesar el archivo: ' . $e->getMessage()
@@ -1040,9 +910,10 @@ class BuyController extends Controller
      */
     public function importSelectedBuys(Request $request)
     {
+
         $request->validate([
             'selected_buys' => 'required|array|min:1',
-            'selected_buys.*.supplier' => 'required',
+            //             // 'selected_buys.*.supplier' => 'required', // Deshabilitado porque el proveedor ya no es requerido para la importación. // Deshabilitado segun requerimiento
             'selected_buys.*.product' => 'required',
             'selected_buys.*.cantidad' => 'required|numeric|min:1',
             'selected_buys.*.precio' => 'required|numeric|min:0'
@@ -1054,14 +925,29 @@ class BuyController extends Controller
             $importedCount = 0;
             $errors = [];
 
-            // Agrupar por compra (mismo proveedor, fecha, documento)
+            // Agrupar por compra (fecha y tipo documento, sin proveedor ni tienda)
             $groupedBuys = collect($request->selected_buys)->groupBy(function($item) {
-                return $item['supplier']['id'] . '_' . $item['fecha'] . '_' . $item['document_type']['id'] . '_' . $item['tienda']['id'];
+                return $item['fecha'] . '_' . $item['document_type']['id'];
             });
+
+            // Busca el foreach ($groupedBuys as $group) dentro del método importSelectedBuys() (alrededor de línea 800) 
+            // y reemplaza la sección de creación de Buy::create():
 
             foreach ($groupedBuys as $group) {
                 try {
                     $firstItem = $group->first();
+                    
+                    // Obtener almacén central
+                    $centralWarehouse = Warehouse::getCentral();
+                    if (!$centralWarehouse) {
+                        throw new \Exception("No se encontró almacén central configurado");
+                    }
+                    
+                    // Obtener almacén central primero
+                    $centralWarehouse = Warehouse::getCentral();
+                    if (!$centralWarehouse) {
+                        throw new \Exception("No se encontró almacén central configurado");
+                    }
                     
                     // Crear la compra principal
                     $totalPrice = $group->sum(function($item) {
@@ -1071,9 +957,9 @@ class BuyController extends Controller
                     $igv = $totalPrice * 0.18;
 
                     $buy = Buy::create([
-                        'supplier_id' => $firstItem['supplier']['id'],
+                        'supplier_id' => null, // Eliminado: ya no se asigna proveedor
+                        'warehouse_id' => $centralWarehouse->id, // Siempre almacén central
                         'document_type_id' => $firstItem['document_type']['id'],
-                        'tienda_id' => $firstItem['tienda']['id'],
                         'payment_type' => $firstItem['payment_method']['type'],
                         'delivery_status' => $firstItem['delivery_status'],
                         'total_price' => $totalPrice,
@@ -1093,7 +979,7 @@ class BuyController extends Controller
                         BuyItem::create([
                             'buy_id' => $buy->id,
                             'product_id' => $item['product']['id'],
-                            'tienda_id' => $item['tienda']['id'],
+                            'warehouse_id' => $centralWarehouse->id, // Siempre almacén central
                             'quantity' => $item['cantidad'],
                             'price' => $item['precio']
                         ]);
@@ -1101,7 +987,7 @@ class BuyController extends Controller
                         // Actualizar stock si está marcado como recibido
                         if ($item['delivery_status'] === 'received') {
                             $stock = Stock::firstOrCreate(
-                                ['product_id' => $item['product']['id'], 'tienda_id' => $item['tienda']['id']],
+                                ['product_id' => $item['product']['id']],
                                 ['quantity' => 0, 'minimum_stock' => 0]
                             );
                             
@@ -1121,7 +1007,8 @@ class BuyController extends Controller
                     $importedCount++;
 
                 } catch (\Exception $e) {
-                    $errors[] = "Error al procesar compra del proveedor {$firstItem['supplier']['nombre_negocio']}: " . $e->getMessage();
+                    // Eliminado: referencia a supplier en el error
+                    $errors[] = "Error al procesar compra de la fila: " . $e->getMessage();
                 }
             }
 
@@ -1136,6 +1023,10 @@ class BuyController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            // Añadimos un log para capturar el error detallado
+            Log::error("Error en importación de compras: " . $e->getMessage() . " Archivo: " . $e->getFile() . " Línea: " . $e->getLine());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al importar compras: ' . $e->getMessage()

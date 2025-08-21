@@ -101,23 +101,14 @@
 
         <!-- Información del Cliente y Venta -->
         <table class="info-table" width="100%" style="border: 1px solid #000; border-collapse: collapse;">
-            @if($buy->supplier)
             <tr>
-                <th style="text-align: right; padding: 5px;">{{ $buy->supplier_doc_type }} :</th>
-                <td style="text-align: left; padding: 5px;">{{ $buy->supplier_document }}</td>
+                <th style="text-align: right; padding: 5px;">ALMACÉN :</th>
+                <td style="text-align: left; padding: 5px;">Almacén Central</td>
                 <th style="text-align: right; padding: 5px;">FECHA Y HORA :</th>
                 <td style="text-align: left; padding: 5px;">
-                    {{-- {{ \Carbon\Carbon::parse($sale->fecha_registro)->format('d/m/Y') }} --}}
                     {{ $buy->fecha_registro }}
                 </td>
             </tr>
-            <tr>
-                <th style="text-align: right; padding: 5px;">PROVEEDOR :</th>
-                <td style="text-align: left; padding: 5px;">{{ $buy->supplier_full_name }}</td>
-                <th style="text-align: right; padding: 5px;"></th>
-                <td style="text-align: left; padding: 5px;"></td>
-            </tr>
-            @endif
             <tr>
                 <th style="text-align: right; padding: 5px;"></th>
                 <td style="text-align: left; padding: 5px;"></td>
