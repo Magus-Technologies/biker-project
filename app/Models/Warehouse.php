@@ -29,4 +29,10 @@ class Warehouse extends Model
     {
         return self::where('type', 'central')->where('status', 1)->first();
     }
+
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class);
+    }
+    
 }

@@ -9,7 +9,7 @@ class Stock extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'tienda_id', 'quantity', 'minimum_stock'];
+    protected $fillable = ['product_id', 'tienda_id', 'warehouse_id', 'quantity', 'minimum_stock'];
 
     public function product()
     {
@@ -30,4 +30,11 @@ class Stock extends Model
     {
         return $this->hasMany(ScannedCode::class);
     }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
 }
+

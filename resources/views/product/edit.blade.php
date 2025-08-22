@@ -10,16 +10,16 @@
             @csrf
             <h5 class="text-lg font-semibold mb-4">Datos del Producto</h5>
 
-            <!-- Información de Stock por Tienda -->
+            <!-- Información de Stock en Almacén Central -->
             <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h6 class="text-md font-semibold mb-3 text-blue-800">
-                    <i class="fas fa-store mr-2"></i>Stock por Tienda
+                    <i class="fas fa-warehouse mr-2"></i>Stock en Almacén Central
                 </h6>
                 @if($productStock->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     @foreach($productStock as $stock)
                     <div class="bg-white p-3 rounded border">
-                        <div class="font-medium text-gray-800">{{ $stock->tienda->nombre ?? 'Sin Tienda' }}</div>
+                        <div class="font-medium text-gray-800">{{ $stock->warehouse->name ?? 'Almacén Central' }}</div>
                         <div class="text-lg font-bold text-blue-600">{{ $stock->quantity }} unidades</div>
                         @if($stock->scannedCodes->count() > 0)
                             <div class="text-xs text-green-600">
@@ -32,7 +32,7 @@
                 @else
                 <div class="text-center text-gray-500 py-4">
                     <i class="fas fa-inbox text-4xl mb-2"></i>
-                    <p>Este producto no tiene stock en ninguna tienda</p>
+                    <p>Este producto no tiene stock en el almacén central</p>
                 </div>
                 @endif
                 <button type="button" id="gestionar-stock" class="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
@@ -388,7 +388,7 @@
                     <div class="border rounded p-3 mb-3">
                         <div class="flex justify-between items-center mb-2">
                             <div>
-                                <div class="font-medium">${stock.tienda ? stock.tienda.nombre : 'Sin Tienda'}</div>
+                                <div class="font-medium">${stock.warehouse ? stock.warehouse.name : 'Almacén Central'}</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-lg font-bold text-blue-600">${stock.quantity} unidades</div>
@@ -396,10 +396,10 @@
                             </div>
                         </div>
                         <div class="flex gap-2 mt-2">
-                            <button type="button" class="increase-stock px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600" data-tienda="${stock.tienda_id}">
+                            <button type="button" class="increase-stock px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600" data-warehouse="1">
                                 <i class="fas fa-plus mr-1"></i>Aumentar
                             </button>
-                            <button type="button" class="decrease-stock px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600" data-tienda="${stock.tienda_id}">
+                            <button type="button" class="decrease-stock px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600" data-warehouse="1">
                                 <i class="fas fa-minus mr-1"></i>Disminuir
                             </button>
                         </div>
@@ -447,8 +447,8 @@
             modal.addEventListener('click', function(e) {
                 if (e.target.classList.contains('increase-stock') || e.target.closest('.increase-stock')) {
                     const btn = e.target.classList.contains('increase-stock') ? e.target : e.target.closest('.increase-stock');
-                    const tiendaId = btn.dataset.tienda;
-                    showQuantityModal('increase', tiendaId, controlType, productId);
+                    const warehouseId = btn.dataset.warehouse;
+                    showQuantityModal('increase', warehouseId, controlType, productId);
                 }
             });
 
@@ -456,8 +456,8 @@
             modal.addEventListener('click', function(e) {
                 if (e.target.classList.contains('decrease-stock') || e.target.closest('.decrease-stock')) {
                     const btn = e.target.classList.contains('decrease-stock') ? e.target : e.target.closest('.decrease-stock');
-                    const tiendaId = btn.dataset.tienda;
-                    showQuantityModal('decrease', tiendaId, controlType, productId);
+                    const warehouseId = btn.dataset.warehouse;
+                    showQuantityModal('decrease', warehouseId, controlType, productId);
                 }
             });
             
@@ -467,7 +467,7 @@
             });
         });
 
-        function showQuantityModal(action, tiendaId, controlType, productId) {
+        function showQuantityModal(action, warehouseId, controlType, productId) {
             const actionText = action === 'increase' ? 'Aumentar' : 'Disminuir';
             const actionColor = action === 'increase' ? 'green' : 'red';
             const actionIcon = action === 'increase' ? 'plus' : 'minus';
@@ -796,7 +796,7 @@
                 const formData = new FormData();
                 formData.append('action', action);
                 formData.append('quantity', quantity);
-                formData.append('tienda_id', tiendaId);
+                formData.append('warehouse_id', warehouseId);
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 
                 if (action === 'increase' && scannedCodes.length > 0) {
@@ -847,7 +847,7 @@
                     codeSelectionArea.classList.remove('hidden');
                     
                     // Cargar códigos existentes
-                    fetch(`{{ route('products.getStockCodes', ['productId' => $product->id]) }}?tienda_id=${tiendaId}`)
+                    fetch(`{{ route('products.getStockCodes', ['productId' => $product->id]) }}?warehouse_id=1`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -985,13 +985,9 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tienda:</label>
-                    <select id="newTiendaSelect" class="w-full p-2 border rounded">
-                        <option value="">Seleccione una tienda</option>
-                        @foreach($tiendas as $tienda)
-                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
-                        @endforeach
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Almacén:</label>
+                    <input type="text" class="w-full p-2 border rounded bg-gray-100" value="Almacén Central" readonly>
+                    <input type="hidden" id="newWarehouseId" value="1">
                 </div>
                                 
                 <div class="mb-4">
@@ -1001,7 +997,7 @@
                 
                 ${controlType === 'codigo_unico' ? `
                     <div class="mb-4">
-                        <button type="button" id="newScanCodesBtn" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center" disabled>
+                        <button type="button" id="newScanCodesBtn" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center">
                             <i class="fas fa-qrcode mr-2"></i>
                             Escanear Códigos
                         </button>
@@ -1080,17 +1076,7 @@
                 stockModal.remove();
             });
             
-            // Tienda change
-            document.getElementById('newTiendaSelect').addEventListener('change', function() {
-                const scanBtn = document.getElementById('newScanCodesBtn');
-                
-                if (this.value) {
-                    if (scanBtn) scanBtn.disabled = false;
-                } else {
-                    if (scanBtn) scanBtn.disabled = true;
-                }
-            });
-            
+                        
             // Lógica de escaneo para nuevo stock
             if (controlType === 'codigo_unico') {
                 document.getElementById('newScanCodesBtn').addEventListener('click', function() {
@@ -1246,13 +1232,10 @@
             
             // Confirm new stock
             document.getElementById('confirmNewStock').addEventListener('click', function() {
-                const tiendaId = document.getElementById('newTiendaSelect').value;
-                const quantity = parseInt(document.getElementById('newQuantityInput').value) || 1; // <- Esta línea faltaba
-
-                if (!tiendaId) {
-                    Swal.fire('Error', 'Debe seleccionar una tienda', 'error');
-                    return;
-                }
+                const warehouseId = 1; // Siempre almacén central
+                const quantity = parseInt(document.getElementById('newQuantityInput').value) || 1;
+                
+                // Eliminado: validación de tienda ya no es necesaria
                 
                 if (controlType === 'codigo_unico' && scannedCodes.length !== quantity) {
                     Swal.fire('Error', 'Debe escanear todos los códigos antes de continuar', 'error');
@@ -1263,7 +1246,7 @@
                 const formData = new FormData();
                 formData.append('action', 'increase');
                 formData.append('quantity', quantity);
-                formData.append('tienda_id', tiendaId);
+                formData.append('warehouse_id', warehouseId);
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 
                 if (scannedCodes.length > 0) {
