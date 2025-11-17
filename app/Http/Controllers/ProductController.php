@@ -304,10 +304,6 @@ class ProductController extends Controller
             'prices.*.min' => 'Cada precio debe ser mayor o igual a 0.',
         ];
 
-        // Determinar si se necesita validar tienda
-        $quantity = $request->quantity ?? 0;
-        $needsTienda = $quantity > 0;
-        
         $validationRules = [
             'description' => 'nullable|string',
             'amount' => 'nullable|integer',
@@ -319,14 +315,10 @@ class ProductController extends Controller
             'prices.*' => 'nullable|numeric|min:0',
             'code_sku' => 'required|string|unique:products,code_sku',
             'code_bar' => 'required|string|unique:products,code_bar',
-            'quantity' => 'nullable|integer|min:0', // Cambiado: ahora es nullable y min:0
+            'quantity' => 'nullable|integer|min:0',
             'control_type' => 'required|in:cantidad,codigo_unico',
         ];
-        
-        // Solo agregar validaciones de tienda si la cantidad es mayor a 0
-        if ($needsTienda) {
-            $validationRules['tienda_id'] = 'required|exists:tiendas,id';
-        }
+        // Eliminado: validación de tienda ya no es necesaria porque siempre usaremos almacén central
         
         try {
             $validated = $request->validate($validationRules, $messages);
@@ -384,23 +376,33 @@ class ProductController extends Controller
                 }
             }
 
-            // Crear stock solo si hay cantidad y tienda seleccionada
-            if ($quantity > 0 && $request->tienda_id) {
-                $stock = Stock::create([
-                    'product_id' => $product->id,
-                    'tienda_id' => $request->tienda_id,
-                    'quantity' => $request->quantity,
-                    'minimum_stock' => $request->minimum_stock,
-                ]);
+            // Definir quantity para uso posterior
+            $quantity = $request->quantity ?? 0;
 
-                // Si es control por código único, guardar códigos escaneados
-                if ($request->control_type === 'codigo_unico' && $request->scanned_codes) {
-                    foreach ($request->scanned_codes as $code) {
-                        ScannedCode::create([
-                            'stock_id' => $stock->id,
-                            'code' => $code
-                        ]);
+            // Crear stock en almacén central si hay cantidad
+            if ($quantity > 0) {
+                // Obtener el almacén central (warehouse con type='central')
+                $almacenCentral = \App\Models\Warehouse::where('type', 'central')->where('status', 1)->first();
+                
+                if ($almacenCentral) {
+                    $stock = Stock::create([
+                        'product_id' => $product->id,
+                        'warehouse_id' => $almacenCentral->id, // Usar warehouse_id en lugar de tienda_id
+                        'quantity' => $request->quantity,
+                        'minimum_stock' => $request->minimum_stock,
+                    ]);
+
+                    // Si es control por código único, guardar códigos escaneados
+                    if ($request->control_type === 'codigo_unico' && $request->scanned_codes) {
+                        foreach ($request->scanned_codes as $code) {
+                            ScannedCode::create([
+                                'stock_id' => $stock->id,
+                                'code' => $code
+                            ]);
+                        }
                     }
+                } else {
+                    throw new \Exception('No se encontró el almacén central. Contacte al administrador.');
                 }
             }
 
@@ -461,8 +463,14 @@ class ProductController extends Controller
             $product = Product::with('brand', 'unit', 'prices')->findOrFail($id);
             $units = Unit::all();
             $tiendas = Tienda::where('status', 1)->get();
-            $productStock = Stock::where('product_id', $product->id)->with('tienda', 'scannedCodes')->get();
-            return view('product.edit', compact('product', 'units', 'tiendas', 'productStock'));
+           // Cambio: Obtener stock del almacén central en lugar de por tiendas
+            $productStock = Stock::where('product_id', $product->id)
+                                ->where('warehouse_id', 1) // Solo almacén central
+                                ->with('warehouse', 'scannedCodes')
+                                ->get();
+            
+            // Ya no necesitamos tiendas para la gestión de stock
+            return view('product.edit', compact('product', 'units', 'productStock'));
         } catch (\Throwable $th) {
             return redirect()->route('product.index');
         }
@@ -591,16 +599,16 @@ class ProductController extends Controller
             
             $action = $request->action; // 'increase' o 'decrease'
             $quantity = $request->quantity;
-            $tiendaId = $request->tienda_id;
+            // Eliminado: ya no usamos tienda_id, solo almacén central
 
             $stock = Stock::where('product_id', $productId)
-                        ->where('tienda_id', $tiendaId)
+                        ->where('warehouse_id', 1) // Solo almacén central
                         ->first();
                         
             if (!$stock) {
                 $stock = Stock::create([
                     'product_id' => $productId,
-                    'tienda_id' => $tiendaId,
+                    'warehouse_id' => 1, // Almacén central fijo
                     'quantity' => 0,
                     'minimum_stock' => 0
                 ]);
@@ -669,10 +677,10 @@ class ProductController extends Controller
     public function getStockCodes(Request $request, $productId)
     {
         try {
-            $tiendaId = $request->tienda_id;
+            // Eliminado: ya no necesitamos tienda_id
 
             $stock = Stock::where('product_id', $productId)
-                        ->where('tienda_id', $tiendaId)
+                        ->where('warehouse_id', 1) // Solo almacén central
                         ->with('scannedCodes')
                         ->first();
                         

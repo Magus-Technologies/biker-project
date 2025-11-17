@@ -47,7 +47,7 @@ ADD CONSTRAINT `products_tienda_id_foreign`
 DROP TABLE IF EXISTS `warehouses`;
 
 
-<<<<<<< HEAD
+
 -- tablas de hoy hora 4 de la tarde dia 20 
 -- Eliminar tablas si existen (para recrearlas)
 DROP TABLE IF EXISTS devolucion_items;
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS devolucion_items (
     FOREIGN KEY (devolucion_id) REFERENCES devoluciones(id) ON DELETE CASCADE,
     FOREIGN KEY (sale_item_id) REFERENCES sale_items(id) ON DELETE CASCADE
 );
-=======
+
 
 ---- CAMBIOS ALEXANDER ----  -
 CREATE TABLE `warehouses` (
@@ -110,4 +110,4 @@ ALTER TABLE `buy_items` ADD COLUMN `warehouse_id` bigint(20) unsigned NULL AFTER
 ALTER TABLE `buy_items` ADD FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses`(`id`);
 
 -- ALTER TABLE `buy_items` DROP COLUMN `tienda_id`; -- Solo si quieres eliminarla
->>>>>>> bikerv3
+

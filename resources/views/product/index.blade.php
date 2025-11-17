@@ -164,12 +164,7 @@
                                     <span>Ubicación</span>
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-warehouse text-gray-500"></i>
-                                    <span>Tienda</span>
-                                </div>
-                            </th>
+                            
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
                                 <div class="flex items-center space-x-1">
                                     <i class="fas fa-tag text-gray-500"></i>
@@ -544,9 +539,8 @@
                 },
                 dom: '<"flex flex-col lg:flex-row justify-between items-center mb-6 space-y-4 lg:space-y-0"<"flex items-center"l><"flex items-center"f>>rt<"flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-gray-200"<"text-sm text-gray-600"i><"flex items-center space-x-2"p>>',
                 columnDefs: [
-                    { targets: [3, 12], orderable: false }, // Imagen y Acciones no ordenables
-                    { targets: [0, 3, 11, 12], className: 'text-center' }, // Centrar columnas específicas
-                    { targets: '_all', className: 'align-top' } // Alinear todas las columnas al tope
+                    { targets: [3, 11], orderable: false }, // Imagen y Acciones no ordenables
+                    { targets: [0, 3, 10, 11], className: 'text-center' }, // Centrar columnas específicas
                 ],
                 order: [[1, 'asc']], // Ordenar por código por defecto
                 autoWidth: false, // Desactivar autoWidth para mejor control
@@ -789,15 +783,15 @@
                     `<div class="flex justify-center">${imageColumn}</div>`,                      // 4. Imagen
                     `<div class="max-w-sm">
                        <p class="font-semibold text-gray-900 leading-tight" title="${product.description || ''}">${product.description || '-'}</p>
-                     </div>`,                                                                     // 5. Descripción
-                    `<span class="text-gray-700 font-medium">${product.model || '-'}</span>`,      // 6. Modelo
-                    `<span class="text-gray-600">${product.location || '-'}</span>`,              // 7. Ubicación
-                    `<span class="text-gray-700 font-medium">${product.tienda?.nombre || '-'}</span>`, // 8. Tienda
-                    `<span class="text-gray-700 font-medium">${product.brand?.name || '-'}</span>`,   // 9. Marca
-                    `<span class="text-gray-600">${product.unit?.name || '-'}</span>`,             // 10. Unidad
-                    priceSelect,                                                                  // 11. Precio
-                    `<div class="flex justify-center">${stockBadge}</div>`,                       // 12. Stock
-                    actions                                                                       // 13. Acciones
+                     </div>`,
+                    `<span class="text-gray-700 font-medium">${product.model || '-'}</span>`,
+                    `<span class="text-gray-600">${product.location || '-'}</span>`,
+
+                    `<span class="text-gray-700 font-medium">${product.brand?.name || '-'}</span>`,
+                    `<span class="text-gray-600">${product.unit?.name || '-'}</span>`,
+                    priceSelect,
+                    `<div class="flex justify-center">${stockBadge}</div>`,
+                    actions
                 ]);
             });
             

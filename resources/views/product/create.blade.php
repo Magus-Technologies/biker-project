@@ -62,16 +62,6 @@
                     <input type="text" name="model" id="model"
                         class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
                 </div>
-                <div id="tiendaSelect" class="hidden">
-                    <label for="tienda_id" class="block font-medium text-gray-700">Tienda</label>
-                    <select name="tienda_id" id="tienda_id" class="form-select block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                        <option value="">Seleccione una tienda</option>
-                        @foreach ($tiendas as $tienda)
-                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <div id="scanButton" class="hidden">
                     <label class="block font-medium text-gray-700 mb-2">Escanear Códigos</label>
                     <button type="button" id="openScanModal" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center">
@@ -345,13 +335,9 @@
             const quantity = parseInt(this.value) || 0;
             const controlType = document.querySelector('input[name="control_type"]:checked').value;
             
-            if (quantity > 0) {
-                tiendaSelect.classList.remove('hidden');
-                if (controlType === 'codigo_unico') {
-                    scanButton.classList.remove('hidden');
-                }
+            if (quantity > 0 && controlType === 'codigo_unico') {
+                scanButton.classList.remove('hidden');
             } else {
-                tiendaSelect.classList.add('hidden');
                 scanButton.classList.add('hidden');
             }
         });
@@ -638,8 +624,7 @@
                         document.getElementById('radio_cantidad').checked = false;
                         updateSwitchAppearance();
                         
-                        // Hide selects
-                        tiendaSelect.classList.add('hidden');
+                        // Hide scan button
                         scanButton.classList.add('hidden');
                     }
                 })
