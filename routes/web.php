@@ -86,10 +86,16 @@ Route::group(
         Route::get('/stock-minimo/export', [App\Http\Controllers\StockMinController::class, 'exportExcel'])->name('stock-minimo.export');
 
         // devoluciones
-        Route::get('/devoluciones', [App\Http\Controllers\DevolucionesController::class, 'index'])->name('devoluciones.index');
-        Route::post('/devoluciones/filtro-por-fecha', [App\Http\Controllers\DevolucionesController::class, 'filtroPorfecha'])->name('devoluciones.filtroPorfecha');
-        Route::get('/devoluciones/sale/{id}', [App\Http\Controllers\DevolucionesController::class, 'getSaleDetails'])->name('devoluciones.getSaleDetails');
-        Route::post('/devoluciones', [App\Http\Controllers\DevolucionesController::class, 'store'])->name('devoluciones.store');
+        Route::middleware(['devoluciones'])->group(function () {
+            Route::get('/devoluciones', [App\Http\Controllers\DevolucionesController::class, 'index'])->name('devoluciones.index');
+            Route::post('/devoluciones/filtro-por-fecha', [App\Http\Controllers\DevolucionesController::class, 'filtroPorfecha'])->name('devoluciones.filtroPorfecha');
+            Route::post('/devoluciones/filtro-devoluciones', [App\Http\Controllers\DevolucionesController::class, 'filtroDevoluciones'])->name('devoluciones.filtroDevoluciones');
+            Route::get('/devoluciones/sale/{id}', [App\Http\Controllers\DevolucionesController::class, 'getSaleDetails'])->name('devoluciones.getSaleDetails');
+            Route::post('/devoluciones', [App\Http\Controllers\DevolucionesController::class, 'store'])->name('devoluciones.store');
+            Route::get('/devoluciones/{id}', [App\Http\Controllers\DevolucionesController::class, 'show'])->name('devoluciones.show');
+            Route::delete('/devoluciones/{id}', [App\Http\Controllers\DevolucionesController::class, 'destroy'])->name('devoluciones.destroy');
+            Route::post('/devoluciones/exportar', [App\Http\Controllers\DevolucionesController::class, 'export'])->name('devoluciones.export');
+        });
 
         //SERVICIOS
         Route::resource('services', App\Http\Controllers\ServiceController::class);
@@ -123,7 +129,7 @@ Route::group(
         Route::get('/quotation/detalles/{id}', [QuotationController::class, 'detallesQuotation'])->name('quotations.detallesQuotation');
         Route::get('/quotation/pdf/{id}', [QuotationController::class, 'generatePDF'])->name('quotations.pdf');
         Route::post('/quotation/cotizacion/vender/{id}', [QuotationController::class, 'vender'])->name('quotations.vender');
-        Route::get('mechanic/MecanicosDisponibles', [App\Http\Controllers\QuotationController::class, 'MecanicosDisponibles'])->name('mecanicosDisponibles');
+        Route::get('quotation/mecanicos-disponibles', [App\Http\Controllers\QuotationController::class, 'MecanicosDisponibles'])->name('mecanicosDisponibles');
         //MAYORISTA
         Route::resource('wholesalers', WholesaleController::class);
         Route::get('/wholesaler/listado', [WholesaleController::class, 'filtroPorfecha'])->name('wholesalers.filtroPorfecha');

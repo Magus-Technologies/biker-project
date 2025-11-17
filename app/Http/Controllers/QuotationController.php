@@ -21,6 +21,7 @@ use App\Models\SalesSunat;
 use App\Models\Service;
 use App\Models\ServiceSale;
 use App\Models\Stock;
+use App\Models\Tienda;
 use App\Models\User;
 // use App\Models\Warehouse; // Obsoleto
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -52,7 +53,8 @@ class QuotationController extends Controller
         $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
         $companies = Company::all();
         $regions = Region::all();
-        return view('quotation.create', compact('paymentsMethod', 'paymentsType', 'documentTypes', 'companies', 'regions'));
+        $tiendas = Tienda::where('status', 1)->get();
+        return view('quotation.create', compact('paymentsMethod', 'paymentsType', 'documentTypes', 'companies', 'regions', 'tiendas'));
     }
     public function MecanicosDisponibles()
     {
@@ -326,7 +328,8 @@ class QuotationController extends Controller
         $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
         $companies = Company::all();
         $regions = Region::all();
-        return view('quotation.edit', compact('quotation', 'paymentsType', 'documentTypes', 'companies', 'paymentsMethod', 'regions'));
+        $tiendas = Tienda::where('status', 1)->get();
+        return view('quotation.edit', compact('quotation', 'paymentsType', 'documentTypes', 'companies', 'paymentsMethod', 'regions', 'tiendas'));
     }
 
     /**

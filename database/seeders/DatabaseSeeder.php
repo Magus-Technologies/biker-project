@@ -27,7 +27,8 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             DocumentTypeSeeder::class,
             CompaniesSeeder::class,
-            PaymentSeeder::class
+            PaymentSeeder::class,
+            DevolucionesSeeder::class
         ]);
     }
 }
