@@ -281,6 +281,7 @@
     </div>
 </x-app-layout>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     let services = [];
     let orderCount = 0; // para numerar los ítems
@@ -637,10 +638,10 @@
                     <td class="px-2 py-1 border">${product.code_sku}</td>
                     <td class="px-2 py-1 border">${product.description}</td>
                     <td class="px-2 py-1 border">${product.location}</td>
-                    <td class="px-2 py-1 border">${product.stock.quantity}</td>
-                    <td class="px-2 py-1 border">${product.stock.minimum_stock}</td>
+                    <td class="px-2 py-1 border">${product.stock?.quantity ?? 'N/A'}</td>
+                    <td class="px-2 py-1 border">${product.stock?.minimum_stock ?? 'N/A'}</td>
                     <td class="px-2 py-1 border">
-                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id} value="1" min="1" max="${product.stock.quantity}" data-product-id="${product.id}">
+                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id}" value="1" min="1" max="${product.stock?.quantity ?? 1}" data-product-id="${product.id}">
                     </td>
                     <td class="px-2 py-1 border">
                         <select class="p-2 border rounded data-price-id-${product.id}" data-product-id="${product.id}">
@@ -776,7 +777,7 @@
                 unit_price: priceSelect.value,
                 prices: response.prices,
                 quantity: quantity,
-                maximum_stock: response.stock.quantity,
+                maximum_stock: response.stock?.quantity,
             }
             // const productCopy = {
             //     ...product
@@ -785,6 +786,13 @@
             quotationItems.push(product);
             addProductTo(product);
             updateInformationCalculos();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Producto agregado exitosamente',
+                showConfirmButton: false,
+                timer: 1500
+            })
 
         }
         products = products.filter(product => product.id != productId)

@@ -307,7 +307,7 @@
         });
 
         function fetchProvinces(regionId) {
-            fetch(`/biker-project/public/api/provinces/${regionId}`)
+            fetch(`/api/provinces/${regionId}`)
                 .then(response => response.json())
                 .then(data => {
                     const provinceSelect = document.getElementById('provinces_id');
@@ -319,7 +319,7 @@
         }
 
         function fetchDistricts(provinceId) {
-            fetch(`/biker-project/public/api/districts/${provinceId}`)
+            fetch(`/api/districts/${provinceId}`)
                 .then(response => response.json())
                 .then(data => {
                     const districtSelect = document.getElementById('districts_id');

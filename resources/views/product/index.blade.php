@@ -120,7 +120,7 @@
             
             <div class="overflow-x-auto">
                 <table id="productsTable" class="min-w-full">
-                    <thead class="bg-gradient-to-r from-gray-100 to-gray-50">
+                    <thead class= "bg-white ">
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
                                 <div class="flex items-center space-x-1">
@@ -324,6 +324,20 @@
         }
         
         /* Estilos para las filas de la tabla */
+        #productsTable {
+            table-layout: auto;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        #productsTable thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(to right, #f9fafb, #f3f4f6);
+            white-space: nowrap;
+        }
+        
         #productsTable tbody tr {
             @apply border-b border-gray-100 hover:bg-blue-50 transition-colors duration-200;
         }
@@ -338,6 +352,76 @@
         
         #productsTable tbody td {
             @apply px-6 py-4 text-sm;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+        
+        /* Asegurar que los encabezados y celdas tengan el mismo padding */
+        #productsTable th,
+        #productsTable td {
+            padding: 1rem 1.5rem !important;
+            box-sizing: border-box;
+        }
+        
+        /* Evitar filas en blanco */
+        #productsTable tbody tr:empty {
+            display: none;
+        }
+        
+        /* Eliminar filas que solo contengan espacios en blanco */
+        #productsTable tbody tr:not(:has(td:not(:empty))) {
+            display: none;
+        }
+        
+        /* Eliminar filas con solo guiones o caracteres especiales */
+        #productsTable tbody tr:has(td:only-child:contains('-')) {
+            display: none;
+        }
+        
+        /* Asegurar que las celdas tengan contenido mínimo */
+        #productsTable tbody td {
+            min-height: 60px;
+        }
+        
+        /* Eliminar espacios en blanco innecesarios */
+        #productsTable tbody tr td:empty::before {
+            content: '';
+            display: none;
+        }
+        
+        /* Ocultar filas que DataTables crea por defecto */
+        .dataTables_empty {
+            display: none !important;
+        }
+        
+        /* Eliminar espacios entre encabezados y datos */
+        #productsTable thead + tbody tr:first-child {
+            border-top: none;
+        }
+        
+        /* Asegurar que no haya filas vacías entre encabezados y datos */
+        #productsTable tbody tr:not(:has(td)) {
+            display: none !important;
+        }
+        
+        /* Eliminar cualquier espacio en blanco que DataTables pueda crear */
+        .dataTables_wrapper .dataTables_processing {
+            display: none !important;
+        }
+        
+        /* Mejorar la alineación de columnas */
+        .dataTables_wrapper .dataTables_scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        .dataTables_wrapper .dataTables_scrollHead {
+            overflow: visible;
+        }
+        
+        .dataTables_wrapper .dataTables_scrollBody {
+            overflow-x: auto;
+            overflow-y: auto;
         }
         
         /* Estilos para los badges de stock */
@@ -402,6 +486,17 @@
                 margin-bottom: 1rem;
             }
         }
+        
+        /* Asegurar que la tabla tenga scroll horizontal si es necesario */
+        .overflow-x-auto {
+            min-width: 1200px; /* Ancho mínimo para evitar que las columnas se compriman */
+        }
+        
+        /* Estilos para el contenedor de la tabla */
+        #vistaTabla {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
     </style>
 
     <script>
@@ -430,7 +525,7 @@
 
         function initializeDataTable() {
             dataTable = $('#productsTable').DataTable({
-                responsive: true,
+                responsive: false, // Desactivar responsive para mejor control
                 pageLength: 15,
                 lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
                 language: {
@@ -451,11 +546,37 @@
                 columnDefs: [
                     { targets: [3, 12], orderable: false }, // Imagen y Acciones no ordenables
                     { targets: [0, 3, 11, 12], className: 'text-center' }, // Centrar columnas específicas
+                    { targets: '_all', className: 'align-top' } // Alinear todas las columnas al tope
                 ],
                 order: [[1, 'asc']], // Ordenar por código por defecto
+                autoWidth: false, // Desactivar autoWidth para mejor control
+                scrollX: true, // Habilitar scroll horizontal si es necesario
+                scrollCollapse: true,
+                fixedHeader: true,
+                deferRender: true, // Evitar renderizado prematuro
                 drawCallback: function() {
+                    // Eliminar filas vacías que DataTables pueda crear
+                    $('#productsTable tbody tr').each(function() {
+                        const $row = $(this);
+                        const hasContent = $row.find('td').toArray().some(td => 
+                            $(td).text().trim() !== '' || $(td).find('*').length > 0
+                        );
+                        
+                        if (!hasContent) {
+                            $row.remove();
+                        }
+                    });
+                    
                     // Aplicar estilos después de cada redibujado
                     $('#productsTable tbody tr').addClass('hover:bg-blue-50 transition-colors duration-200');
+                    
+                    // Asegurar que las columnas mantengan su ancho
+                    $('#productsTable').css('table-layout', 'auto');
+                    
+                    // Ajustar columnas después de dibujar
+                    setTimeout(() => {
+                        dataTable.columns.adjust();
+                    }, 50);
                 }
             });
         }
@@ -545,6 +666,11 @@
             const buscarValue = document.getElementById('buscar').value;
             const tiendaId = document.getElementById('tienda_id').value;
             
+            // Limpiar la tabla antes de cargar nuevos datos
+            if (dataTable) {
+                dataTable.clear().draw();
+            }
+            
             fetch(`{{ route('products.search') }}?buscar=${encodeURIComponent(buscarValue)}&tienda_id=${encodeURIComponent(tiendaId)}`)
                 .then(response => response.json())
                 .then(products => {
@@ -568,14 +694,32 @@
         function renderTableView(products) {
             if (!dataTable) return;
             
-            dataTable.clear();
+            // Limpiar la tabla completamente y eliminar cualquier fila vacía
+            dataTable.clear().draw();
+            
+            // Limpiar manualmente el tbody para asegurar que no haya filas residuales
+            $('#productsTableBody').empty();
             
             // Actualizar contador
             document.getElementById('totalProducts').textContent = products.length;
             
-            products.forEach(product => {
-                const rowIndex = dataTable.rows().count() + 1;
-                
+            if (products.length === 0) {
+                // Mostrar mensaje cuando no hay productos (sin crear filas vacías)
+                $('#productsTableBody').html(`
+                    <tr>
+                        <td colspan="13" class="text-center py-8 text-gray-500">
+                            <i class="fas fa-box-open text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-lg">No hay productos disponibles</p>
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+            
+            // Crear array de filas para agregar todas de una vez
+            const rows = [];
+            
+            products.forEach((product, index) => {
                 const stock = product.stocks && product.stocks.length > 0 
                     ? product.stocks.reduce((total, s) => total + s.quantity, 0) 
                     : 0;
@@ -637,26 +781,44 @@
                     </div>
                 `;
 
-                dataTable.row.add([
-                    `<span class="text-gray-600 font-medium">${rowIndex}</span>`,
-                    product.code_sku || '-',
-                    product.code_bar || '-',
-                    `<div class="flex justify-center">${imageColumn}</div>`,
+                // Crear fila con exactamente 13 columnas para coincidir con los encabezados
+                rows.push([
+                    `<span class="text-gray-600 font-medium">${index + 1}</span>`,                    // 1. #
+                    product.code_sku || '-',                                                      // 2. Código
+                    product.code_bar || '-',                                                      // 3. Código Barras
+                    `<div class="flex justify-center">${imageColumn}</div>`,                      // 4. Imagen
                     `<div class="max-w-sm">
                        <p class="font-semibold text-gray-900 leading-tight" title="${product.description || ''}">${product.description || '-'}</p>
-                     </div>`,
-                    `<span class="text-gray-700 font-medium">${product.model || '-'}</span>`,
-                    `<span class="text-gray-600">${product.location || '-'}</span>`,
-                    `<span class="text-gray-700 font-medium">${product.tienda?.nombre || '-'}</span>`,
-                    `<span class="text-gray-700 font-medium">${product.brand?.name || '-'}</span>`,
-                    `<span class="text-gray-600">${product.unit?.name || '-'}</span>`,
-                    priceSelect,
-                    `<div class="flex justify-center">${stockBadge}</div>`,
-                    actions
+                     </div>`,                                                                     // 5. Descripción
+                    `<span class="text-gray-700 font-medium">${product.model || '-'}</span>`,      // 6. Modelo
+                    `<span class="text-gray-600">${product.location || '-'}</span>`,              // 7. Ubicación
+                    `<span class="text-gray-700 font-medium">${product.tienda?.nombre || '-'}</span>`, // 8. Tienda
+                    `<span class="text-gray-700 font-medium">${product.brand?.name || '-'}</span>`,   // 9. Marca
+                    `<span class="text-gray-600">${product.unit?.name || '-'}</span>`,             // 10. Unidad
+                    priceSelect,                                                                  // 11. Precio
+                    `<div class="flex justify-center">${stockBadge}</div>`,                       // 12. Stock
+                    actions                                                                       // 13. Acciones
                 ]);
             });
             
-            dataTable.draw();
+            // Agregar todas las filas de una vez para evitar filas vacías intermedias
+            if (rows.length > 0) {
+                dataTable.rows.add(rows).draw();
+            }
+            
+            // Verificar y eliminar cualquier fila vacía que pueda haber quedado
+            setTimeout(() => {
+                $('#productsTable tbody tr').each(function() {
+                    const $row = $(this);
+                    const hasContent = $row.find('td').toArray().some(td => 
+                        $(td).text().trim() !== '' || $(td).find('*').length > 0
+                    );
+                    
+                    if (!hasContent || $row.find('td').length === 0) {
+                        $row.remove();
+                    }
+                });
+            }, 100);
         }
 
         function renderGridView() {
@@ -943,6 +1105,15 @@
             
             if (e.target === imagesModal) {
                 closeModalImages();
+            }
+        });
+        
+        // Ajustar columnas cuando cambie el tamaño de la ventana
+        window.addEventListener('resize', function() {
+            if (dataTable && currentView === 'tabla') {
+                setTimeout(() => {
+                    dataTable.columns.adjust();
+                }, 100);
             }
         });
     </script>
