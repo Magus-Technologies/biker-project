@@ -1,105 +1,133 @@
+<!-- resources\views\service\index.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{-- Registro de Socios --}}
-        </h2>
-    </x-slot>
+    <x-breadcrumb title="Registro de Servicios" subtitle="servicios" />
 
-    <div class="max-w-7xl  mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">Registro de Servicios</h2>
-            <form class="flex items-center text-xs" id="formBuscarPorFecha">
-                <label for="">Desde: </label>
-                <input type="date" name="fecha_desde" id="fecha_desde"
-                    class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                <label for="">Hasta: </label>
-                <input type="date" name="fecha_hasta" id="fecha_hasta"
-                    class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                @can('filtrar-por-trabajador-servicios')
-                    <select name="mechanic" id="mechanic" class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                        <option value="todos">Todos</option>
-                        @foreach ($mechanics as $mechanic)
-                            <option value="{{ $mechanic->id }}">{{ $mechanic->name }} {{ $mechanic->apellidos }}</option>
-                        @endforeach
-                    </select>
-                @endcan
-                @can('filtrar-por-estado-servicios')
-                    <div>
-                        <label for="">Estado: </label>
-                        <select name="estado-filtro" id="estado-filtro" class="border border-gray-300 rounded-lg py-2 px-4">
-                            <option value="">Todos</option>
-                            <option value="0">Pendiente</option>
-                            <option value="1">Completo</option>
-                            <option value="2">En proceso</option>
-                        </select>
-                    </div>
-                @endcan
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
-                    Buscar
-                </button>
+    <!-- Bootstrap 5 para modales (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
-            </form>
-            @can('agregar-servicios')
-                <a href="{{ route('services.create') }}"
-                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300">
-                    Agregar
-                </a>
-            @endcan
-        </div>
-
+    <!-- Contenedor principal -->
+    <div class="px-3 py-4">
         <!-- Mensajes de éxito o error -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                {{ session('success') }}
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                {{ session('error') }}
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-exclamation-circle mr-1"></i>{{ session('error') }}
             </div>
         @endif
 
-        <!-- Tabla de registros -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-5">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº Codigo
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº Motor
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Placa
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Mecanico
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estado
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Descripcion
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Fecha
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acciones
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200" id="tbodyServices">
-                </tbody>
-            </table>
+        <!-- Tabla con filtros y botón agregar -->
+        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+            <!-- Encabezado con filtros y botón agregar -->
+            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                    <!-- Filtros -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center flex-1">
+                        <!-- Fechas -->
+                        <div class="flex items-center gap-2">
+                            <label for="fecha_desde" class="text-xs font-medium text-gray-600">Desde:</label>
+                            <input type="date" id="fecha_desde" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label for="fecha_hasta" class="text-xs font-medium text-gray-600">Hasta:</label>
+                            <input type="date" id="fecha_hasta" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                        </div>
+
+                        <!-- Mecánico (solo si tiene permiso) -->
+                        @can('filtrar-por-trabajador-servicios')
+                            <select id="mechanic" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                                <option value="">Todos los mecánicos</option>
+                                @foreach ($mechanics as $mechanic)
+                                    <option value="{{ $mechanic->id }}">{{ $mechanic->name }} {{ $mechanic->apellidos }}</option>
+                                @endforeach
+                            </select>
+                        @endcan
+
+                        <!-- Estado (solo si tiene permiso) -->
+                        @can('filtrar-por-estado-servicios')
+                            <select id="estado-filtro" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                                <option value="">Todos los estados</option>
+                                <option value="0">Pendiente</option>
+                                <option value="1">Completo</option>
+                                <option value="2">En proceso</option>
+                            </select>
+                        @endcan
+
+                        <button type="button" onclick="aplicarFiltros()"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
+                            <i class="bi bi-funnel mr-1"></i>Filtrar
+                        </button>
+                    </div>
+
+                    <!-- Botón Agregar -->
+                    @can('agregar-servicios')
+                        <a href="{{ route('services.create') }}"
+                            class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center transition-colors text-sm">
+                            <i class="bi bi-plus-lg mr-1"></i>Agregar
+                        </a>
+                    @endcan
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="overflow-x-auto">
+                <table id="servicesTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Código</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Motor</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Placa</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Mecánico</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Estado</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Descripción</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Fecha</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach($servicios as $servicio)
+                            <tr class="hover:bg-blue-50 transition-colors"
+                                data-mechanic="{{ $servicio->users_id }}"
+                                data-estado="{{ $servicio->status_service }}"
+                                data-fecha="{{ \Carbon\Carbon::parse($servicio->fecha_registro)->format('Y-m-d') }}">
+
+                                <td class="px-3 py-2 text-sm text-gray-700">{{ $servicio->codigo }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $servicio->drive->nro_motor ?? 'N/A' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $servicio->car->placa ?? 'Sin placa' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">
+                                    {{ $servicio->user->name ?? '' }} {{ $servicio->user->apellidos ?? '' }}
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full
+                                        {{ $servicio->status_service == 1 ? 'bg-green-100 text-green-700' :
+                                           ($servicio->status_service == 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
+                                        {{ $servicio->status_service == 1 ? 'Completo' :
+                                           ($servicio->status_service == 2 ? 'En proceso' : 'Pendiente') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $servicio->descripcion }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">
+                                    {{ \Carbon\Carbon::parse($servicio->fecha_registro)->format('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <button onclick="openModal({{ $servicio->id }})"
+                                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                                            title="Ver/Agregar detalles">
+                                        <i class="bi bi-eye text-base"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <!-- Mostrar los enlaces de paginación -->
-        @if ($servicios instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
-            {{ $servicios->links() }}
-        @endif
     </div>
 
     <!-- MODAL AGREGAR DETALLES -->
@@ -141,7 +169,6 @@
         </div>
     </div>
 
-
     <!-- MODAL VER DETALLES -->
     <div id="modalVerDetalles" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="bg-white rounded-lg shadow-lg w-96">
@@ -157,7 +184,7 @@
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
         window.authUser = @json(auth()->user()->load('roles'));
 
@@ -167,16 +194,16 @@
                 modal.classList.toggle('hidden', !show);
             }
         }
+
         document.getElementById("formAgregarDetalles").addEventListener("submit", function(event) {
             event.preventDefault();
             enviarDetalles();
         });
+
         async function enviarDetalles() {
             const serviceId = document.getElementById("serviceIdAgregar").value;
             const estado = document.getElementById("estado").value || null;
             const descripcion = document.getElementById("descripcionAgregar").value;
-
-            console.log('serviceId' + serviceId, 'estado:' + estado, 'descripcion:' + descripcion);
 
             const formData = {
                 serviceId,
@@ -203,9 +230,10 @@
                         text: data.message,
                         showConfirmButton: false,
                         timer: 2000
-                    })
+                    });
                     toggleModal("modalAgregarDetalles", false);
-                    finAllServices();
+                    // Recargar la página para actualizar la tabla
+                    setTimeout(() => window.location.reload(), 2000);
                 } else {
                     alert("Error al guardar: " + data.message);
                 }
@@ -217,20 +245,14 @@
                     text: error,
                     showConfirmButton: false,
                     timer: 2000
-                })
+                });
             }
         }
 
         async function openModal(serviceId) {
-            console.log('entro');
-
-            //const serviceId = button.getAttribute('data-service-id');
-            const description = 'desc';
-
             if (window.authUser?.roles?.some(role => role.name === 'mecanico')) {
                 document.getElementById('serviceIdAgregar').value = serviceId;
-                document.getElementById('modalAgregarDetalles').classList.remove(
-                    'hidden');
+                document.getElementById('modalAgregarDetalles').classList.remove('hidden');
             } else {
                 try {
                     const response = await fetch(
@@ -260,97 +282,86 @@
             }
         }
 
-
-        function finAllServices() {
-            let desde = document.getElementById('fecha_desde').value;
-            let hasta = document.getElementById('fecha_hasta').value;
-            let mechanicElement = document.getElementById('mechanic');
-            let mechanic = mechanicElement ? mechanicElement.value : '';
-            let estadoElement = document.getElementById('estado-filtro');
-            let estado = estadoElement ? estadoElement.value : '';
-            fetch(
-                    `{{ route('service.filtroPorfecha') }}?fecha_desde=${encodeURIComponent(desde)}&fecha_hasta=${encodeURIComponent(hasta)}&mechanic=${encodeURIComponent(mechanic)}&estado=${encodeURIComponent(estado)}`
-                )
-                .then(response => response.json())
-                .then(data => {
-                    let tbody = document.getElementById('tbodyServices');
-                    tbody.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(servicio => {
-                            let row = document.createElement('tr');
-                            row.innerHTML = `
-                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">${servicio.codigo}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">
-                            ${servicio.drive.nro_motor}
-                        </td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">${(servicio.car.placa)?servicio.car.placa:'Sin placa'}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">
-                            ${servicio.user.name} ${servicio.user.apellidos}
-                        </td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm">
-                            <button type="button" id="btn-${servicio.id}"
-                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow-md 
-                                    ${servicio.status_service == 1 
-                                        ? 'bg-green-200 text-green-700' 
-                                        : (servicio.status_service == 2 
-                                            ? 'bg-yellow-200 text-yellow-700' 
-                                            : 'bg-red-200 text-red-700')}">
-                                ${servicio.status_service == 1 ? 'Completo' : servicio.status_service == 2 ? 'En proceso' : 'Pendiente'}
-                            </button>
-                        </td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">${servicio.descripcion}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">${servicio.fecha_registro}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-sm">
-                            <button type="button" onclick="openModal(${servicio.id})"
-                                class="px-3 py-1 text-white font-semibold rounded open-modal
-                                ${window.authUser?.roles?.some(role => role.name === 'mecanico') 
-                                    ? 'bg-green-600 hover:bg-green-700' 
-                                    : 'bg-blue-600 hover:bg-blue-700'}"
-                                data-service-id="${servicio.id}"
-                                data-description="${servicio.descripcion}">
-                                ${window.authUser?.roles?.some(role => role.name === 'mecanico') 
-                                    ? 'Agregar Detalles' 
-                                    : 'Ver detalles'}
-                            </button>
-                        </td>
-                    `;
-                            tbody.appendChild(row);
-                        });
-                    } else {
-                        tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-3 py-1 text-center text-gray-500">No hay registros disponibles</td>
-                    </tr>
-                `;
+        // Inicializar DataTables
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filtro personalizado de DataTables
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    if (settings.nTable.id !== 'servicesTable') {
+                        return true;
                     }
-                })
-        }
-        document.getElementById('formBuscarPorFecha').addEventListener('submit', function(event) {
-            event.preventDefault();
-            finAllServices();
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-            window.authUserId = @json(auth()->user()->id);
 
-            // calculamos la fecha actual
-            let fecha_desde = document.getElementById('fecha_desde');
-            let fecha_hasta = document.getElementById('fecha_hasta');
+                    let mechanicFilter = document.getElementById('mechanic')?.value;
+                    let estadoFilter = document.getElementById('estado-filtro')?.value;
+                    let fechaDesde = document.getElementById('fecha_desde').value;
+                    let fechaHasta = document.getElementById('fecha_hasta').value;
 
-            let today = new Date();
-            let year = today.getFullYear();
-            let month = String(today.getMonth() + 1).padStart(2, '0'); // Meses van de 0 a 11, por eso se suma 1
-            let day = String(today.getDate()).padStart(2, '0');
+                    let row = window.servicesTable.row(dataIndex).node();
+                    if (!row) return true;
 
-            let formattedDate = `${year}-${month}-${day}`;
+                    // Filtrar por mecánico
+                    if (mechanicFilter && row.dataset.mechanic != mechanicFilter) {
+                        return false;
+                    }
 
-            fecha_desde.value = formattedDate;
-            fecha_hasta.value = formattedDate;
+                    // Filtrar por estado
+                    if (estadoFilter && row.dataset.estado != estadoFilter) {
+                        return false;
+                    }
 
-            if (fecha_desde && fecha_hasta) {
-                finAllServices();
+                    // Filtrar por rango de fechas
+                    if (fechaDesde || fechaHasta) {
+                        let rowFecha = row.dataset.fecha;
+                        if (fechaDesde && rowFecha < fechaDesde) return false;
+                        if (fechaHasta && rowFecha > fechaHasta) return false;
+                    }
+
+                    return true;
+                }
+            );
+
+            // Inicializar DataTable
+            if ($.fn.DataTable) {
+                window.servicesTable = $('#servicesTable').DataTable({
+                    deferRender: true,
+                    processing: false,
+                    stateSave: false,
+                    responsive: true,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                    language: {
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ servicios",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ servicios",
+                        infoEmpty: "0 servicios",
+                        infoFiltered: "(filtrado de _MAX_ totales)",
+                        zeroRecords: "No se encontraron servicios",
+                        emptyTable: "No hay servicios registrados",
+                        paginate: {
+                            first: "Primero",
+                            last: "Último",
+                            next: "Siguiente",
+                            previous: "Anterior"
+                        }
+                    },
+                    dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                    columnDefs: [
+                        { targets: [7], orderable: false }, // Acciones no ordenables
+                        { targets: [4, 7], className: 'text-center' }
+                    ],
+                    order: [[6, 'desc']], // Ordenar por fecha descendente
+                    autoWidth: false,
+                    scrollX: false
+                });
             }
-            //fin calculo
         });
+
+        // Función para aplicar filtros
+        function aplicarFiltros() {
+            if (window.servicesTable) {
+                window.servicesTable.draw();
+            }
+        }
     </script>
 
 </x-app-layout>

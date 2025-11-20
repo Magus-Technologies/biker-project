@@ -1,6 +1,6 @@
 <!-- resources\views\components\sidebar.blade.php -->
 <!-- Desktop Sidebar -->
-<aside class="desktop-sidebar" :style="'width: ' + (sidebarOpen ? '280px' : '60px')">
+<aside class="desktop-sidebar" :class="{'sidebar-expanded': sidebarOpen, 'sidebar-collapsed': !sidebarOpen}">
     <div class="sidebar-content">
         <nav class="nav flex-column">
             <!-- MENÚ PRINCIPAL -->
@@ -39,6 +39,7 @@
             <x-sidebar.menu-item route="buys.index" icon="bi-bag" title="Compras" />
             <x-sidebar.menu-section key="ventas" icon="bi-cart" title="Ventas" :routes="[
                 ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart-check', 'title' => 'Ventas'],
+                ['route' => 'sales.bulk-create', 'permission' => null, 'icon' => 'bi-cart-plus', 'title' => 'Ventas Mayoristas'],
                 ['route' => 'devoluciones.index', 'permission' => null, 'icon' => 'bi-arrow-return-left', 'title' => 'Devoluciones']
             ]" />
             <x-sidebar.menu-item route="quotations.index" icon="bi-file-earmark-text" title="Cotizaciones" />

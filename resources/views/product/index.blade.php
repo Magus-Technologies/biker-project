@@ -1,204 +1,185 @@
 <!-- resources\views\product\index.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Lista de Productos</h2>
-    </x-slot>
+    <x-breadcrumb title="Lista de Productos" subtitle="productos" />
 
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.tailwindcss.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 5 para modales -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="px-3 py-4">
         <!-- Header con controles -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <!-- Botones de vista -->
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <div class="flex items-center space-x-2">
-                    <button id="btnVistaTabla" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        <i class="fas fa-table mr-2"></i>
-                        Vista Tabla
-                    </button>
-                    <button id="btnVistaGrid" class="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                        <i class="fas fa-th-large mr-2"></i>
-                        Vista Grid
-                    </button>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+            <!-- Fila única con todos los controles -->
+            <div class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
+                <!-- Grupo izquierdo: Vista + Filtros -->
+                <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 min-w-0 flex-1">
+                    <!-- Botones de vista -->
+                    <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg shrink-0">
+                        <button id="btnVistaTabla" class="flex items-center px-3 py-2 bg-white text-gray-700 rounded-md shadow-sm hover:bg-gray-50 transition-all text-sm font-medium whitespace-nowrap">
+                            <i class="bi bi-list-ul mr-2"></i>
+                            Tabla
+                        </button>
+                        <button id="btnVistaGrid" class="flex items-center px-3 py-2 text-gray-600 rounded-md hover:bg-white hover:shadow-sm transition-all text-sm font-medium whitespace-nowrap">
+                            <i class="bi bi-grid-3x3-gap mr-2"></i>
+                            Grid
+                        </button>
+                    </div>
+
+                    <!-- Select de tienda -->
+                    <div class="relative w-full sm:w-auto sm:min-w-[180px] sm:max-w-[200px] shrink">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="bi bi-shop text-gray-400 text-sm"></i>
+                        </div>
+                        <select name="tienda_id" id="tienda_id" class="w-full h-[38px] border border-gray-300 rounded-lg py-2 pl-10 pr-9 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white">
+                            <option value="todos">Todas las tiendas</option>
+                            @foreach ($tiendas as $tienda)
+                                <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="bi bi-chevron-down text-gray-400 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <!-- Exportar -->
+                    <div class="flex shrink-0">
+                        <select id="exportFilter" class="w-36 h-[38px] border border-gray-300 rounded-l-lg py-2 px-2 text-sm focus:ring-2 focus:ring-purple-500 bg-white">
+                            <option value="productos">Productos</option>
+                            <option value="stock_minimo">Stock Mín.</option>
+                            <option value="precio">Precio</option>
+                        </select>
+                        <button id="btnExport" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-r-lg transition-colors h-[38px] flex items-center justify-center" title="Exportar">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-2">
+                <!-- Grupo derecho: Botones de acción -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <button id="btnOpenImportModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors shadow-sm text-sm whitespace-nowrap">
+                        <i class="bi bi-upload mr-2"></i>
+                        Importar
+                    </button>
+                    
                     @can('agregar-productos')
-                        <a href="{{ route('products.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors">
-                            <i class="fas fa-plus mr-2"></i>
-                            Agregar Producto
+                        <a href="{{ route('products.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors shadow-sm text-sm whitespace-nowrap">
+                            <i class="bi bi-plus-lg mr-2"></i>
+                            Agregar
                         </a>
                     @endcan
                 </div>
-            </div>
-
-            <!-- Filtros y controles -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
-                <!-- Selector de tienda -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tienda</label>
-                    <select name="tienda_id" id="tienda_id" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="todos">Todas las tiendas</option>
-                        @foreach ($tiendas as $tienda)
-                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Campo de búsqueda -->
-                <div class="lg:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar productos</label>
-                    <div class="flex">
-                        <input type="text" id="buscar" name="buscar" placeholder="Código, descripción, modelo..." 
-                               class="flex-1 border border-gray-300 rounded-l-lg py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <button id="btnBuscar" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg transition-colors">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Controles de exportación -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Exportar</label>
-                    <div class="flex">
-                        <select id="exportFilter" class="flex-1 border border-gray-300 rounded-l-lg py-2 px-3 text-sm">
-                            <option value="productos">Por Productos</option>
-                            <option value="stock_minimo">Por Stock Mínimo</option>
-                            <option value="precio">Por Precio</option>
-                        </select>
-                        <button id="btnExport" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-r-lg transition-colors">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botón de importar -->
-            <div class="flex justify-end">
-                <button id="btnOpenImportModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors">
-                    <i class="fas fa-upload mr-2"></i>
-                    Importar Productos
-                </button>
             </div>
         </div>
 
         <!-- Mensajes de éxito o error -->
         @if (session('success'))
-            <div class="bg-green-50 border-l-4 border-green-400 text-green-800 px-4 py-3 rounded-lg mb-4 flex items-center shadow-sm">
-                <i class="fas fa-check-circle mr-2"></i>
-                {{ session('success') }}
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="bg-red-50 border-l-4 border-red-400 text-red-800 px-4 py-3 rounded-lg mb-4 flex items-center shadow-sm">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                {{ session('error') }}
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-exclamation-circle mr-1"></i>{{ session('error') }}
             </div>
         @endif
 
         <!-- Vista de Tabla -->
-        <div id="vistaTabla" class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-            <!-- Header de la tabla -->
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                        <i class="fas fa-table mr-2 text-blue-600"></i>
-                        Lista de Productos
-                    </h3>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">Total: <span class="font-semibold" id="totalProducts">0</span> productos</span>
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i>
-                            Actualizar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
+        <div id="vistaTabla" class="bg-white rounded-lg border border-gray-200 overflow-hidden">            
             <div class="overflow-x-auto">
-                <table id="productsTable" class="min-w-full">
-                    <thead class= "bg-white ">
+                <table id="productsTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-hashtag text-gray-500"></i>
-                                    <span>#</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-code text-gray-500"></i>
-                                    <span>Código</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-barcode text-gray-500"></i>
-                                    <span>Código Barras</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center justify-center space-x-1">
-                                    <i class="fas fa-image text-gray-500"></i>
-                                    <span>Imagen</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-info-circle text-gray-500"></i>
-                                    <span>Descripción</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-cube text-gray-500"></i>
-                                    <span>Modelo</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-map-marker-alt text-gray-500"></i>
-                                    <span>Ubicación</span>
-                                </div>
-                            </th>
-                            
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-tag text-gray-500"></i>
-                                    <span>Marca</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-ruler text-gray-500"></i>
-                                    <span>Unidad</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center space-x-1">
-                                    <i class="fas fa-dollar-sign text-gray-500"></i>
-                                    <span>Precio</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center justify-center space-x-1">
-                                    <i class="fas fa-boxes text-gray-500"></i>
-                                    <span>Stock</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
-                                <div class="flex items-center justify-center space-x-1">
-                                    <i class="fas fa-cogs text-gray-500"></i>
-                                    <span>Acciones</span>
-                                </div>
-                            </th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">#</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">CÓDIGO</th>
+                            {{-- <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">CÓDIGO BARRAS</th> --}}
+                            {{-- <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">IMAGEN</th> --}}
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">DESCRIPCIÓN</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">MODELO</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">UBICACIÓN</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">TIENDA</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">MARCA</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">UNIDAD</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">PRECIO</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">STOCK</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">ACCIONES</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white" id="productsTableBody">
-                        <!-- Los datos se cargarán aquí dinámicamente -->
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach($products as $product)
+                            @php
+                                $stock = $product->stocks && $product->stocks->count() > 0 
+                                    ? $product->stocks->sum('quantity') 
+                                    : 0;
+                            @endphp
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $loop->iteration }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $product->code_sku ?? '-' }}</td>
+                                {{-- <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $product->code_bar ?? '-' }}</td> --}}
+                                {{-- <td class="px-3 py-2 text-center">
+                                    @if($product->images && $product->images->count() > 0)
+                                        <button onclick="openModal({{ $product->id }})" class="w-10 h-10 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg flex items-center justify-center transition-colors mx-auto">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    @else
+                                        <div class="w-10 h-10 bg-gray-100 text-gray-400 rounded-lg flex items-center justify-center mx-auto">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    @endif
+                                </td> --}}
+                                <td class="px-3 py-2 text-sm text-gray-90 text-center0">
+                                    <span class="font-medium" title="{{ $product->description }}">{{ Str::limit($product->description, 50) ?? '-' }}</span>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $product->model ?? '-' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $product->location ?? '-' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $product->tienda->nombre ?? '-' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $product->brand->name ?? '-' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $product->unit->name ?? '-' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-900 text-center">
+                                    @if($product->prices && $product->prices->count() > 0)
+                                        <select class="border border-gray-300 rounded px-2 py-1 text-xs">
+                                            @foreach($product->prices as $price)
+                                                <option>{{ $price->type }} - S/ {{ number_format($price->price, 2) }}</option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        <span class="text-gray-400 text-xs italic">Sin precios</span>
+                                    @endif
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    @if($stock > 10)
+                                        <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full bg-green-100 text-green-700">
+                                            <i class="fas fa-check-circle mr-1"></i>{{ $stock }}
+                                        </span>
+                                    @elseif($stock > 0)
+                                        <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full bg-yellow-100 text-yellow-700">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>{{ $stock }}
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full bg-red-100 text-red-700">
+                                            <i class="fas fa-times-circle mr-1"></i>Sin stock
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <a href="{{ route('products.show', $product->id) }}" class="text-blue-600 hover:text-blue-800 transition-colors" title="Ver">
+                                            <i class="fas fa-eye text-base"></i>
+                                        </a>
+                                        <a href="{{ route('products.edit', $product->id) }}" class="text-purple-600 hover:text-purple-800 transition-colors" title="Editar">
+                                            <i class="fas fa-edit text-base"></i>
+                                        </a>
+                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" title="Eliminar">
+                                                <i class="fas fa-trash text-base"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -278,219 +259,34 @@
 
     <!-- Scripts necesarios -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.tailwindcss.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* Estilos personalizados para DataTables */
-        .dataTables_wrapper {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        /* Ocultar flecha nativa del select en todos los navegadores */
+        #tienda_id {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none;
         }
         
-        .dataTables_wrapper .dataTables_length select {
-            @apply border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+        #tienda_id::-ms-expand {
+            display: none;
         }
         
-        .dataTables_wrapper .dataTables_filter input {
-            @apply border border-gray-300 rounded-lg px-4 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400;
-        }
-        
-        .dataTables_wrapper .dataTables_length label,
-        .dataTables_wrapper .dataTables_filter label {
-            @apply text-sm font-medium text-gray-700;
-        }
-        
-        .dataTables_wrapper .dataTables_info {
-            @apply text-sm text-gray-600 font-medium;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            @apply px-4 py-2 mx-1 rounded-lg border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all duration-200 font-medium;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            @apply bg-blue-600 text-white border-blue-600 shadow-md;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-            @apply opacity-50 cursor-not-allowed;
-        }
-        
-        /* Estilos para las filas de la tabla */
-        #productsTable {
-            table-layout: auto;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
+        /* Centrar headers y datos */
         #productsTable thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: linear-gradient(to right, #f9fafb, #f3f4f6);
-            white-space: nowrap;
-        }
-        
-        #productsTable tbody tr {
-            @apply border-b border-gray-100 hover:bg-blue-50 transition-colors duration-200;
-        }
-        
-        #productsTable tbody tr:nth-child(even) {
-            @apply bg-gray-50;
-        }
-        
-        #productsTable tbody tr:hover {
-            @apply bg-blue-50 shadow-sm;
+            text-align: center !important;
         }
         
         #productsTable tbody td {
-            @apply px-6 py-4 text-sm;
-            vertical-align: top;
-            word-wrap: break-word;
+            text-align: center !important;
         }
         
-        /* Asegurar que los encabezados y celdas tengan el mismo padding */
-        #productsTable th,
-        #productsTable td {
-            padding: 1rem 1.5rem !important;
-            box-sizing: border-box;
-        }
-        
-        /* Evitar filas en blanco */
-        #productsTable tbody tr:empty {
-            display: none;
-        }
-        
-        /* Eliminar filas que solo contengan espacios en blanco */
-        #productsTable tbody tr:not(:has(td:not(:empty))) {
-            display: none;
-        }
-        
-        /* Eliminar filas con solo guiones o caracteres especiales */
-        #productsTable tbody tr:has(td:only-child:contains('-')) {
-            display: none;
-        }
-        
-        /* Asegurar que las celdas tengan contenido mínimo */
-        #productsTable tbody td {
-            min-height: 60px;
-        }
-        
-        /* Eliminar espacios en blanco innecesarios */
-        #productsTable tbody tr td:empty::before {
-            content: '';
-            display: none;
-        }
-        
-        /* Ocultar filas que DataTables crea por defecto */
-        .dataTables_empty {
-            display: none !important;
-        }
-        
-        /* Eliminar espacios entre encabezados y datos */
-        #productsTable thead + tbody tr:first-child {
-            border-top: none;
-        }
-        
-        /* Asegurar que no haya filas vacías entre encabezados y datos */
-        #productsTable tbody tr:not(:has(td)) {
-            display: none !important;
-        }
-        
-        /* Eliminar cualquier espacio en blanco que DataTables pueda crear */
-        .dataTables_wrapper .dataTables_processing {
-            display: none !important;
-        }
-        
-        /* Mejorar la alineación de columnas */
-        .dataTables_wrapper .dataTables_scroll {
-            overflow-x: auto;
-            overflow-y: hidden;
-        }
-        
-        .dataTables_wrapper .dataTables_scrollHead {
-            overflow: visible;
-        }
-        
-        .dataTables_wrapper .dataTables_scrollBody {
-            overflow-x: auto;
-            overflow-y: auto;
-        }
-        
-        /* Estilos para los badges de stock */
-        .stock-badge {
-            @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
-        }
-        
-        .stock-badge.in-stock {
-            @apply bg-green-100 text-green-800 border border-green-200;
-        }
-        
-        .stock-badge.out-of-stock {
-            @apply bg-red-100 text-red-800 border border-red-200;
-        }
-        
-        .stock-badge.low-stock {
-            @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
-        }
-        
-        /* Botón de imagen */
-        .image-button {
-            @apply w-10 h-10 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer;
-        }
-        
-        .image-button:hover {
-            @apply shadow-md;
-        }
-        
-        /* Botones de acción */
-        .action-button {
-            @apply w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer;
-        }
-        
-        .action-button.edit {
-            @apply bg-indigo-100 hover:bg-indigo-200 text-indigo-600 hover:shadow-md;
-        }
-        
-        .action-button.delete {
-            @apply bg-red-100 hover:bg-red-200 text-red-600 hover:shadow-md;
-        }
-        
-        .action-button.view {
-            @apply bg-green-100 hover:bg-green-200 text-green-600 hover:shadow-md;
-        }
-
-        /* Estilos para las cards */
-        .product-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Responsive para la tabla */
-        @media (max-width: 768px) {
-            .dataTables_wrapper .dataTables_length,
-            .dataTables_wrapper .dataTables_filter {
-                float: none;
-                text-align: center;
-                margin-bottom: 1rem;
-            }
-        }
-        
-        /* Asegurar que la tabla tenga scroll horizontal si es necesario */
-        .overflow-x-auto {
-            min-width: 1200px; /* Ancho mínimo para evitar que las columnas se compriman */
-        }
-        
-        /* Estilos para el contenedor de la tabla */
-        #vistaTabla {
-            overflow-x: auto;
-            overflow-y: hidden;
+        /* Línea del encabezado más visible */
+        #productsTable thead th {
+            border-bottom: 2px solid #6b7280 !important;
         }
     </style>
 
@@ -507,97 +303,53 @@
         };
 
         let currentView = 'tabla';
-        let allProducts = [];
+        let allProducts = @json($products);
         let currentPage = 1;
         const itemsPerPage = 12;
-        let dataTable;
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeDataTable();
-            loadAllProducts();
             initializeEventListeners();
         });
 
         function initializeDataTable() {
-            dataTable = $('#productsTable').DataTable({
-                responsive: false, // Desactivar responsive para mejor control
-                pageLength: 15,
-                lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
-                    search: "Buscar en tabla:",
-                    lengthMenu: "Mostrar _MENU_ productos por página",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ productos",
-                    infoEmpty: "Mostrando 0 a 0 de 0 productos",
-                    infoFiltered: "(filtrado de _MAX_ productos totales)",
-                    paginate: {
-                        first: "Primero",
-                        last: "Último",
-                        next: "Siguiente",
-                        previous: "Anterior"
-                    }
-                },
-                dom: '<"flex flex-col lg:flex-row justify-between items-center mb-6 space-y-4 lg:space-y-0"<"flex items-center"l><"flex items-center"f>>rt<"flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-gray-200"<"text-sm text-gray-600"i><"flex items-center space-x-2"p>>',
-                columnDefs: [
-                    { targets: [3, 11], orderable: false }, // Imagen y Acciones no ordenables
-                    { targets: [0, 3, 10, 11], className: 'text-center' }, // Centrar columnas específicas
-                ],
-                order: [[1, 'asc']], // Ordenar por código por defecto
-                autoWidth: false, // Desactivar autoWidth para mejor control
-                scrollX: true, // Habilitar scroll horizontal si es necesario
-                scrollCollapse: true,
-                fixedHeader: true,
-                deferRender: true, // Evitar renderizado prematuro
-                drawCallback: function() {
-                    // Eliminar filas vacías que DataTables pueda crear
-                    $('#productsTable tbody tr').each(function() {
-                        const $row = $(this);
-                        const hasContent = $row.find('td').toArray().some(td => 
-                            $(td).text().trim() !== '' || $(td).find('*').length > 0
-                        );
-                        
-                        if (!hasContent) {
-                            $row.remove();
+            if ($.fn.DataTable) {
+                $('#productsTable').DataTable({
+                    deferRender: true,
+                    processing: false,
+                    stateSave: false,
+                    responsive: true,
+                    pageLength: 15,
+                    lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
+                    language: {
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ productos",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ productos",
+                        infoEmpty: "0 productos",
+                        infoFiltered: "(filtrado de _MAX_ totales)",
+                        zeroRecords: "No se encontraron productos",
+                        emptyTable: "No hay productos registrados",
+                        paginate: {
+                            first: "Primero",
+                            last: "Último",
+                            next: "Siguiente",
+                            previous: "Anterior"
                         }
-                    });
-                    
-                    // Aplicar estilos después de cada redibujado
-                    $('#productsTable tbody tr').addClass('hover:bg-blue-50 transition-colors duration-200');
-                    
-                    // Asegurar que las columnas mantengan su ancho
-                    $('#productsTable').css('table-layout', 'auto');
-                    
-                    // Ajustar columnas después de dibujar
-                    setTimeout(() => {
-                        dataTable.columns.adjust();
-                    }, 50);
-                }
-            });
+                    },
+                    dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                    columnDefs: [
+                        { targets: [9], orderable: false }, // Acciones no ordenables
+                        { targets: '_all', className: 'text-center' }
+                    ],
+                    order: [[1, 'asc']] // Ordenar por código
+                });
+            }
         }
 
         function initializeEventListeners() {
             // Toggle entre vistas
             document.getElementById('btnVistaTabla').addEventListener('click', () => switchView('tabla'));
             document.getElementById('btnVistaGrid').addEventListener('click', () => switchView('grid'));
-
-            // Búsqueda
-            document.getElementById('btnBuscar').addEventListener('click', (e) => {
-                e.preventDefault();
-                loadAllProducts();
-            });
-
-            // Enter en el campo de búsqueda
-            document.getElementById('buscar').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    loadAllProducts();
-                }
-            });
-
-            // Cambio de tienda
-            document.getElementById('tienda_id').addEventListener('change', () => {
-                loadAllProducts();
-            });
 
             // Modales
             document.getElementById('btnOpenImportModal').addEventListener('click', () => {
@@ -632,187 +384,30 @@
             currentView = view;
 
             if (view === 'tabla') {
-                btnTabla.classList.remove('bg-gray-200', 'text-gray-700');
-                btnTabla.classList.add('bg-red-600', 'text-white');
-                btnGrid.classList.remove('bg-red-600', 'text-white');
-                btnGrid.classList.add('bg-gray-200', 'text-gray-700');
+                // Activar botón tabla
+                btnTabla.classList.remove('text-gray-600');
+                btnTabla.classList.add('bg-white', 'text-gray-700', 'shadow-sm');
+                
+                // Desactivar botón grid
+                btnGrid.classList.remove('bg-white', 'text-gray-700', 'shadow-sm');
+                btnGrid.classList.add('text-gray-600');
                 
                 vistaTabla.classList.remove('hidden');
                 vistaGrid.classList.add('hidden');
-                
-                if (dataTable) {
-                    dataTable.columns.adjust().draw();
-                }
             } else {
-                btnGrid.classList.remove('bg-gray-200', 'text-gray-700');
-                btnGrid.classList.add('bg-red-600', 'text-white');
-                btnTabla.classList.remove('bg-red-600', 'text-white');
-                btnTabla.classList.add('bg-gray-200', 'text-gray-700');
+                // Activar botón grid
+                btnGrid.classList.remove('text-gray-600');
+                btnGrid.classList.add('bg-white', 'text-gray-700', 'shadow-sm');
+                
+                // Desactivar botón tabla
+                btnTabla.classList.remove('bg-white', 'text-gray-700', 'shadow-sm');
+                btnTabla.classList.add('text-gray-600');
                 
                 vistaTabla.classList.add('hidden');
                 vistaGrid.classList.remove('hidden');
                 
                 renderGridView();
             }
-        }
-
-        function loadAllProducts() {
-            const buscarValue = document.getElementById('buscar').value;
-            const tiendaId = document.getElementById('tienda_id').value;
-            
-            // Limpiar la tabla antes de cargar nuevos datos
-            if (dataTable) {
-                dataTable.clear().draw();
-            }
-            
-            fetch(`{{ route('products.search') }}?buscar=${encodeURIComponent(buscarValue)}&tienda_id=${encodeURIComponent(tiendaId)}`)
-                .then(response => response.json())
-                .then(products => {
-                    allProducts = products;
-                    if (currentView === 'tabla') {
-                        renderTableView(products);
-                    } else {
-                        renderGridView();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la búsqueda:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al cargar los productos'
-                    });
-                });
-        }
-
-        function renderTableView(products) {
-            if (!dataTable) return;
-            
-            // Limpiar la tabla completamente y eliminar cualquier fila vacía
-            dataTable.clear().draw();
-            
-            // Limpiar manualmente el tbody para asegurar que no haya filas residuales
-            $('#productsTableBody').empty();
-            
-            // Actualizar contador
-            document.getElementById('totalProducts').textContent = products.length;
-            
-            if (products.length === 0) {
-                // Mostrar mensaje cuando no hay productos (sin crear filas vacías)
-                $('#productsTableBody').html(`
-                    <tr>
-                        <td colspan="13" class="text-center py-8 text-gray-500">
-                            <i class="fas fa-box-open text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-lg">No hay productos disponibles</p>
-                        </td>
-                    </tr>
-                `);
-                return;
-            }
-            
-            // Crear array de filas para agregar todas de una vez
-            const rows = [];
-            
-            products.forEach((product, index) => {
-                const stock = product.stocks && product.stocks.length > 0 
-                    ? product.stocks.reduce((total, s) => total + s.quantity, 0) 
-                    : 0;
-                
-                let stockBadge, stockClass;
-                if (stock > 10) {
-                    stockClass = 'in-stock';
-                    stockBadge = `<span class="stock-badge ${stockClass}">
-                         <i class="fas fa-check-circle text-green-500 mr-1"></i>
-                         <span class="font-bold text-green-500">${stock}</span>
-                       </span>`;
-                } else if (stock > 0) {
-                    stockClass = 'low-stock';
-                    stockBadge = `<span class="stock-badge ${stockClass}">
-                         <i class="fas fa-exclamation-triangle mr-1 text-yellow-500"></i>
-                         <span class="font-bold">${stock}</span>
-                       </span>`;
-                } else {
-                    stockClass = 'out-of-stock';
-                    stockBadge = `<span class="stock-badge ${stockClass}">
-                         <i class="fas fa-times-circle mr-1 text-red-600"></i>
-                         <span class="font-bold">Sin stock</span>
-                       </span>`;
-                }
-
-                const imageColumn = product.images && product.images.length > 0
-                    ? `<button onclick="openModal(${product.id})" class="image-button" title="Ver imágenes">
-                         <i class="fas fa-eye text-blue-600"></i>
-                       </button>`
-                    : `<div class="image-button opacity-50 cursor-not-allowed" title="Sin imágenes">
-                         <i class="fas fa-image"></i>
-                       </div>`;
-
-                const priceSelect = product.prices && product.prices.length > 0
-                    ? `<select class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                         ${product.prices.map(price => `
-                             <option value="${price.price}">
-                                 ${getPriceTypeLabel(price.type)} - S/ ${parseFloat(price.price).toFixed(2)}
-                             </option>
-                         `).join('')}
-                       </select>`
-                    : '<span class="text-gray-400 text-sm italic">Sin precios</span>';
-
-                const actions = `
-                    <div class="flex items-center justify-center space-x-2">
-                        <a href="${window.routes.productsShow.replace('__ID__', product.id)}" class="action-button view" title="Ver detalles">
-                            <i class="fas fa-eye text-blue-600 text-xs"></i>
-                        </a>
-                        <a href="${window.routes.productsEdit.replace('__ID__', product.id)}" class="action-button edit" title="Editar">
-                            <i class="fas fa-edit text-yellow-600 text-xs"></i>
-                        </a>
-                        <form action="${window.routes.productsDestroy.replace('__ID__', product.id)}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="action-button delete" title="Eliminar">
-                                <i class="fas fa-trash text-red-600 text-xs"></i>
-                            </button>
-                        </form>
-                    </div>
-                `;
-
-                // Crear fila con exactamente 13 columnas para coincidir con los encabezados
-                rows.push([
-                    `<span class="text-gray-600 font-medium">${index + 1}</span>`,                    // 1. #
-                    product.code_sku || '-',                                                      // 2. Código
-                    product.code_bar || '-',                                                      // 3. Código Barras
-                    `<div class="flex justify-center">${imageColumn}</div>`,                      // 4. Imagen
-                    `<div class="max-w-sm">
-                       <p class="font-semibold text-gray-900 leading-tight" title="${product.description || ''}">${product.description || '-'}</p>
-                     </div>`,
-                    `<span class="text-gray-700 font-medium">${product.model || '-'}</span>`,
-                    `<span class="text-gray-600">${product.location || '-'}</span>`,
-
-                    `<span class="text-gray-700 font-medium">${product.brand?.name || '-'}</span>`,
-                    `<span class="text-gray-600">${product.unit?.name || '-'}</span>`,
-                    priceSelect,
-                    `<div class="flex justify-center">${stockBadge}</div>`,
-                    actions
-                ]);
-            });
-            
-            // Agregar todas las filas de una vez para evitar filas vacías intermedias
-            if (rows.length > 0) {
-                dataTable.rows.add(rows).draw();
-            }
-            
-            // Verificar y eliminar cualquier fila vacía que pueda haber quedado
-            setTimeout(() => {
-                $('#productsTable tbody tr').each(function() {
-                    const $row = $(this);
-                    const hasContent = $row.find('td').toArray().some(td => 
-                        $(td).text().trim() !== '' || $(td).find('*').length > 0
-                    );
-                    
-                    if (!hasContent || $row.find('td').length === 0) {
-                        $row.remove();
-                    }
-                });
-            }, 100);
         }
 
         function renderGridView() {
@@ -846,13 +441,12 @@
                     : null;
 
                 return `
-                    <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                    <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
                         <div class="relative">
                             ${imageUrl 
-                                ? `<img src="${imageUrl}" alt="${product.description}" class="w-full h-48 object-cover cursor-pointer" onclick="openModal(${product.id})">`
-                                : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center cursor-pointer" onclick="openModal(${product.id})">
+                                ? `<img src="${imageUrl}" alt="${product.description}" class="w-full h-48 object-cover">`
+                                : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center">
                                      <i class="fas fa-image text-4xl text-gray-400"></i>
-                                     <span class="ml-2 text-gray-500">Sin imagen</span>
                                    </div>`
                             }
                             <div class="absolute top-2 right-2">
@@ -881,7 +475,7 @@
                             </div>
                             
                             <div class="flex space-x-2">
-                                <a href="${window.routes.productsEdit.replace('__ID__', product.id)}" class="flex-1 bg-blue-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded text-center transition-colors">
+                                <a href="${window.routes.productsEdit.replace('__ID__', product.id)}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded text-center transition-colors">
                                     <i class="fas fa-edit mr-1"></i>
                                     Editar
                                 </a>
@@ -945,16 +539,6 @@
         function changePage(page) {
             currentPage = page;
             renderGridView();
-        }
-
-        function getPriceTypeLabel(type) {
-            const labels = {
-                'buy': 'Compra',
-                'sucursalA': 'Sucursal A',
-                'sucursalB': 'Sucursal B',
-                'wholesale': 'Mayorista'
-            };
-            return labels[type] || type;
         }
 
         function openModal(productId) {
@@ -1074,7 +658,7 @@
                     });
                     
                     document.getElementById('importModal').classList.add('hidden');
-                    loadAllProducts();
+                    setTimeout(() => location.reload(), 2000);
                 }
             })
             .catch(error => {
@@ -1099,15 +683,6 @@
             
             if (e.target === imagesModal) {
                 closeModalImages();
-            }
-        });
-        
-        // Ajustar columnas cuando cambie el tamaño de la ventana
-        window.addEventListener('resize', function() {
-            if (dataTable && currentView === 'tabla') {
-                setTimeout(() => {
-                    dataTable.columns.adjust();
-                }, 100);
             }
         });
     </script>

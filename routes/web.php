@@ -28,7 +28,10 @@ use App\Http\Controllers\BuyController;
 Route::get('/csrf-token', function () {
     return response()->json(['token' => csrf_token()]);
 });
-Route::get('/', [AuthenticatedSessionController::class, 'create']);
+
+Route::get('/', function () {
+    return auth()->check() ? redirect('/dashboard') : redirect('/login');
+});
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'role:administrador|mecanico|ventas'])
@@ -113,6 +116,7 @@ Route::group(
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
         //VENTAS
+        Route::get('/sales/bulk-create', [SaleController::class, 'bulkCreate'])->name('sales.bulk-create');
         Route::resource('sales', SaleController::class);
         Route::get('/sale/listado', [SaleController::class, 'filtroPorfecha'])->name('sales.filtroPorfecha');
         Route::get('/sale/detalles/{id}', [SaleController::class, 'detallesVenta'])->name('sale.detallesVenta');

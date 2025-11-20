@@ -15,7 +15,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $drives = Drive::where('status', 1)->paginate(10);
+        // Obtener todos los conductores activos sin paginación (DataTables lo manejará)
+        $drives = Drive::where('status', 1)->get();
         return view('driver.index', compact('drives'));
     }
 

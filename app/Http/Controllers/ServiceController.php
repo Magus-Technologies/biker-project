@@ -16,11 +16,14 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $servicios = [];
+        // $servicios = [];
         $mechanics = User::where('status_mechanic', 1)
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'mecanico');
             })->get();
+        $servicios = Service::with(['drive', 'car', 'user', 'registeredBy'])
+            ->orderBy('fecha_registro', 'desc')
+            ->get();
         return view('service.index', compact('servicios', 'mechanics'));
     }
     public function generateCode()

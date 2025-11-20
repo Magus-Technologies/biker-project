@@ -1,4 +1,5 @@
 <x-app-layout>
+    <x-breadcrumb title="Registrar venta" parent="ventas" parentUrl="{{route('sales.index')}}" subtitle="crear"/>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{-- Registro de Socios --}}
@@ -514,7 +515,12 @@
         let servicePrice = document.getElementById("service_price").value.trim();
 
         if (serviceName === "" || servicePrice === "") {
-            alert("Por favor, complete todos los campos.");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor, complete todos los campos.',
+                confirmButtonColor: '#3b82f6'
+            });
             return;
         }
 
@@ -805,10 +811,25 @@
 
             if (!response.ok) throw new Error("Error en la petición");
             const data = await response.json();
-            alert("La Venta se ha guardado correctamente.");
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Venta guardada!',
+                text: 'La venta se ha guardado correctamente.',
+                confirmButtonColor: '#10b981',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = '/sales';
+            });
         } catch (error) {
             console.error("Error al guardar la orden:", error);
-            alert("Error al guardar la orden.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al guardar la orden.',
+                confirmButtonColor: '#ef4444'
+            });
         }
     }
 
@@ -899,7 +920,12 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('No se pudo encontrar el DNI');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'DNI no encontrado',
+                        text: 'No se pudo encontrar el DNI en la base de datos.',
+                        confirmButtonColor: '#ef4444'
+                    });
                 });
         }
     }

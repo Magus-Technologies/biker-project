@@ -32,8 +32,13 @@ class SaleController extends Controller
     public function index()
     {
         $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
+        
+        // Obtener ventas con relaciones cargadas para DataTables
+        $sales = Sale::with(['userRegister', 'mechanic', 'documentType'])
+            ->orderBy('fecha_registro', 'desc')
+            ->get();
 
-        return view('sales.index', compact('documentTypes'));
+        return view('sales.index', compact('documentTypes', 'sales'));
     }
     public function detallesVenta($id)
     {
@@ -107,6 +112,21 @@ class SaleController extends Controller
         $tiendas = Tienda::all(); // Added
 
         return view('sales.create', compact('regions', 'paymentsMethod', 'documentTypes', 'companies', 'paymentsType', 'tiendas')); // Added 'tiendas'
+    }
+
+    /**
+     * Show the form for creating bulk sales (Ventas Mayoristas).
+     */
+    public function bulkCreate()
+    {
+        $paymentsMethod = PaymentMethod::where('status', 1)->get();
+        $paymentsType = Payment::all();
+        $documentTypes = DocumentType::whereIn('name', ['FACTURA', 'BOLETA DE VENTA', 'NOTA DE VENTA'])->get();
+        $companies = Company::all();
+        $regions = Region::all();
+        $tiendas = Tienda::all();
+
+        return view('sales.bulk-create', compact('regions', 'paymentsMethod', 'documentTypes', 'companies', 'paymentsType', 'tiendas'));
     }
 
     /**

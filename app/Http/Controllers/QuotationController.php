@@ -40,7 +40,13 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        return view('quotation.index');
+        // Solo mostrar cotizaciones activas (status = '1')
+        $quotations = Quotation::where('status', '1')
+            ->with('userRegister', 'mechanic')
+            ->orderBy('fecha_registro', 'desc')
+            ->get();
+        
+        return view('quotation.index', compact('quotations'));
     }
 
     /**
@@ -84,7 +90,9 @@ class QuotationController extends Controller
             return response()->json(['error' => 'Faltan parámetros'], 400);
         }
         $user = auth()->user();
-        $ventas = Quotation::with('userRegister', 'mechanic')
+        // Solo mostrar cotizaciones activas (status = '1')
+        $ventas = Quotation::where('status', '1')
+            ->with('userRegister', 'mechanic')
             ->whereDate('fecha_registro', '>=', $request->fecha_desde)
             ->whereDate('fecha_registro', '<=', $request->fecha_hasta);
         return response()->json($ventas->get());
@@ -432,10 +440,14 @@ class QuotationController extends Controller
             $quotation = Quotation::find($id);
 
             if (!$quotation) {
-                return response()->json(['error' => 'Venta no encontrada'], 404);
+                return response()->json(['error' => 'Cotización no encontrada'], 404);
             }
-            $quotation->delete();
-            return response()->json(['success' => 'Venta eliminada correctamente'], 200);
+            
+            // Soft delete: cambiar status a '0' en lugar de eliminar
+            $quotation->status = '0';
+            $quotation->save();
+            
+            return response()->json(['success' => 'Cotización eliminada correctamente'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

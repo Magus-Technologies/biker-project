@@ -13,18 +13,17 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
-    <!-- Scripts -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bootstrap Icons (CDN - no está en package.json) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Swiper JS -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Vite: Tailwind CSS + Alpine.js + Librerías (Font Awesome, SweetAlert2, Swiper) + DataTables -->
+    @vite([
+        'resources/css/app.css',
+        'resources/css/datatables.css',
+        'resources/js/app.js',
+        'resources/js/vendor.js',
+        'resources/js/datatables.js'
+    ])
 
     <!-- Estilos del Layout -->
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
@@ -82,14 +81,14 @@
     <!-- Botón Toggle Desktop -->
     <button @click="toggleSidebar()" 
             class="sidebar-toggle-btn hidden lg:flex" 
-            :style="'left: ' + (sidebarOpen ? 'calc(280px - 22px)' : 'calc(60px - 22px)')"
+            :class="{'toggle-expanded': sidebarOpen, 'toggle-collapsed': !sidebarOpen}"
             :title="sidebarOpen ? 'Contraer sidebar' : 'Expandir sidebar'">
         <i :class="sidebarOpen ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
     </button>
 
     <!-- Page Content - OPTIMIZADO PARA RESPONSIVE -->
     <main class="main-content transition-all duration-300 min-h-screen"
-          :style="window.innerWidth >= 1025 ? 'margin-left: ' + (sidebarOpen ? '280px' : '60px') : (mobileMenuOpen ? 'margin-left: 280px' : 'margin-left: 0')">
+          :class="{'sidebar-expanded': sidebarOpen && window.innerWidth >= 1025, 'sidebar-collapsed': !sidebarOpen && window.innerWidth >= 1025}">
         {{ $slot }}
     </main>
 

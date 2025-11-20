@@ -1,127 +1,118 @@
 <!-- resources\views\clientes-mayoristas\index.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Lista de Clientes Mayoristas
-        </h2>
-    </x-slot>
+    <!-- Breadcrumb -->
+    <x-breadcrumb title="Lista de Clientes Mayoristas" subtitle="Clientes" />
 
-    <!-- CDN Bootstrap y Bootstrap Icons -->
+    <!-- Bootstrap 5 para modales (CDN - no está en package.json) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <div class="max-w-7xl mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">Lista de Clientes Mayoristas</h2>
-            <a href="{{ route('clientes-mayoristas.create') }}"
-                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Agregar Cliente
-            </a>
-        </div>
-
+    <!-- Contenedor principal con poco padding -->
+    <div class="px-3 py-4">
         <!-- Mensajes de éxito o error -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                {{ session('success') }}
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                {{ session('error') }}
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-exclamation-circle mr-1"></i>{{ session('error') }}
             </div>
         @endif
 
-        <!-- Tabla de registros mejorada y responsiva -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+        <!-- Tabla con botón agregar integrado -->
+        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+            <!-- Botón Agregar en la esquina superior derecha -->
+            <div class="px-4 py-3 flex justify-end border-b border-gray-200">
+                <a href="{{ route('clientes-mayoristas.create') }}"
+                    class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors text-sm">
+                    <i class="bi bi-plus-lg mr-1"></i>
+                    Agregar Cliente
+                </a>
+            </div>
+
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100">
+                <table id="clientesTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
                                 Código
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
                                 Nombres y Apellidos
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Nombre del Negocio
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
+                                Negocio
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
                                 Tienda
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
                                 Teléfono
                             </th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">
                                 Estado
                             </th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">
                                 Acciones
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($clientes as $cliente)
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-700">
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-3 py-2 text-sm text-gray-700">
                                     {{ $cliente->codigo }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="px-3 py-2 text-sm font-medium text-gray-900">
                                     {{ $cliente->nombre_completo }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                                <td class="px-3 py-2 text-sm text-gray-600">
                                     {{ $cliente->nombre_negocio }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                <td class="px-3 py-2 text-sm text-gray-600">
                                     {{ $cliente->tienda ?? 'N/A' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                <td class="px-3 py-2 text-sm text-gray-600">
                                     {{ $cliente->telefono }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cliente->status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $cliente->status ? 'Activado' : 'Deshabilitado' }}
+                                <td class="px-3 py-2 text-center">
+                                    <span class="px-2 py-1 inline-flex text-xs font-medium rounded {{ $cliente->status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                        {{ $cliente->status ? 'Activo' : 'Inactivo' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                    <div class="flex items-center justify-center space-x-3">
+                                <td class="px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
                                         <button onclick="mostrarDetallesCliente({{ $cliente->id }})" 
-                                                class="text-blue-600 hover:text-blue-900 transition-transform duration-200 transform hover:scale-110" 
+                                                class="text-blue-600 hover:text-blue-800 transition-colors" 
                                                 title="Ver detalles">
-                                            <i class="bi bi-eye-fill text-lg"></i>
+                                            <i class="bi bi-eye text-base"></i>
                                         </button>
                                         <a href="{{ route('clientes-mayoristas.edit', $cliente->id) }}" 
-                                           class="text-indigo-600 hover:text-indigo-900 transition-transform duration-200 transform hover:scale-110" 
+                                           class="text-purple-600 hover:text-purple-800 transition-colors" 
                                            title="Editar">
-                                            <i class="bi bi-pencil-fill text-lg"></i>
+                                            <i class="bi bi-pencil text-base"></i>
                                         </a>
+                                        <button class="text-red-600 hover:text-red-800 transition-colors" 
+                                                title="Eliminar">
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                                    <div class="flex flex-col items-center">
-                                        <i class="bi bi-inbox text-6xl text-gray-300 mb-4"></i>
-                                        <h3 class="text-xl font-semibold text-gray-700">No hay clientes mayoristas</h3>
-                                        <p class="text-gray-400 mt-1">Comienza agregando un nuevo cliente para verlo aquí.</p>
-                                    </div>
+                                <td colspan="7" class="px-3 py-8 text-center text-gray-500">
+                                    <i class="bi bi-inbox text-4xl text-gray-300 mb-2"></i>
+                                    <p class="text-sm">No hay clientes mayoristas registrados</p>
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-        </div>
-
-        <!-- Paginación -->
-        <div class="mt-6">
-            {{ $clientes->links() }}
         </div>
     </div>
 
@@ -436,9 +427,57 @@ function mostrarDetallesCliente(clienteId) {
         });
 }
 
-// Inicializar tooltips de Bootstrap si están disponibles
+// Inicializar DataTables - Optimizado para carga rápida
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si Bootstrap Tooltip está disponible
+    // Inicializar DataTable en la tabla de clientes mayoristas
+    if ($.fn.DataTable) {
+        $('#clientesTable').DataTable({
+            // Optimizaciones de rendimiento
+            deferRender: true,
+            processing: false,
+            stateSave: false,
+            
+            // Configuración básica
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            
+            // Idioma español
+            language: {
+                search: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ clientes",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ clientes",
+                infoEmpty: "0 clientes",
+                infoFiltered: "(filtrado de _MAX_ totales)",
+                zeroRecords: "No se encontraron clientes",
+                emptyTable: "No hay clientes mayoristas registrados",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                }
+            },
+            
+            // Layout personalizado
+            dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+            
+            // Configuración de columnas
+            columnDefs: [
+                { targets: [5, 6], orderable: false }, // Estado y Acciones no ordenables
+                { targets: [5, 6], className: 'text-center' } // Centrar Estado y Acciones
+            ],
+            
+            // Ordenamiento inicial
+            order: [[0, 'asc']], // Ordenar por código por defecto
+            
+            // Dimensiones
+            autoWidth: false,
+            scrollX: false
+        });
+    }
+    
+    // Inicializar tooltips de Bootstrap si están disponibles
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
