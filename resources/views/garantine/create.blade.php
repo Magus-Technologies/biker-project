@@ -1,16 +1,20 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{-- Registro de Socios --}}
-        </h2>
-    </x-slot>
-    <div class="w-3/4 mx-auto py-8" id="vehiculo" role="tabpanel" aria-labelledby="vehiculo-tab">
+    <!-- Breadcrumb -->
+    <x-breadcrumb 
+        title="Registrar Garantía" 
+        parent="Garantías" 
+        parentUrl="{{ route('garantines.index') }}"
+        subtitle="Registrar" 
+    />
+
+    <div class="px-3 py-4">
+        <div class="max-w-5xl mx-auto" id="vehiculo" role="tabpanel" aria-labelledby="vehiculo-tab">
         <form class="p-6 bg-white rounded-lg shadow-md" id="formGarantine" enctype="multipart/form-data">
             @csrf
             <h5 class="text-lg font-semibold text-gray-800 mb-4">Datos de Garantia</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label for="num_doc" class="block text-sm font-medium text-gray-700">N� documento</label>
+                    <label for="num_doc" class="block text-sm font-medium text-gray-700">Nr documento</label>
                     <div class="flex mt-2">
                         <input name="n_documento" id="n_documento" type="text" placeholder="Ingrese Documento"
                             class="block w-full  border border-gray-300 rounded-md shadow-sm">

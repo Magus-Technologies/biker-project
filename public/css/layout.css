@@ -1,6 +1,19 @@
 [x-cloak] { display: none !important; }
 .w-280 { width: 280px; }
 
+/* Prevenir FOUC - Sidebar tiene ancho por defecto */
+.desktop-sidebar {
+    width: 280px; /* Ancho por defecto expandido */
+}
+
+.desktop-sidebar.sidebar-collapsed {
+    width: 60px;
+}
+
+.desktop-sidebar.sidebar-expanded {
+    width: 280px;
+}
+
 /* Variables CSS mejoradas */
 :root {
     --sidebar-width: 280px;
@@ -254,6 +267,7 @@
 .sidebar-toggle-btn {
     position: fixed;
     top: 50%;
+    left: calc(280px - 22px); /* Posición por defecto: sidebar expandido */
     transform: translateY(-50%);
     width: 44px;
     height: 44px;
@@ -272,6 +286,14 @@
     backdrop-filter: blur(10px);
 }
 
+.sidebar-toggle-btn.toggle-collapsed {
+    left: calc(60px - 22px);
+}
+
+.sidebar-toggle-btn.toggle-expanded {
+    left: calc(280px - 22px);
+}
+
 .sidebar-toggle-btn:hover {
     background: linear-gradient(135deg, var(--accent-blue) 0%, var(--light-blue) 100%);
     transform: translateY(-50%) scale(1.15);
@@ -288,6 +310,7 @@
     position: fixed;
     top: 0;
     right: 0;
+    left: 280px; /* Por defecto: sidebar expandido */
     height: 70px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     box-shadow: 0 4px 25px rgba(0,0,0,0.08);
@@ -299,6 +322,14 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-bottom: 1px solid rgba(30, 58, 138, 0.1);
     backdrop-filter: blur(10px);
+}
+
+.desktop-header.header-collapsed {
+    left: 60px;
+}
+
+.desktop-header.header-expanded {
+    left: 280px;
 }
 
 /* Header Mobile mejorado */
@@ -514,6 +545,11 @@
     background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%);
 }
 
+/* Main Content - Estilos base para evitar FOUC */
+.main-content {
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* CONFIGURACIÓN RESPONSIVE OPTIMIZADA */
 /* Pantallas pequeñas (móviles y tablets) - SIN márgenes laterales */
 @media (max-width: 1024px) {
@@ -560,8 +596,19 @@
 
     .main-content {
         margin-top: 70px;
-        padding: 1rem 2rem 1.5rem 2rem; /* Mantener márgenes laterales en desktop */
+        margin-left: 280px; /* Valor por defecto: sidebar expandido */
+        padding: 0.75rem 0.75rem 1rem 0.75rem; /* Padding mínimo en desktop */
         transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Estado colapsado del sidebar */
+    .main-content.sidebar-collapsed {
+        margin-left: 60px;
+    }
+    
+    /* Estado expandido del sidebar (por defecto) */
+    .main-content.sidebar-expanded {
+        margin-left: 280px;
     }
 }
 

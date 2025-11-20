@@ -1,127 +1,202 @@
+<!-- resources\views\car\index.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{-- Registro de Socios --}}
-        </h2>
-    </x-slot>
+    <x-breadcrumb title="Registro de Vehículos" subtitle="vehículos" />
 
-    <div class="max-w-7xl  mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">Registro de Vehiculos</h2>
-            {{-- @can('buscar-socio')
-                <form method="GET" action="{{ route('socios.index') }}" class="flex items-center">
-                    <input type="text" name="buscar" placeholder="Buscar socio..." value="{{ request('buscar') }}"
-                        class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
-                        Buscar
-                    </button>
-                </form>
-            @endcan --}}
-            {{-- @can('agregar-socio') --}}
-            <a href="{{ route('cars.create') }}"
-                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300">
-                Agregar
-            </a>
-            {{-- @endcan --}}
-        </div>
+    <!-- Bootstrap 5 para modales (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Contenedor principal -->
+    <div class="px-3 py-4">
         <!-- Mensajes de éxito o error -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                {{ session('success') }}
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                {{ session('error') }}
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-exclamation-circle mr-1"></i>{{ session('error') }}
             </div>
         @endif
 
-        <!-- Tabla de registros -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-5">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Codigo
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Conductor
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            placa
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº motor
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acciones
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($cars as $car)
-                        <tr>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">
-                                {{ $car->codigo }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $car->driver->nombres }} {{ $car->driver->apellido_paterno }}
-                                {{ $car->driver->apellido_materno }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $car->placa }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $car->driver->nro_motor }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <button type="button" id ="btn-{{ $car->id }}"
-                                    class=" px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow-md {{ $car->status == 1 ? 'bg-green-200 text-green-700' : 'text-red-700  bg-red-200' }}"
-                                    onclick="confirmDelete({{ $car->id }}, '{{ $car->status == 1 ? '¿Está seguro de desactivar este registro?' : '¿Está seguro de activar este registro?' }}')">
-                                    @if ($car->status == 1)
-                                        Activado
-                                    @else
-                                        Deshabilitado
-                                    @endif
-                                </button>
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('cars.edit', $car->id) }}"
-                                    class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                    Editar
-                                </a>
+        <!-- Tabla con botón agregar -->
+        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+            <!-- Botón Agregar en la esquina superior derecha -->
+            <div class="px-4 py-3 flex justify-end border-b border-gray-200">
+                <a href="{{ route('cars.create') }}"
+                    class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors text-sm">
+                    <i class="bi bi-plus-lg mr-1"></i>Agregar
+                </a>
+            </div>
 
-                                <form action="{{ route('cars.destroy', $car->id) }}" method="POST"
-                                    style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900"
-                                        onclick="return confirm('¿Estás seguro de que deseas eliminar este vehiculo?');">
-                                        Eliminar
+            <!-- Tabla -->
+            <div class="overflow-x-auto">
+                <table id="carsTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Código</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Conductor</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Placa</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Nº Motor</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Estado</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach($cars as $car)
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-3 py-2 text-sm text-gray-700">{{ $car->codigo }}</td>
+                                <td class="px-3 py-2 text-sm font-medium text-gray-900">
+                                    {{ $car->driver->nombres ?? '' }} 
+                                    {{ $car->driver->apellido_paterno ?? '' }} 
+                                    {{ $car->driver->apellido_materno ?? '' }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $car->placa ?? 'Sin placa' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $car->driver->nro_motor ?? 'N/A' }}</td>
+                                <td class="px-3 py-2 text-center">
+                                    <button type="button" 
+                                            id="btn-{{ $car->id }}"
+                                            class="px-2 py-1 inline-flex text-xs font-medium rounded-full 
+                                                {{ $car->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}"
+                                            onclick="confirmStatusChange({{ $car->id }}, '{{ $car->status == 1 ? '¿Está seguro de desactivar este vehículo?' : '¿Está seguro de activar este vehículo?' }}')">
+                                        {{ $car->status == 1 ? 'Activo' : 'Inactivo' }}
                                     </button>
-                                </form>
-                            </td>
-
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-3 py-1 text-center text-gray-500">
-                                No hay registros disponibles
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <!-- Editar -->
+                                        <a href="{{ route('cars.edit', $car->id) }}"
+                                           class="text-purple-600 hover:text-purple-800 transition-colors" 
+                                           title="Editar">
+                                            <i class="bi bi-pencil text-base"></i>
+                                        </a>
+                                        
+                                        <!-- Eliminar -->
+                                        <button onclick="confirmDelete({{ $car->id }})" 
+                                                class="text-red-600 hover:text-red-800 transition-colors" 
+                                                title="Eliminar">
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <!-- Mostrar los enlaces de paginación -->
-        {{-- @if ($registros instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
-            {{ $registros->links() }}
-        @endif --}}
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Inicializar DataTables
+        document.addEventListener('DOMContentLoaded', function() {
+            if ($.fn.DataTable) {
+                $('#carsTable').DataTable({
+                    deferRender: true,
+                    processing: false,
+                    stateSave: false,
+                    responsive: true,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                    language: {
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ vehículos",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ vehículos",
+                        infoEmpty: "0 vehículos",
+                        infoFiltered: "(filtrado de _MAX_ totales)",
+                        zeroRecords: "No se encontraron vehículos",
+                        emptyTable: "No hay vehículos registrados",
+                        paginate: {
+                            first: "Primero",
+                            last: "Último",
+                            next: "Siguiente",
+                            previous: "Anterior"
+                        }
+                    },
+                    dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                    columnDefs: [
+                        { targets: [4, 5], orderable: false }, // Estado y Acciones no ordenables
+                        { targets: [4, 5], className: 'text-center' }
+                    ],
+                    order: [[0, 'asc']], // Ordenar por código
+                    autoWidth: false,
+                    scrollX: false
+                });
+            }
+        });
 
+        // Función para confirmar cambio de estado
+        function confirmStatusChange(carId, message) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, cambiar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Aquí debes implementar la ruta para cambiar el estado
+                    Swal.fire(
+                        'Pendiente',
+                        'Debes implementar la ruta para cambiar el estado del vehículo',
+                        'info'
+                    );
+                }
+            });
+        }
+
+        // Función para eliminar vehículo
+        async function confirmDelete(carId) {
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¿Deseas eliminar este vehículo?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            try {
+                let url = `{{ route('cars.destroy', ':id') }}`.replace(':id', carId);
+                let response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+                
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Vehículo Eliminado',
+                        text: 'El vehículo se ha eliminado correctamente',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    // Recargar la página
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    throw new Error('Error al eliminar el vehículo');
+                }
+            } catch (error) {
+                console.error("Error al eliminar:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar el vehículo',
+                    showConfirmButton: true
+                });
+            }
+        }
+    </script>
 
 </x-app-layout>

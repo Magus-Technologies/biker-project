@@ -16,7 +16,8 @@ class ClienteMayoristaController extends Controller
      */
     public function index()
     {
-        $clientes = ClienteMayorista::where('status', 1)->paginate(10);
+        // Obtener todos los clientes activos sin paginación (DataTables lo manejará)
+        $clientes = ClienteMayorista::where('status', 1)->get();
         return view('clientes-mayoristas.index', compact('clientes'));
     }
 

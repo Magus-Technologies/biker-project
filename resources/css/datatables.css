@@ -1,0 +1,193 @@
+/* resources/css/datatables.css */
+@import "datatables.net-dt";
+
+/* Estilos limpios para DataTables - Estilo minimalista */
+.dataTables_wrapper {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 0;
+}
+
+/* Controles superiores */
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_length label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+/* Estilos más específicos para el select */
+.dataTables_wrapper .dataTables_length select,
+select[name*="length"],
+select.dt-input {
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.375rem !important;
+    font-size: 0.875rem !important;
+    background-color: white !important;
+    background-image: none !important; /* Eliminar flecha de DataTables */
+    margin: 0 !important;
+    padding: 4px 24px 4px 12px !important; /* Menos padding a la derecha */
+    min-width: 70px !important; /* Menos ancho */
+    width: auto !important;
+    height: 32px !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+    appearance: menulist !important; /* Solo flecha del navegador */
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+select[name*="length"]:focus {
+    outline: none !important;
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 1px #60a5fa !important;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_filter label {
+    @apply text-sm text-gray-600 font-normal;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    @apply border border-gray-300 rounded px-3 py-1 text-sm bg-white focus:ring-1 focus:ring-blue-400 focus:border-blue-400;
+    margin: 0;
+    min-width: 200px;
+}
+
+/* Info y paginación */
+.dataTables_wrapper .dataTables_info {
+    @apply text-xs text-gray-500;
+    padding-top: 0.75rem;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.75rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    @apply px-2 py-1 mx-0.5 rounded text-sm border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors;
+    min-width: 32px;
+    text-align: center;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    @apply bg-blue-500 text-white border-blue-500;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    @apply opacity-40 cursor-not-allowed;
+}
+
+/* Tabla - Sin sombras, padding reducido */
+.dataTables_wrapper table.dataTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.dataTables_wrapper table.dataTable thead th {
+    @apply bg-gray-50 text-gray-600 font-semibold text-xs uppercase;
+    padding: 0.5rem 0.75rem !important;
+    border-bottom: 2px solid #9ca3af !important; /* Línea más oscura y gruesa */
+}
+
+/* FORZAR ALINEACIÓN - Reglas específicas para todas las combinaciones */
+.dataTables_wrapper table.dataTable thead th.text-center,
+.dataTables_wrapper table.dataTable thead th.text-center.sorting,
+.dataTables_wrapper table.dataTable thead th.text-center.sorting_asc,
+.dataTables_wrapper table.dataTable thead th.text-center.sorting_desc {
+    text-align: center !important;
+}
+
+.dataTables_wrapper table.dataTable thead th.text-left,
+.dataTables_wrapper table.dataTable thead th.text-left.sorting,
+.dataTables_wrapper table.dataTable thead th.text-left.sorting_asc,
+.dataTables_wrapper table.dataTable thead th.text-left.sorting_desc {
+    text-align: left !important;
+}
+
+.dataTables_wrapper table.dataTable thead th.text-right,
+.dataTables_wrapper table.dataTable thead th.text-right.sorting,
+.dataTables_wrapper table.dataTable thead th.text-right.sorting_asc,
+.dataTables_wrapper table.dataTable thead th.text-right.sorting_desc {
+    text-align: right !important;
+}
+
+.dataTables_wrapper table.dataTable tbody td {
+    @apply text-sm text-gray-700;
+    padding: 0.5rem 0.75rem !important;
+    border-bottom: 1px solid #e5e7eb; /* Líneas de separación entre filas */
+}
+
+/* Permitir que Tailwind text-center funcione en celdas */
+.dataTables_wrapper table.dataTable tbody td.text-center {
+    text-align: center !important;
+}
+
+.dataTables_wrapper table.dataTable tbody td.text-left {
+    text-align: left !important;
+}
+
+.dataTables_wrapper table.dataTable tbody td.text-right {
+    text-align: right !important;
+}
+
+.dataTables_wrapper table.dataTable tbody tr {
+    @apply transition-colors;
+}
+
+.dataTables_wrapper table.dataTable tbody tr:hover {
+    @apply bg-blue-50;
+}
+
+/* Sin zebra striping por defecto */
+.dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
+    background-color: transparent;
+}
+
+/* Ordenamiento - ajustar iconos para centrado */
+.dataTables_wrapper table.dataTable thead .sorting,
+.dataTables_wrapper table.dataTable thead .sorting_asc,
+.dataTables_wrapper table.dataTable thead .sorting_desc {
+    cursor: pointer;
+    position: relative;
+}
+
+.dataTables_wrapper table.dataTable thead .sorting:after,
+.dataTables_wrapper table.dataTable thead .sorting_asc:after,
+.dataTables_wrapper table.dataTable thead .sorting_desc:after {
+    position: absolute;
+    right: 0.5rem;
+    opacity: 0.3;
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center;
+    }
+}

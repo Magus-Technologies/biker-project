@@ -1,452 +1,581 @@
 <!-- resources\views\sales\index.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        </h2>
-    </x-slot>
-    <div class="max-w-7xl  mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">Registro de Ventas</h2>
-            <form class="flex items-center text-xs" id="formBuscarPorFecha">
-                <select id="document_type_id" class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                    <option value="">Todo los documentos</option>
-                    @foreach ($documentTypes as $documentType)
-                        <option value="{{ $documentType->id }}">
-                            {{ $documentType->name }}</option>
-                    @endforeach
-                </select>
+    <x-breadcrumb title="Registro de Ventas" subtitle="ventas" />
 
-                <label for="">Desde: </label>
-                <input type="date" name="fecha_desde" id="fecha_desde"
-                    class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                <label for="">Hasta: </label>
-                <input type="date" name="fecha_hasta" id="fecha_hasta"
-                    class="border border-gray-300 rounded-lg py-2 px-4 mr-2">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
-                    Buscar
-                </button>
-            </form>
-            <a href="{{ route('sales.create') }}"
-                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300">
-                Agregar
-            </a>
-        </div>
-        <!-- Mensajes de xito o error -->
+    <!-- Bootstrap 5 para modales (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Contenedor principal -->
+    <div class="px-3 py-4">
+        <!-- Mensajes de éxito o error -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                {{ session('success') }}
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
             </div>
         @endif
+
         @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                {{ session('error') }}
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-exclamation-circle mr-1"></i>{{ session('error') }}
             </div>
         @endif
-        <!-- Tabla de registros -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-5">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            N
-                        </th>
-                        <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Documento
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Cliente
-                        </th>
 
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            DNI Cliente
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Vendedor
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Mecanico
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            SubTotal
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            IGV
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Fecha
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acciones
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200" id="tbodySales">
-                </tbody>
-            </table>
-        </div>
-        <!-- Mostrar los enlaces de paginacin -->
-        {{-- @if ($registros instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
-            {{ $registros->links() }}
-        @endif --}}
-    </div>
-    <!-- Modal -->
-    <div id="detalleModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex justify-center items-center p-4">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-5 border border-gray-300 relative">
-            <!-- Botn de Cierre -->
-            <button onclick="cerrarModal()"
-                class="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-lg font-semibold transition">
-                ?
-            </button>
+        <!-- Tabla con filtros y botón agregar -->
+        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+            <!-- Encabezado con filtros y botón agregar -->
+            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                    <!-- Filtros -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center flex-1">
+                        <select id="document_type_id" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                            <option value="">Todos los documentos</option>
+                            @foreach ($documentTypes as $documentType)
+                                <option value="{{ $documentType->id }}">{{ $documentType->name }}</option>
+                            @endforeach
+                        </select>
 
-            <!-- Encabezado -->
-            <h2 class="text-sm font-bold text-center pb-3 uppercase tracking-wide text-gray-800 border-b">
-                Detalles de la Venta
-            </h2>
+                        <div class="flex items-center gap-2">
+                            <label for="fecha_desde" class="text-xs font-medium text-gray-600">Desde:</label>
+                            <input type="date" id="fecha_desde" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                        </div>
 
-            <!-- Informacin General -->
-            <div class="mt-3 p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-xs space-y-1">
-                <p><strong>Cliente:</strong> <span id="ventaCliente"></span></p>
-                <p><strong>DNI:</strong> <span id="ventaDni"></span></p>
-                <p><strong>Vendedor:</strong> <span id="ventaVendedor"></span></p>
-                <p><strong>Fecha y hora:</strong> <span id="ventaFecha"></span></p>
+                        <div class="flex items-center gap-2">
+                            <label for="fecha_hasta" class="text-xs font-medium text-gray-600">Hasta:</label>
+                            <input type="date" id="fecha_hasta" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                        </div>
+
+                        <button type="button" onclick="aplicarFiltros()" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
+                            <i class="bi bi-funnel mr-1"></i>Filtrar
+                        </button>
+                    </div>
+
+                    <!-- Botón Agregar -->
+                    <a href="{{ route('sales.create') }}"
+                        class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center transition-colors text-sm">
+                        <i class="bi bi-plus-lg mr-1"></i>Agregar
+                    </a>
+                </div>
             </div>
-            <!-- Tabla de Productos y Servicios -->
-            <div class="mt-4">
-                <h3 class="text-xs font-semibold border-b pb-1 text-gray-700 uppercase">
-                    Detalles de la Compra
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left border border-gray-300 mt-2 rounded-lg overflow-hidden">
-                        <thead class="bg-gray-100 text-gray-800 uppercase text-xs">
-                            <tr>
-                                <th class="py-2 px-2 border-r border-gray-300">Tipo</th>
-                                <th class="py-2 px-2 border-r border-gray-300">Descripcin</th>
-                                <th class="py-2 px-2 text-center border-r border-gray-300">Cantidad</th>
-                                <th class="py-2 px-2 text-center border-r border-gray-300">Precio Unitario</th>
-                                <th class="py-2 px-2 text-center">Total</th>
+
+            <!-- Tabla -->
+            <div class="overflow-x-auto">
+                <table id="salesTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">N°</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Documento</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Cliente</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">DNI</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Vendedor</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Mecánico</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">SubTotal</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">IGV</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Fecha</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach($sales as $sale)
+                            <tr class="hover:bg-blue-50 transition-colors"
+                                data-document-type="{{ $sale->document_type_id }}"
+                                data-fecha="{{ \Carbon\Carbon::parse($sale->fecha_registro)->format('Y-m-d') }}">
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $sale->code }}</td>
+                                <td class="px-3 py-2 text-sm font-medium text-gray-900 text-center">
+                                    <a href="javascript:void(0)" 
+                                       onclick="{{ $sale->document_type_id == 6 ? 'generarPDFNota(' . $sale->id . ')' : 'generarPDF(' . $sale->id . ')' }}"
+                                       class="text-blue-600 hover:text-blue-800">
+                                        {{ $sale->serie }} - {{ $sale->number }}
+                                    </a>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">
+                                    {{ $sale->customer_names_surnames ?? 'Sin cliente' }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $sale->customer_dni }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">
+                                    {{ $sale->userRegister->name ?? 'Sin vendedor' }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">
+                                    {{ $sale->mechanic->name ?? 'Sin mecánico' }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-right">
+                                    S/. {{ number_format($sale->total_price - $sale->igv, 2) }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-right">
+                                    S/. {{ number_format($sale->igv, 2) }}
+                                </td>
+                                <td class="px-3 py-2 text-sm font-medium text-gray-900 text-right">
+                                    S/. {{ number_format($sale->total_price, 2) }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">
+                                    {{ \Carbon\Carbon::parse($sale->fecha_registro)->format('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <!-- Ver detalles -->
+                                        <button onclick="verDetalles({{ $sale->id }})" 
+                                                class="text-blue-600 hover:text-blue-800 transition-colors" 
+                                                title="Ver detalles">
+                                            <i class="bi bi-eye text-base"></i>
+                                        </button>
+                                        
+                                        <!-- Eliminar -->
+                                        <button onclick="deleteSale({{ $sale->id }})" 
+                                                class="text-red-600 hover:text-red-800 transition-colors {{ $sale->status_sunat == 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                title="Eliminar"
+                                                {{ $sale->status_sunat == 1 ? 'disabled' : '' }}>
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
+                                        
+                                        <!-- PDF -->
+                                        <button onclick="{{ $sale->document_type_id == 6 ? 'generarPDFNota(' . $sale->id . ')' : 'generarPDF(' . $sale->id . ')' }}"
+                                                class="text-red-600 hover:text-red-800 transition-colors" 
+                                                title="Generar PDF">
+                                            <i class="bi bi-filetype-pdf text-base"></i>
+                                        </button>
+                                        
+                                        <!-- Enviar SUNAT -->
+                                        <button onclick="enviarSunat({{ $sale->id }})"
+                                                class="{{ $sale->status_sunat == 1 ? 'text-blue-600' : 'text-green-600' }} hover:opacity-80 transition-opacity {{ $sale->status_sunat == 1 ? 'cursor-not-allowed' : '' }}"
+                                                title="{{ $sale->status_sunat == 1 ? 'Enviado a SUNAT' : 'Enviar a SUNAT' }}"
+                                                {{ $sale->status_sunat == 1 ? 'disabled' : '' }}>
+                                            <i class="bi {{ $sale->status_sunat == 1 ? 'bi-send-check' : 'bi-send-slash' }} text-base"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody id="listaDetalles" class="divide-y divide-gray-300">
-                            <!-- Aqu se insertarn los productos y servicios -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Totales -->
-            <div class="mt-4 flex justify-end">
-                <div class="p-3 border border-gray-300 rounded-lg w-56 bg-gray-50 text-xs">
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-700">SubTotal:</span>
-                        <input type="text" id="ventaSubTotal"
-                            class="border border-gray-400 px-2 py-1 w-20  rounded bg-white focus:outline-none" readonly>
-                    </div>
-                    <div class="flex justify-between items-center mt-1">
-                        <span class="font-medium text-gray-700">IGV:</span>
-                        <input type="number" id="ventaIGV" value="0" step="0.01"
-                            class="border border-gray-400 px-2 py-1 w-20 rounded bg-white focus:outline-none"
-                            oninput="calcularSubtotal()">
-                    </div>
-                    <div class="flex justify-between items-center text-sm font-semibold text-gray-900 mt-1">
-                        <span>Total:</span>
-                        <input type="number" id="ventaTotal" value="0" step="0.01"
-                            class="border border-gray-500 px-2 py-1 w-20  rounded bg-white focus:outline-none"
-                            oninput="calcularSubtotal()">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Devoluciones -->
-            <div id="devolucionesContainer" class="mt-4 hidden">
-                <h3 class="text-xs font-semibold border-b pb-1 text-gray-700 uppercase">
-                    Devoluciones
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left border border-gray-300 mt-2 rounded-lg overflow-hidden">
-                        <thead class="bg-gray-100 text-gray-800 uppercase text-xs">
-                            <tr>
-                                <th class="py-2 px-2 border-r border-gray-300">Producto Devuelto</th>
-                                <th class="py-2 px-2 text-center border-r border-gray-300">Cantidad Devuelta</th>
-                                <th class="py-2 px-2 border-r border-gray-300">Fecha</th>
-                                <th class="py-2 px-2 border-r border-gray-300">Registrado por</th>
-                                <th class="py-2 px-2 border-r border-gray-300">Motivo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaDevoluciones" class="divide-y divide-gray-300">
-                            <!-- Devoluciones will be inserted here -->
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
+@push('modals')
+<!-- Modal de detalles - Estilo Bootstrap -->
+<div class="modal fade" id="saleDetailsModal" tabindex="-1" aria-labelledby="saleDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+                <h5 class="modal-title d-flex align-items-center" id="saleDetailsModalLabel">
+                    <i class="bi bi-receipt me-2"></i>
+                    <span>Detalles de la Venta</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="saleDetailsContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <h6 class="text-muted">Cargando detalles de la venta...</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endpush
 
+<style>
+/* Estilos para el modal */
+.modal-header {
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
 
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
 
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
 
+.btn-close-white:hover {
+    opacity: 1;
+}
 
+.info-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
 
+.info-section h4 {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function finAllSales() {
-            let desde = document.getElementById('fecha_desde').value;
-            let hasta = document.getElementById('fecha_hasta').value;
-            let document_type_id = document.getElementById('document_type_id').value;
-            fetch(
-                    `{{ route('sales.filtroPorfecha') }}?fecha_desde=${encodeURIComponent(desde)}&fecha_hasta=${encodeURIComponent(hasta)}&document_type_id=${encodeURIComponent(document_type_id)}`
-                )
-                .then(response => response.json())
-                .then(data => {
-                    let tbody = document.getElementById('tbodySales');
-                    tbody.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(sale => {
-                            let row = document.createElement('tr');
-                            row.innerHTML = `
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">${sale.code}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900"><a href="javascript:voi"${sale.document_type_id == 6 ? `generarPDFNota(${sale.id})` : `generarPDF(${sale.id})`}">${sale.serie} - ${sale.number}</a></td>
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">${sale.customer_names_surnames == null ? 'Sin cliente' : sale.customer_names_surnames}</td> 
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">${sale.customer_dni}</td>
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
-                            ${sale.user_register == null ? 'Sin vendedor' : sale.user_register.name} 
-                        </td>
-                         <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
-                            ${sale.mechanic == null ? 'Sin mecanico' : sale.mechanic.name} 
-                        </td>
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
-                            ${( (Number(sale.total_price) || 0) - (Number(sale.igv) || 0) ).toFixed(2)}
-                        </td>
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
 
-                          <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
-                            ${sale.igv}
-                        </td>
-                        <td class="px-3 py-1 whitespace-nowrap text-xs text-gray-900">
-                            ${sale.total_price}
-                        </td>
-                       
-                        <td class="px-1 py-1 whitespace-nowrap text-xs text-gray-900 p">${sale.fecha_registro}</td>
-                         <td class="px-1 py-1 whitespace-nowrap text-xs text-gray-900">
-                            <button class="text-xl px-2 py-1 rounded"
-                                onclick="verDetalles(${sale.id})"><i class="bi bi-eye-fill text-blue-500"></i></button>
-                            <button class="text-xl px-2 py-1 rounded"
-                        onclick="deleteSale(${sale.id})" ${sale.status_sunat == 1 ? 'disabled' : ''}><i class="bi bi-trash3-fill text-red-500"></i></button>
-                        <button class="text-xl px-2 py-1 rounded" 
-                        onclick="${sale.document_type_id == 6 ? `generarPDFNota(${sale.id})` : `generarPDF(${sale.id})`}"><i class="bi bi-filetype-pdf text-red-500"></i></button>
-                        <button class=" text-white px-2 py-1 rounded text-xl" ${sale.status_sunat == 1 ? 'disabled' : ''}
-                        onclick="enviarSunat(${sale.id})" title="${sale.status_sunat == 1 ? 'Enviado a Sunat' : 'No enviado a Sunat'}">${sale.status_sunat == 1 ? '<i class="bi bi-send-check text-blue-500"></i>' : '<i class="bi bi-send-slash text-green-500"></i>'}</button>
-                        </td>
-                    `;
-                            tbody.appendChild(row);
-                        });
-                    } else {
-                        tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-3 py-1 text-center text-gray-500">No hay registros disponibles</td>
-                    </tr>
-                `;
-                    }
-                })
-        }
+.info-row:last-child {
+    border-bottom: none;
+}
 
-        document.getElementById('formBuscarPorFecha').addEventListener('submit', function(event) {
-            event.preventDefault();
-            finAllSales();
-        })
-        // Funcin para obtener los detalles de la venta
-        async function verDetalles(saleId) {
-            try {
-                let url = `{{ route('sale.detallesVenta', ':id') }}`.replace(':id', saleId);
-                let response = await fetch(url);
-                let data = await response.json(); // Recibe los datos en JSON
+.info-label {
+    color: #6b7280;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
 
-                // Insertar datos generales de la venta
-                // document.getElementById("ventaId").textContent = data.sale.id;
-                document.getElementById("ventaCliente").textContent = data.sale.customer_names_surnames;
-                document.getElementById("ventaVendedor").textContent = data.sale.user_register.name;
-                document.getElementById("ventaDni").textContent = data.sale.customer_dni;
-                document.getElementById("ventaFecha").textContent = data.sale.fecha_registro;
-                // document.getElementById("ventaTotal").textContent = parseFloat(data.sale.total_price).toFixed(2);
-                document.getElementById('ventaSubTotal').value = parseFloat(data.sale.total_price - data.sale.igv)
-                    .toFixed(2);
-                document.getElementById('ventaIGV').value = data.sale.igv;
-                document.getElementById('ventaTotal').value = parseFloat(data.sale.total_price).toFixed(2);
+.info-value {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+</style>
 
-                // Limpiar la tabla antes de agregar nuevos datos
-                let listaDetalles = document.getElementById("listaDetalles");
-                listaDetalles.innerHTML = "";
-
-                // Recorrer los tems de la venta y agregarlos a la tabla
-                data.sale.sale_items.forEach(item => {
-                    let fila = document.createElement("tr");
-                    fila.innerHTML = `
-                <td class="py-2 px-3">${item.item_type.includes("Product") ? "Producto" : "Servicio"}</td>
-                <td class="py-2 px-3">${item.item.description || item.item.name}</td>
-                <td class="py-2 px-3 text-center">${item.quantity}</td>
-                <td class="py-2 px-3 text-center">S/.${parseFloat(item.unit_price).toFixed(2)}</td>
-                <td class="py-2 px-3 text-center">S/.${(item.quantity * parseFloat(item.unit_price)).toFixed(2)}</td>
+<script>
+// Función para ver detalles de la venta
+async function verDetalles(saleId) {
+    const modal = new bootstrap.Modal(document.getElementById('saleDetailsModal'));
+    const content = document.getElementById('saleDetailsContent');
+    
+    // Mostrar loading
+    content.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h6 class="text-muted">Cargando detalles de la venta...</h6>
+        </div>
+    `;
+    
+    modal.show();
+    
+    try {
+        let url = `{{ route('sale.detallesVenta', ':id') }}`.replace(':id', saleId);
+        let response = await fetch(url);
+        let data = await response.json();
+        
+        // Construir HTML de detalles
+        let html = `
+            <div class="info-section">
+                <h4><i class="bi bi-person-circle me-2 text-blue-600"></i>Información General</h4>
+                <div class="info-row">
+                    <span class="info-label">Cliente:</span>
+                    <span class="info-value">${data.sale.customer_names_surnames || 'Sin cliente'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">DNI:</span>
+                    <span class="info-value">${data.sale.customer_dni || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Vendedor:</span>
+                    <span class="info-value">${data.sale.user_register ? data.sale.user_register.name : 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha:</span>
+                    <span class="info-value">${data.sale.fecha_registro}</span>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4><i class="bi bi-cart-check me-2 text-blue-600"></i>Detalles de la Compra</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-end">Precio Unit.</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+        
+        data.sale.sale_items.forEach(item => {
+            let tipo = item.item_type.includes("Product") ? "Producto" : "Servicio";
+            let descripcion = item.item.description || item.item.name;
+            let total = (item.quantity * parseFloat(item.unit_price)).toFixed(2);
+            
+            html += `
+                <tr>
+                    <td>${tipo}</td>
+                    <td>${descripcion}</td>
+                    <td class="text-center">${item.quantity}</td>
+                    <td class="text-end">S/. ${parseFloat(item.unit_price).toFixed(2)}</td>
+                    <td class="text-end">S/. ${total}</td>
+                </tr>
             `;
-                    listaDetalles.appendChild(fila);
+        });
+        
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-3">
+                    <div class="border rounded p-3" style="min-width: 250px;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-medium">SubTotal:</span>
+                            <span class="fw-bold">S/. ${(data.sale.total_price - data.sale.igv).toFixed(2)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-medium">IGV:</span>
+                            <span class="fw-bold">S/. ${parseFloat(data.sale.igv).toFixed(2)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2">
+                            <span class="fw-bold">Total:</span>
+                            <span class="fw-bold text-primary fs-5">S/. ${parseFloat(data.sale.total_price).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Agregar devoluciones si existen
+        if (data.sale.devoluciones && data.sale.devoluciones.length > 0) {
+            html += `
+                <div class="info-section">
+                    <h4><i class="bi bi-arrow-return-left me-2 text-blue-600"></i>Devoluciones</h4>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            data.sale.devoluciones.forEach(devolucion => {
+                devolucion.items.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>${item.sale_item.item.description || item.sale_item.item.name}</td>
+                            <td class="text-center">${item.quantity_returned}</td>
+                            <td>${new Date(devolucion.created_at).toLocaleString()}</td>
+                            <td>${devolucion.user_register ? devolucion.user_register.name : 'N/A'}</td>
+                            <td>${devolucion.reason || 'Sin motivo'}</td>
+                        </tr>
+                    `;
                 });
-
-                // Limpiar la tabla de devoluciones
-                let listaDevoluciones = document.getElementById("listaDevoluciones");
-                let devolucionesContainer = document.getElementById("devolucionesContainer");
-                listaDevoluciones.innerHTML = "";
-
-                // Llenar la tabla de devoluciones si existen
-                if (data.sale.devoluciones && data.sale.devoluciones.length > 0) {
-                    devolucionesContainer.classList.remove("hidden");
-                    data.sale.devoluciones.forEach(devolucion => {
-                        devolucion.items.forEach(item => {
-                            let fila = document.createElement("tr");
-                            fila.innerHTML = `
-                                <td class="py-2 px-3">${item.sale_item.item.description || item.sale_item.item.name}</td>
-                                <td class="py-2 px-3 text-center">${item.quantity_returned}</td>
-                                <td class="py-2 px-3">${new Date(devolucion.created_at).toLocaleString()}</td>
-                                <td class="py-2 px-3">${devolucion.user_register ? devolucion.user_register.name : 'N/A'}</td>
-                                <td class="py-2 px-3">${devolucion.reason || 'Sin motivo'}</td>
-                            `;
-                            listaDevoluciones.appendChild(fila);
-                        });
-                    });
-                } else {
-                    devolucionesContainer.classList.add("hidden");
-                }
-
-                // Mostrar el modal
-                document.getElementById("detalleModal").classList.remove("hidden");
-            } catch (error) {
-                console.error("Error obteniendo los detalles:", error);
-            }
-        }
-        async function deleteSale(saleId) {
-
-            const result = await Swal.fire({
-                title: 'Ests seguro?',
-                text: "No podrs revertir esta accin",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'S, eliminar',
-                cancelButtonText: 'Cancelar'
             });
-            if (!result.isConfirmed) {
-                return;
-            }
-
-            try {
-                let url = `{{ route('sales.destroy', ':id') }}`.replace(':id', saleId);
-                let response = await fetch(url, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                });
-
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Venta Eliminada',
-                        text: 'La venta se ha eliminado correctamente',
-                        showConfirmButton: false,
-                        timer: 2000
-                    })
-                    // La venta se elimino correctamente
-                    finAllSales();
-                } else {
-                    console.error("Error al eliminar la venta");
-                }
-            } catch (error) {
-                console.error("Error al eliminar la venta:", error);
-            }
-        }
-        async function generarPDF(saleId) {
-            try {
-                let url = `{{ route('sales.pdf', ':id') }}`.replace(':id', saleId);
-                window.open(url, '_blank');
-            } catch (error) {
-                console.error("Error al generar el PDF:", error);
-            }
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
         }
         
-         async function generarPDFNota(saleId) {
-            try {
-                let url = `{{ route('salesNota.pdf', ':id') }}`.replace(':id', saleId);
-                window.open(url, '_blank');
-            } catch (error) {
-                console.error("Error al generar el PDF:", error);
+        content.innerHTML = html;
+    } catch (error) {
+        console.error("Error obteniendo los detalles:", error);
+        content.innerHTML = `
+            <div class="text-center py-5">
+                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                <h6 class="text-danger mt-3">Error al cargar los detalles</h6>
+                <p class="text-muted">Por favor, intenta nuevamente</p>
+                <button class="btn btn-outline-primary" onclick="verDetalles(${saleId})">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Función para eliminar venta
+async function deleteSale(saleId) {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (!result.isConfirmed) return;
+    
+    try {
+        let url = `{{ route('sales.destroy', ':id') }}`.replace(':id', saleId);
+        let response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
-        }
-
-        function cerrarModal() {
-            document.getElementById("detalleModal").classList.add("hidden");
-        }
-        // fin de detalles
-        document.addEventListener('DOMContentLoaded', () => {
-            window.authUserId = @json(auth()->user()->id);
-            // calculamos la fecha actual
-            let fecha_desde = document.getElementById('fecha_desde');
-            let fecha_hasta = document.getElementById('fecha_hasta');
-
-            let today = new Date();
-            let year = today.getFullYear();
-            let month = String(today.getMonth() + 1).padStart(2, '0'); // Meses van de 0 a 11, por eso se suma 1
-            let day = String(today.getDate()).padStart(2, '0');
-
-            let formattedDate = `${year}-${month}-${day}`;
-
-            fecha_desde.value = formattedDate;
-            fecha_hasta.value = formattedDate;
-
-            if (fecha_desde && fecha_hasta) {
-                finAllSales();
-            }
-            //fin calculo
         });
-
-        // enviarSunat
-        async function enviarSunat(saleId) {
-            try {
-                let url = `{{ route('sales.enviarSunat', ':id') }}`.replace(':id', saleId);
-                let response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                });
-
-                let respuesta = await response.json();
-                console.log(respuesta)
-
-                if (response.ok) {
-                    finAllSales();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Venta Enviada a la SUNAT',
-                        text: 'La venta se ha enviado correctamente a la SUNAT',
-                        showConfirmButton: false,
-                        timer: 2000
-                    })
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Al enviar la venta a la SUNAT',
-                        showConfirmButton: false,
-                        timer: 2000
-                    })
-                    console.error("Error al enviar la venta a la SUNAT");
-                }
-            } catch (error) {
-                console.error("Error al enviar la venta a la SUNAT:", error);
-            }
+        
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Venta Eliminada',
+                text: 'La venta se ha eliminado correctamente',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            // Recargar la página para actualizar la tabla
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            throw new Error('Error al eliminar la venta');
         }
-    </script>
+    } catch (error) {
+        console.error("Error al eliminar la venta:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo eliminar la venta',
+            showConfirmButton: true
+        });
+    }
+}
+
+// Función para generar PDF
+function generarPDF(saleId) {
+    let url = `{{ route('sales.pdf', ':id') }}`.replace(':id', saleId);
+    window.open(url, '_blank');
+}
+
+// Función para generar PDF de nota de venta
+function generarPDFNota(saleId) {
+    let url = `{{ route('salesNota.pdf', ':id') }}`.replace(':id', saleId);
+    window.open(url, '_blank');
+}
+
+// Función para enviar a SUNAT
+async function enviarSunat(saleId) {
+    try {
+        let url = `{{ route('sales.enviarSunat', ':id') }}`.replace(':id', saleId);
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+        
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Venta Enviada a SUNAT',
+                text: 'La venta se ha enviado correctamente',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            throw new Error('Error al enviar a SUNAT');
+        }
+    } catch (error) {
+        console.error("Error al enviar a SUNAT:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo enviar la venta a SUNAT',
+            showConfirmButton: true
+        });
+    }
+}
+
+// Inicializar DataTables
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtro personalizado de DataTables
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+            if (settings.nTable.id !== 'salesTable') {
+                return true;
+            }
+            
+            let documentTypeId = document.getElementById('document_type_id').value;
+            let fechaDesde = document.getElementById('fecha_desde').value;
+            let fechaHasta = document.getElementById('fecha_hasta').value;
+            
+            let row = window.salesTable.row(dataIndex).node();
+            if (!row) return true;
+            
+            // Filtrar por tipo de documento
+            if (documentTypeId && row.dataset.documentType != documentTypeId) {
+                return false;
+            }
+            
+            // Filtrar por rango de fechas
+            if (fechaDesde || fechaHasta) {
+                let rowFecha = row.dataset.fecha;
+                if (fechaDesde && rowFecha < fechaDesde) return false;
+                if (fechaHasta && rowFecha > fechaHasta) return false;
+            }
+            
+            return true;
+        }
+    );
+    
+    // Inicializar DataTable
+    if ($.fn.DataTable) {
+        window.salesTable = $('#salesTable').DataTable({
+            deferRender: true,
+            processing: false,
+            stateSave: false,
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            language: {
+                search: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ ventas",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ ventas",
+                infoEmpty: "0 ventas",
+                infoFiltered: "(filtrado de _MAX_ totales)",
+                zeroRecords: "No se encontraron ventas",
+                emptyTable: "No hay ventas registradas",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                }
+            },
+            dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+            columnDefs: [
+                { targets: [10], orderable: false }, // Acciones no ordenables
+                { targets: [10], className: 'text-center' },
+                { targets: [6, 7, 8], className: 'text-right' } // Montos alineados a la derecha
+            ],
+            order: [[9, 'desc']], // Ordenar por fecha descendente
+            autoWidth: false,
+            scrollX: false
+        });
+    }
+});
+
+// Función para aplicar filtros
+function aplicarFiltros() {
+    if (window.salesTable) {
+        window.salesTable.draw();
+    }
+}
+
+
+</script>
 
 </x-app-layout>

@@ -1,112 +1,143 @@
+<!-- resources\views\mechanic\index.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{-- Registro de Socios --}}
-        </h2>
-    </x-slot>
+    <x-breadcrumb title="Lista de Mecánicos" subtitle="mecánicos" />
 
-    <div class="max-w-7xl  mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">Lista de Mecanicos</h2>
-        </div>
+    <!-- Contenedor principal -->
+    <div class="px-3 py-4">
+        <!-- Mensajes de éxito o error -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                {{ session('success') }}
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                {{ session('error') }}
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-sm">
+                <i class="bi bi-exclamation-circle mr-1"></i>{{ session('error') }}
             </div>
         @endif
 
-        <!-- Tabla de registros -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-5">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº Codigo
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nombres y Apellidos
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nº DNI
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Telefono
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Direcion
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Correo
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estado
-                        </th>
-                        <th class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acciones
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($mechanics as $mechanic)
+        <!-- Tabla -->
+        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+            <!-- Tabla -->
+            <div class="overflow-x-auto">
+                <table id="mechanicsTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">
-                                {{ $mechanic->codigo }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-900">
-                                {{ $mechanic->name . ' ' . $mechanic->apellidos }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $mechanic->dni }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $mechanic->telefono }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $mechanic->direccion }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $mechanic->correo }}
-                            </td>
-                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <button type="button" id ="btn-{{ $mechanic->id }}"
-                                    class=" px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow-md {{ $mechanic->status_mechanic == 1 ? 'bg-green-200 text-green-700' : 'text-red-700  bg-red-200' }}"
-                                    onclick="confirmDelete({{ $mechanic->id }}, '{{ $mechanic->status == 0 ? '¿Está seguro de desactivar este registro?' : '¿Está seguro de activar este registro?' }}')">
-                                    @if ($mechanic->status_mechanic == 1)
-                                        Disponible
-                                    @else
-                                        No disponible
-                                    @endif
-                                </button>
-                            </td>
-                            {{-- <td class="px-3 py-1 whitespace-nowrap text-sm font-medium">
-                                <a href="" class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                    Editar
-                                </a>
-                            </td> --}}
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Código</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Nombres y Apellidos</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">DNI</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Teléfono</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Dirección</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Correo</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Estado</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-3 py-1 text-center text-gray-500">
-                                No hay registros disponibles
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach($mechanics as $mechanic)
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $mechanic->codigo }}</td>
+                                <td class="px-3 py-2 text-sm font-medium text-gray-900 text-center">
+                                    {{ $mechanic->name }} {{ $mechanic->apellidos }}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $mechanic->dni }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $mechanic->telefono }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $mechanic->direccion }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $mechanic->correo }}</td>
+                                <td class="px-3 py-2 text-center">
+                                    <button type="button" 
+                                            id="btn-{{ $mechanic->id }}"
+                                            class="px-2 py-1 inline-flex text-xs font-medium rounded-full 
+                                                {{ $mechanic->status_mechanic == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}"
+                                            onclick="confirmDelete({{ $mechanic->id }}, '{{ $mechanic->status_mechanic == 0 ? '¿Está seguro de activar este mecánico?' : '¿Está seguro de desactivar este mecánico?' }}')">
+                                        {{ $mechanic->status_mechanic == 1 ? 'Disponible' : 'No disponible' }}
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <!-- Mostrar los enlaces de paginación -->
-        {{-- @if ($registros instanceof \Illuminate\Pagination\LengthAwarePaginator && $registros->count() > 0)
-            {{ $registros->links() }}
-        @endif --}}
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Inicializar DataTables
+        document.addEventListener('DOMContentLoaded', function() {
+            if ($.fn.DataTable) {
+                $('#mechanicsTable').DataTable({
+                    deferRender: true,
+                    processing: false,
+                    stateSave: false,
+                    responsive: true,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                    language: {
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ mecánicos",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ mecánicos",
+                        infoEmpty: "0 mecánicos",
+                        infoFiltered: "(filtrado de _MAX_ totales)",
+                        zeroRecords: "No se encontraron mecánicos",
+                        emptyTable: "No hay mecánicos registrados",
+                        paginate: {
+                            first: "Primero",
+                            last: "Último",
+                            next: "Siguiente",
+                            previous: "Anterior"
+                        }
+                    },
+                    dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                    columnDefs: [
+                        { targets: [6], orderable: false }, // Estado no ordenable
+                        { targets: [6], className: 'text-center' }
+                    ],
+                    order: [[0, 'asc']], // Ordenar por código
+                    autoWidth: false,
+                    scrollX: false
+                });
+            }
+        });
 
+        // Función para confirmar cambio de estado (debes implementar el endpoint)
+        function confirmDelete(mechanicId, message) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, cambiar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Aquí debes implementar la lógica para cambiar el estado
+                    // Por ejemplo, hacer un fetch a una ruta específica
+                    Swal.fire(
+                        'Pendiente',
+                        'Debes implementar la ruta para cambiar el estado del mecánico',
+                        'info'
+                    );
+                }
+            });
+        }
+    </script>
+
+    <style>
+        /* FORZAR alineación centrada en tabla de mecánicos */
+        #mechanicsTable thead th {
+            text-align: center !important;
+        }
+        
+        #mechanicsTable tbody td {
+            text-align: center !important;
+        }
+        
+        /* Línea del encabezado más visible */
+        #mechanicsTable thead th {
+            border-bottom: 2px solid #6b7280 !important;
+        }
+    </style>
 
 </x-app-layout>

@@ -1,6 +1,6 @@
 <!-- resources\views\components\header.blade.php -->
 <!-- Header Desktop -->
-<header class="desktop-header" :style="'left: ' + (sidebarOpen ? '280px' : '60px')">
+<header class="desktop-header" :class="{'header-expanded': sidebarOpen, 'header-collapsed': !sidebarOpen}">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
