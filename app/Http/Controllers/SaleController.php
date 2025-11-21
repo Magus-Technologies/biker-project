@@ -136,7 +136,7 @@ class SaleController extends Controller
     {
         // return response()->json($request);
         try {
-            // 1?? Crear la Venta
+            // 1. Crear la Venta
             $sale = Sale::create([
                 'code' => $this->generateCode(),
                 'total_price' => $request->total,
@@ -149,8 +149,8 @@ class SaleController extends Controller
                 'document_type_id' => $request->document_type_id,
                 'companies_id' => $request->companies_id,
                 'payments_id' => $request->payments_id,
-                'mechanics_id' => $request->mechanics_id,
-                'districts_id' => $request->districts_id,
+                'mechanics_id' => $request->mechanics_id ? $request->mechanics_id : null,
+                'districts_id' => ($request->districts_id && $request->districts_id != 'todos') ? $request->districts_id : null,
                 'nro_dias' => $request->nro_dias,
                 'fecha_vencimiento' => $request->fecha_vencimiento,
             ]);
@@ -213,7 +213,10 @@ class SaleController extends Controller
                 }
             }
             if ($sale) {
-                return response()->json(['success' => 'Venta guardada correctamente'], 200);
+                return response()->json([
+                    'success' => 'Venta guardada correctamente',
+                    'sale_id' => $sale->id
+                ], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

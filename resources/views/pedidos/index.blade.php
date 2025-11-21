@@ -141,9 +141,9 @@
                                 @endif
 
                                 @if($pedido->status === 'convertido' && $pedido->sale_id)
-                                    <!-- Ver venta -->
-                                    <a href="{{ route('sale.detallesVenta', $pedido->sale_id) }}" class="text-green-600 hover:text-green-800 p-1" title="Ver venta">
-                                        <i class="bi bi-receipt"></i>
+                                    <!-- Ver PDF de venta -->
+                                    <a href="{{ route('sales.pdf', $pedido->sale_id) }}" target="_blank" class="text-green-600 hover:text-green-800 p-1" title="Ver PDF de venta">
+                                        <i class="bi bi-file-earmark-pdf"></i>
                                     </a>
                                 @endif
 

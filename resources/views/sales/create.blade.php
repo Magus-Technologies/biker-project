@@ -285,6 +285,121 @@
     const totalAmountEl = document.getElementById("totalAmount");
     const orderTableBody = document.getElementById("orderTableBody");
     let payments = [];
+    let pedidoId = null; // Para guardar el ID del pedido si viene de conversión
+
+    // Verificar si viene de un pedido
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        pedidoId = urlParams.get('pedido_id');
+
+        if (pedidoId) {
+            cargarDatosPedido(pedidoId);
+        }
+    });
+
+    // Función para cargar datos del pedido
+    async function cargarDatosPedido(id) {
+        try {
+            Swal.fire({
+                title: 'Cargando pedido...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            const response = await fetch(`${baseUrl}/pedido/convertir/${id}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const datos = result.datos;
+
+                // Cargar datos del cliente
+                document.getElementById('dni_personal').value = datos.customer_dni || '';
+                document.getElementById('nombres_apellidos').value = datos.customer_names_surnames || '';
+                document.getElementById('direccion').value = datos.customer_address || '';
+
+                // Cargar distrito si existe
+                if (datos.districts_id && datos.districts_id !== 'todos') {
+                    // Aquí necesitarías cargar la ubicación completa
+                    document.getElementById('districts_id').value = datos.districts_id;
+                }
+
+                // Cargar mecánico si existe
+                if (datos.mechanics_id) {
+                    document.getElementById('mechanics_id').value = datos.mechanics_id;
+                    // Obtener nombre del mecánico
+                    fetch(`${baseUrl}/quotation/mecanicos-disponibles`)
+                        .then(res => res.json())
+                        .then(mecanicos => {
+                            const mecanico = mecanicos.find(m => m.id == datos.mechanics_id);
+                            if (mecanico) {
+                                document.getElementById('datos_mecanico').value = `${mecanico.name} ${mecanico.apellidos}`;
+                            }
+                        });
+                }
+
+                // Cargar productos
+                if (datos.products && datos.products.length > 0) {
+                    for (const producto of datos.products) {
+                        // Buscar el producto completo con sus precios
+                        const productResponse = await fetch(`${baseUrl}/api/product?search=${encodeURIComponent(producto.description)}`);
+                        const productData = await productResponse.json();
+                        const productoCompleto = productData.find(p => p.id == producto.item_id);
+
+                        if (productoCompleto) {
+                            const productToAdd = {
+                                item_id: producto.item_id,
+                                description: producto.description,
+                                priceId: producto.priceId,
+                                unit_price: producto.unit_price,
+                                prices: productoCompleto.prices || [],
+                                quantity: producto.quantity,
+                                maximum_stock: productoCompleto.stock?.quantity || 999
+                            };
+
+                            // Agregar a quotationItems sin prices
+                            const productCopy = { ...productToAdd };
+                            delete productCopy.prices;
+                            quotationItems.push(productCopy);
+
+                            // Agregar a la tabla
+                            addProductTo(productToAdd);
+                        }
+                    }
+                }
+
+                // Cargar servicios
+                if (datos.services && datos.services.length > 0) {
+                    datos.services.forEach(servicio => {
+                        const newService = {
+                            id: Date.now() + Math.random(),
+                            name: servicio.name,
+                            price: servicio.price
+                        };
+                        services.push(newService);
+                    });
+                    updateTable();
+                }
+
+                // Actualizar cálculos
+                updateInformationCalculos();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pedido cargado',
+                    text: 'Los datos del pedido han sido cargados. Complete los datos de facturación.',
+                    confirmButtonColor: '#10b981',
+                    timer: 3000
+                });
+
+            } else {
+                Swal.fire('Error', result.message || 'No se pudo cargar el pedido', 'error');
+            }
+        } catch (error) {
+            console.error('Error al cargar pedido:', error);
+            Swal.fire('Error', 'Ocurrió un error al cargar el pedido', 'error');
+        }
+    }
+
     // credito y contado
     document.getElementById("paymentType").addEventListener("change", function() {
         let selectedValue = this.value;
@@ -468,7 +583,7 @@
     });
 
     function fetchProvinces(regionId) {
-        fetch(`/api/provinces/${regionId}`)
+        fetch(`${baseUrl}/api/provinces/${regionId}`)
             .then(response => response.json())
             .then(data => {
                 const provinceSelect = document.getElementById('provinces_id');
@@ -498,7 +613,7 @@
     }
 
     function fetchDistricts(provinceId) {
-        fetch(`/api/districts/${provinceId}`)
+        fetch(`${baseUrl}/api/districts/${provinceId}`)
             .then(response => response.json())
             .then(data => {
                 const districtSelect = document.getElementById('districts_id');
@@ -791,10 +906,76 @@
     function parseAmount(elementId) {
         return parseFloat(document.getElementById(elementId).textContent.replace("S/ ", "")) || 0;
     }
-    // guardar cotizacion 
+    // guardar cotizacion
     async function saveSales() {
         try {
             const orderData = buildOrderData();
+
+            // Validaciones antes de enviar
+            if (!orderData.document_type_id) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'Seleccione un tipo de documento',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            if (!orderData.companies_id) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'Seleccione una empresa',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            if (!orderData.payments_id) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'Seleccione un tipo de pago',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            if (quotationItems.length === 0 && services.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin productos',
+                    text: 'Agregue al menos un producto o servicio',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            if (!orderData.districts_id || orderData.districts_id === 'todos') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'Seleccione departamento, provincia y distrito',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            // Validar método de pago si es contado
+            if (orderData.payments_id === '1') {
+                const paymentMethod1 = document.getElementById('paymentMethod1').value;
+                if (!paymentMethod1) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campo requerido',
+                        text: 'Seleccione un método de pago',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                    return;
+                }
+            }
+
             salePaymentMethods()
 
             const response = await fetch('{{ route('sales.store') }}', {
@@ -805,29 +986,52 @@
                 },
                 body: JSON.stringify({
                     ...orderData,
-                    payments
+                    payments,
+                    pedido_id: pedidoId // Incluir el ID del pedido si existe
                 })
             });
 
-            if (!response.ok) throw new Error("Error en la petición");
             const data = await response.json();
-            
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || "Error en la petición");
+            }
+
+            // Si viene de un pedido, marcarlo como convertido
+            if (pedidoId && data.sale_id) {
+                try {
+                    await fetch(`${baseUrl}/pedido/marcar-convertido`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            pedido_id: pedidoId,
+                            sale_id: data.sale_id
+                        })
+                    });
+                } catch (e) {
+                    console.error('Error al marcar pedido como convertido:', e);
+                }
+            }
+
             Swal.fire({
                 icon: 'success',
                 title: '¡Venta guardada!',
-                text: 'La venta se ha guardado correctamente.',
+                text: pedidoId ? 'La venta se ha creado y el pedido ha sido convertido.' : 'La venta se ha guardado correctamente.',
                 confirmButtonColor: '#10b981',
                 timer: 2000,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = '/sales';
+                window.location.href = `${baseUrl}/sales`;
             });
         } catch (error) {
             console.error("Error al guardar la orden:", error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Error al guardar la orden.',
+                text: error.message || 'Error al guardar la orden.',
                 confirmButtonColor: '#ef4444'
             });
         }
@@ -872,7 +1076,7 @@
             return;
         }
 
-        fetch(`/api/services?query=${inputValue}`)
+        fetch(`${baseUrl}/api/services?query=${inputValue}`)
             .then(response => response.json())
             .then(data => {
                 suggestionsList.innerHTML = "";

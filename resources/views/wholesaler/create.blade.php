@@ -303,7 +303,7 @@
     });
 
     function fetchProvinces(regionId) {
-        fetch(`/api/provinces/${regionId}`)
+        fetch(`${baseUrl}/api/provinces/${regionId}`)
             .then(response => response.json())
             .then(data => {
                 const provinceSelect = document.getElementById('provinces_id');
@@ -333,7 +333,7 @@
     }
 
     function fetchDistricts(provinceId) {
-        fetch(`/api/districts/${provinceId}`)
+        fetch(`${baseUrl}/api/districts/${provinceId}`)
             .then(response => response.json())
             .then(data => {
                 const districtSelect = document.getElementById('districts_id');
@@ -474,7 +474,7 @@
             return;
         }
 
-        fetch(`/api/services?query=${inputValue}`)
+        fetch(`${baseUrl}/api/services?query=${inputValue}`)
             .then(response => response.json())
             .then(data => {
                 suggestionsList.innerHTML = "";

@@ -23,6 +23,8 @@
                     <input type="text" id="customer_names_surnames" placeholder="Nombre completo" class="w-full p-2 border rounded">
                 </div>
 
+                {{-- CAMPOS OPCIONALES - Descomentar si se necesitan --}}
+                {{--
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
                     <input type="text" id="customer_address" placeholder="Dirección del cliente" class="w-full p-2 border rounded">
@@ -42,13 +44,21 @@
                         <option value="todos">Distrito</option>
                     </select>
                 </div>
+                --}}
+
+                {{-- Campos ocultos para mantener compatibilidad --}}
+                <input type="hidden" id="customer_address" value="">
+                <input type="hidden" id="regions_id" value="todos">
+                <input type="hidden" id="provinces_id" value="todos">
+                <input type="hidden" id="districts_id" value="todos">
 
                 <!-- Botón para buscar productos -->
                 <button type="button" id="buscarProductos" class="bg-yellow-400 hover:bg-yellow-500 p-2 rounded w-full mb-4">
                     <i class="bi bi-search mr-1"></i> Consultar Productos
                 </button>
 
-                <!-- Servicios -->
+                {{-- SERVICIOS - OPCIONAL - Descomentar si se necesita --}}
+                {{--
                 <div class="border-t pt-4">
                     <h3 class="font-medium mb-2">Agregar Servicio</h3>
                     <div class="relative mb-2">
@@ -64,6 +74,7 @@
                         </button>
                     </div>
                 </div>
+                --}}
 
                 <!-- Mecánico -->
                 <div class="border-t pt-4 mt-4">
@@ -150,7 +161,8 @@
             </table>
         </div>
 
-        <!-- Tabla de Servicios -->
+        {{-- TABLA DE SERVICIOS - OPCIONAL - Descomentar si se necesita --}}
+        {{--
         <div class="mt-4 bg-white p-6 rounded-lg shadow">
             <h2 class="text-lg font-bold mb-4">Servicios</h2>
             <table class="w-full border-collapse border">
@@ -168,6 +180,7 @@
                 </tbody>
             </table>
         </div>
+        --}}
     </div>
 
     <!-- Modal de Productos -->
@@ -226,9 +239,9 @@
         // Buscar DNI
         document.getElementById('customer_dni').addEventListener('input', buscarDNI);
 
-        // Ubicación
-        document.getElementById('regions_id').addEventListener('change', fetchProvinces);
-        document.getElementById('provinces_id').addEventListener('change', fetchDistricts);
+        // UBICACIÓN - COMENTADO (campos ocultos)
+        // document.getElementById('regions_id').addEventListener('change', fetchProvinces);
+        // document.getElementById('provinces_id').addEventListener('change', fetchDistricts);
 
         // Productos
         document.getElementById('buscarProductos').addEventListener('click', () => {
@@ -237,9 +250,9 @@
         });
         document.getElementById('btnBuscarProduct').addEventListener('click', fetchProducts);
 
-        // Servicios
-        document.getElementById('service_name').addEventListener('input', searchServices);
-        document.getElementById('addService').addEventListener('click', addService);
+        // SERVICIOS - COMENTADO (sección oculta)
+        // document.getElementById('service_name').addEventListener('input', searchServices);
+        // document.getElementById('addService').addEventListener('click', addService);
     });
 
     // Funciones de Modal
@@ -580,8 +593,8 @@
             return;
         }
 
-        if (data.products.length === 0 && data.services.length === 0) {
-            Swal.fire('Error', 'Agregue al menos un producto o servicio', 'warning');
+        if (data.products.length === 0) {
+            Swal.fire('Error', 'Agregue al menos un producto', 'warning');
             return;
         }
 
