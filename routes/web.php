@@ -135,6 +135,9 @@ Route::group(
 
         // DESPACHOS
         Route::resource('despachos', App\Http\Controllers\DespachoController::class);
+        Route::post('/despacho/marcar-entregado', [App\Http\Controllers\DespachoController::class, 'marcarEntregado'])->name('despachos.marcarEntregado');
+        Route::post('/despacho/marcar-pendiente', [App\Http\Controllers\DespachoController::class, 'marcarPendiente'])->name('despachos.marcarPendiente');
+        Route::get('/despacho/filtrar', [App\Http\Controllers\DespachoController::class, 'filtrar'])->name('despachos.filtrar');
 
         //UNIDAD MEDIDA
         Route::resource('units', App\Http\Controllers\UnitController::class);

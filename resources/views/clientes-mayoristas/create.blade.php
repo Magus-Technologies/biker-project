@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function fetchProvinces(regionId) {
-        fetch( `/biker-project/public/api/provinces/${regionId}`)
+        fetch( `${baseUrl}/api/provinces/${regionId}`)
             .then(response => response.json())
             .then(data => {
                 const provinceSelect = document.getElementById('provinces_id');
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchDistricts(provinceId) {
-        fetch(`/biker-project/public/api/districts/${provinceId}`)
+        fetch(`${baseUrl}/api/districts/${provinceId}`)
             .then(response => response.json())
             .then(data => {
                 const districtSelect = document.getElementById('districts_id');

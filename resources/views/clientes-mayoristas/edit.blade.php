@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function fetchProvinces(regionId) {
-        fetch(`/api/provinces/${regionId}`)
+        fetch(`${baseUrl}/api/provinces/${regionId}`)
             .then(response => response.json())
             .then(data => {
                 const provinceSelect = document.getElementById('provinces_id');
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchDistricts(provinceId) {
-        fetch(`/api/districts/${provinceId}`)
+        fetch(`${baseUrl}/api/districts/${provinceId}`)
             .then(response => response.json())
             .then(data => {
                 const districtSelect = document.getElementById('districts_id');

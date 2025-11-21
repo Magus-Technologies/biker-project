@@ -32,7 +32,8 @@ class Sale extends Model
         'status_sunat',
         'nro_dias',
         'fecha_vencimiento',
-
+        'delivery_status',
+        'delivered_at',
     ];
 
 
@@ -78,6 +79,11 @@ class Sale extends Model
     public function districts()
     {
         return $this->belongsTo(District::class);
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'districts_id');
     }
     public function mechanic()
     {
