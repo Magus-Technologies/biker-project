@@ -501,37 +501,7 @@ async function enviarSunat(saleId) {
 
 // Inicializar DataTables
 document.addEventListener('DOMContentLoaded', function() {
-    // Filtro personalizado de DataTables
-    $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
-            if (settings.nTable.id !== 'salesTable') {
-                return true;
-            }
-            
-            let documentTypeId = document.getElementById('document_type_id').value;
-            let fechaDesde = document.getElementById('fecha_desde').value;
-            let fechaHasta = document.getElementById('fecha_hasta').value;
-            
-            let row = window.salesTable.row(dataIndex).node();
-            if (!row) return true;
-            
-            // Filtrar por tipo de documento
-            if (documentTypeId && row.dataset.documentType != documentTypeId) {
-                return false;
-            }
-            
-            // Filtrar por rango de fechas
-            if (fechaDesde || fechaHasta) {
-                let rowFecha = row.dataset.fecha;
-                if (fechaDesde && rowFecha < fechaDesde) return false;
-                if (fechaHasta && rowFecha > fechaHasta) return false;
-            }
-            
-            return true;
-        }
-    );
-    
-    // Inicializar DataTable
+    // Inicializar DataTable primero
     if ($.fn.DataTable) {
         window.salesTable = $('#salesTable').DataTable({
             deferRender: true,
@@ -565,6 +535,37 @@ document.addEventListener('DOMContentLoaded', function() {
             autoWidth: false,
             scrollX: false
         });
+
+        // Filtro personalizado de DataTables (después de inicializar)
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                if (settings.nTable.id !== 'salesTable') {
+                    return true;
+                }
+
+                let documentTypeId = document.getElementById('document_type_id').value;
+                let fechaDesde = document.getElementById('fecha_desde').value;
+                let fechaHasta = document.getElementById('fecha_hasta').value;
+
+                // Obtener la fila usando la API de DataTables
+                let row = settings.aoData[dataIndex].nTr;
+                if (!row) return true;
+
+                // Filtrar por tipo de documento
+                if (documentTypeId && row.dataset.documentType != documentTypeId) {
+                    return false;
+                }
+
+                // Filtrar por rango de fechas
+                if (fechaDesde || fechaHasta) {
+                    let rowFecha = row.dataset.fecha;
+                    if (fechaDesde && rowFecha < fechaDesde) return false;
+                    if (fechaHasta && rowFecha > fechaHasta) return false;
+                }
+
+                return true;
+            }
+        );
     }
 });
 

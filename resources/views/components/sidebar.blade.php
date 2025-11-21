@@ -5,7 +5,7 @@
         <nav class="nav flex-column">
             <!-- MENÚ PRINCIPAL -->
             <div class="nav-section">
-                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="/dashboard">
+                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-house-door"></i>
                     <span class="nav-text" x-show="sidebarOpen">Inicio</span>
                 </a>
@@ -40,6 +40,8 @@
             <x-sidebar.menu-section key="ventas" icon="bi-cart" title="Ventas" :routes="[
                 ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart-check', 'title' => 'Ventas'],
                 ['route' => 'sales.bulk-create', 'permission' => null, 'icon' => 'bi-cart-plus', 'title' => 'Ventas Mayoristas'],
+                ['route' => 'pedidos.index', 'permission' => null, 'icon' => 'bi-list-check', 'title' => 'Pedidos'],
+                ['route' => 'despachos.index', 'permission' => null, 'icon' => 'bi-truck', 'title' => 'Despacho'],
                 ['route' => 'devoluciones.index', 'permission' => null, 'icon' => 'bi-arrow-return-left', 'title' => 'Devoluciones']
             ]" />
             <x-sidebar.menu-item route="quotations.index" icon="bi-file-earmark-text" title="Cotizaciones" />

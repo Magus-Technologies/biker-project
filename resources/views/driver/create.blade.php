@@ -1,214 +1,315 @@
-<!-- resources\views\driver\create.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Registro de Conductor
-        </h2>
-    </x-slot>
-    <div class=" w-3/4 mx-auto py-8">
-        <!-- Botón de regresar -->
-        <div class="mb-4">
+    <!-- Breadcrumb -->
+    <x-breadcrumb 
+        title="Nuevo Cliente" 
+        parent="Clientes" 
+        parentUrl="{{ route('drives.index') }}"
+        subtitle="Crear" 
+    />
+
+    <div class="px-3 py-4">
+        <!-- Header -->
+        <div class="bg-white rounded-lg px-4 py-3 mb-3 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-700">
+                <i class="bi bi-person-plus mr-2 text-blue-600"></i>
+                Registro de Cliente
+            </h2>
             <a href="{{ route('drives.index') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow-md hover:bg-gray-700 transition">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
+               class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                <i class="bi bi-arrow-left mr-1"></i>
                 Regresar
             </a>
         </div>
 
-        <form id="formCustomer">
+        <form id="formCustomer" class="space-y-4">
             @csrf
-            <h5 class="text-lg font-semibold mb-4">Datos del Conductor</h5>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label for="tipo_doc" class="block text-sm font-medium text-gray-700">Tipo Documento</label>
-                    <select name="tipo_doc" id="tipo_doc"
-                        class="form-select block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                        <option value="">Seleccione un Documento</option>
-                        <option value="DNI">DNI</option>
-                        <option value="Pasaporte">Pasaporte</option>
-                        <option value="Carnet">Carnet de Extranjería</option>
-                    </select>
+            
+            <!-- Datos Personales -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <i class="bi bi-person-vcard mr-2 text-blue-600"></i>
+                        Datos Personales
+                    </h3>
                 </div>
-                <div>
-                    <label for="nro_documento" class="block text-sm font-medium text-gray-700">N° Documento <span class="text-red-500">*</span></label>
-                    <div class="flex mt-2">
-                        <input name="nro_documento" type="text" placeholder="Ingrese Documento" id="nro_documento" required
-                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                        <button id="buscarDni" class="ml-2 py-2 px-4 bg-yellow-500 text-white rounded-md"
-                            type="button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <!-- COMENTADO: Nacionalidad ya no se usa
-                <div>
-                    <label for="nacionalidad" class="block text-sm font-medium text-gray-700">Nacionalidad</label>
-                    <input type="text" name="nacionalidad" id="nacionalidad"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                -->
-                <div class="col-span-1 lg:col-span-1 row-span-4">
-                    <label for="photo" class="block text-sm font-medium text-gray-700">Foto</label>
-                    <div class="mt-2">
-                        <input type="file" id="photo" name="photo" accept="image/*"
-                            class="block w-full text-sm text-gray-500 file:py-2 file:px-4 file:border file:rounded-lg file:bg-gray-100 hover:file:bg-gray-200" />
-                        <div id="photo-preview"
-                            class="mt-2 flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg min-h-[120px]">
-                            <span id="photo-placeholder" class="text-gray-500">Sube una foto</span>
-                            <img id="preview-image" class="hidden max-w-full max-h-32 object-cover rounded" />
+                <div class="p-4">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Columna de Formulario -->
+                        <div class="flex-1">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Tipo Documento -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Tipo Documento
+                                    </label>
+                                    <select name="tipo_doc" id="tipo_doc" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Seleccione</option>
+                                        <option value="DNI" selected>DNI</option>
+                                        <option value="Pasaporte">Pasaporte</option>
+                                        <option value="Carnet">Carnet de Extranjería</option>
+                                    </select>
+                                </div>
+
+                                <!-- N° Documento -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        N° Documento <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="flex gap-2">
+                                        <input name="nro_documento" type="text" placeholder="12345678" id="nro_documento" required
+                                            class="flex-1 border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                        <button id="buscarDni" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 rounded-md transition-colors" type="button" title="Buscar DNI">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Nombres -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Nombres <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" placeholder="Nombres" name="nombres" id="nombres" required
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Apellido Paterno -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Apellido Paterno <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" placeholder="Apellido Paterno" name="apellido_paterno" id="apellido_paterno" required
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Apellido Materno -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Apellido Materno
+                                    </label>
+                                    <input type="text" placeholder="Apellido Materno" name="apellido_materno" id="apellido_materno"
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Fecha Nacimiento -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Fecha de Nacimiento
+                                    </label>
+                                    <input type="date" name="fecha_nacimiento"
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Teléfono -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Teléfono <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" placeholder="999999999" name="telefono" required
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Correo -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Correo Electrónico
+                                    </label>
+                                    <input type="email" placeholder="correo@ejemplo.com" name="correo"
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna de Foto -->
+                        <div class="lg:w-56 flex-shrink-0">
+                            <div class="sticky top-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="bi bi-camera mr-1"></i>
+                                    Foto
+                                </label>
+                                <div id="photo-preview" class="flex items-center justify-center p-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 h-56 mb-2">
+                                    <span id="photo-placeholder" class="text-gray-400 text-xs text-center">
+                                        <i class="bi bi-image text-3xl block mb-1"></i>
+                                        Vista previa
+                                    </span>
+                                    <img id="preview-image" class="hidden max-w-full max-h-full object-contain rounded" />
+                                </div>
+                                <input type="file" id="photo" name="photo" accept="image/*"
+                                    class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div>
-                    <label for="nombres" class="block text-sm font-medium text-gray-700">Nombres</label>
-                    <input type="text" placeholder="Nombre" name="nombres" id="nombres"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="apellido_paterno" class="block text-sm font-medium text-gray-700">Apellido
-                        Paterno</label>
-                    <input type="text" placeholder="Apellido Paterno" name="apellido_paterno" id="apellido_paterno"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="apellido_materno" class="block text-sm font-medium text-gray-700">Apellido
-                        Materno</label>
-                    <input type="text" placeholder="Apellido Materno" name="apellido_materno" id="apellido_materno"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-
-                <!-- COMENTADO: Nº de Licencia ya no se usa
-                <div>
-                    <label for="nro_licencia" class="block text-sm font-medium text-gray-700">Nº de Licencia</label>
-                    <input type="text" name="nro_licencia"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                -->
-                <!-- COMENTADO: Lic. Categoría ya no se usa
-                <div>
-                    <label for="licencia_categoria" class="block text-sm font-medium text-gray-700">Lic.
-                        Categoría</label>
-                    <select name="licencia_categoria"
-                        class="form-select block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                        <option value="">Seleccionar</option>
-                        <option value="AI">AI</option>
-                        <option value="AIIA">AIIA</option>
-                        <option value="AIIB">AIIB</option>
-                        <option value="AIIIA">AIIIA</option>
-                        <option value="AIIIB">AIIIB</option>
-                        <option value="AIIIC">AIIIC</option>
-                    </select>
-                </div>
-                -->
-                <div>
-                    <label for="nro_motor" class="block text-sm font-medium text-gray-700">Número de Motor</label>
-                    <input type="text" name="nro_motor"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <!-- NUEVO CAMPO: Número de Chasis -->
-                <div>
-                    <label for="nro_chasis" class="block text-sm font-medium text-gray-700">Número de Chasis <span class="text-red-500">*</span></label>
-                    <input type="text" name="nro_chasis" required
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <!-- NUEVO CAMPO: Número de Placa -->
-                <div>
-                    <label for="nro_placa" class="block text-sm font-medium text-gray-700">Número de Placa <span class="text-red-500">*</span></label>
-                    <input type="text" name="nro_placa" required
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="fecha_nacimiento" class="block text-sm font-medium text-gray-700">Fecha de
-                        Nacimiento</label>
-                    <input type="date" name="fecha_nacimiento"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="telefono" class="block text-sm font-medium text-gray-700">Nº de Teléfono <span class="text-red-500">*</span></label>
-                    <input type="text" name="telefono" required
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="correo" class="block text-sm font-medium text-gray-700">Correo</label>
-                    <input type="email" name="correo"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
             </div>
-            <div class="my-6 shadow-lg p-5 rounded-lg border-r-gray-500 " style="border: 2px solid rgb(215,215,215);">
-                <h5 class="text-lg font-semibold mb-4">Dirección</h5>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                        <label for="regions_id" class="block text-sm font-medium text-gray-700">Departamento</label>
-                        <select name="regions_id" id="regions_id" class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                            <option value="">Seleccione un Departamento</option>
-                            @foreach ($regions as $region)
-                                <option value="{{ $region->id }}">{{ $region->name }}</option>
-                            @endforeach
-                        </select>
-                        <input type="hidden" name="departamento" id="departamento_name">
-                    </div>
-                    <div>
-                        <label for="provinces_id" class="block text-sm font-medium text-gray-700">Provincia</label>
-                        <select name="provinces_id" id="provinces_id" class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm" disabled>
-                            <option value="">Seleccione una opción</option>
-                        </select>
-                        <input type="hidden" name="provincia" id="provincia_name">
-                    </div>
-                    <div>
-                        <label for="districts_id" class="block text-sm font-medium text-gray-700">Distrito</label>
-                        <select name="districts_id" id="districts_id" class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm" disabled>
-                            <option value="">Seleccione una opción</option>
-                        </select>
-                        <input type="hidden" name="distrito" id="distrito_name">
-                    </div>
-                    <div>
-                        <label for="direccion_detalle"
-                            class="block text-sm font-medium text-gray-700">Av./Cal./Pj./Urb./Mz./Lt./Otros</label>
-                        <input type="text" name="direccion_detalle"
-                            class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
+
+            <!-- Datos del Vehículo -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-3 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <i class="bi bi-car-front mr-2 text-purple-600"></i>
+                        Datos del Vehículo
+                    </h3>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Número de Placa -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Número de Placa <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" placeholder="ABC-123" name="nro_placa" required
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 uppercase">
+                        </div>
+
+                        <!-- Número de Motor -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Número de Motor
+                            </label>
+                            <input type="text" placeholder="Motor" name="nro_motor"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Número de Chasis -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Número de Chasis <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" placeholder="Chasis" name="nro_chasis" required
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="my-6 shadow-lg p-5 rounded-lg border-r-gray-500 " style="border: 2px solid rgb(215,215,215);">
-                <h5 class="text-lg font-semibold mb-4">Contacto de Emergencia</h5>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                        <label for="nombres_contacto" class="block text-sm font-medium text-gray-700">Nombres</label>
-                        <input type="text" name="nombres_contacto"
-                            class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                    </div>
-                    <div>
-                        <label for="telefono_contacto" class="block text-sm font-medium text-gray-700">N°
-                            Telefono</label>
-                        <input type="text" name="telefono_contacto"
-                            class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                    </div>
-                    <div>
-                        <label for="parentesco_contacto"
-                            class="block text-sm font-medium text-gray-700">Parentesco</label>
-                        <input type="text" name="parentesco_contacto"
-                            class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
+            <!-- Dirección -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <i class="bi bi-geo-alt mr-2 text-green-600"></i>
+                        Dirección
+                    </h3>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Departamento -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Departamento
+                            </label>
+                            <select name="regions_id" id="regions_id" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="">Seleccione</option>
+                                @foreach ($regions as $region)
+                                    <option value="{{ $region->id }}">{{ $region->name }}</option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="departamento" id="departamento_name">
+                        </div>
+
+                        <!-- Provincia -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Provincia
+                            </label>
+                            <select name="provinces_id" id="provinces_id" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500" disabled>
+                                <option value="">Seleccione</option>
+                            </select>
+                            <input type="hidden" name="provincia" id="provincia_name">
+                        </div>
+
+                        <!-- Distrito -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Distrito
+                            </label>
+                            <select name="districts_id" id="districts_id" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500" disabled>
+                                <option value="">Seleccione</option>
+                            </select>
+                            <input type="hidden" name="distrito" id="distrito_name">
+                        </div>
+
+                        <!-- Dirección Detalle -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Av./Cal./Pj./Urb.
+                            </label>
+                            <input type="text" placeholder="Dirección detallada" name="direccion_detalle"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="flex justify-center space-x-4 mt-6">
-                <button id="registrar"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
-                    type="submit">
-                    Registrar
+
+            <!-- Contacto de Emergencia -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-orange-50 px-4 py-3 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <i class="bi bi-telephone-plus mr-2 text-red-600"></i>
+                        Contacto de Emergencia
+                    </h3>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Nombres Contacto -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Nombres Completos
+                            </label>
+                            <input type="text" placeholder="Nombre del contacto" name="nombres_contacto"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Teléfono Contacto -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Teléfono
+                            </label>
+                            <input type="text" placeholder="999999999" name="telefono_contacto"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Parentesco -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Parentesco
+                            </label>
+                            <input type="text" placeholder="Ej: Padre, Madre, Hermano" name="parentesco_contacto"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end gap-3">
+                <a href="{{ route('drives.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                    <i class="bi bi-x-lg mr-1"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                    <i class="bi bi-save mr-1"></i>
+                    Registrar Cliente
                 </button>
             </div>
         </form>
     </div>
-</x-app-layout>
-<script>
+
+    <script>
     let form = document.getElementById('formCustomer');
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         let formData = new FormData(form);
+
+        // Mostrar loading
+        Swal.fire({
+            title: 'Guardando...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         fetch('{{ route('drives.store') }}', {
                 method: 'POST',
@@ -220,45 +321,35 @@
                         let errorMessages = '';
                         if (err.errors) {
                             for (let field in err.errors) {
-                                errorMessages += `${field}: ${err.errors[field].join(', ')}\n`;
+                                errorMessages += `• ${err.errors[field].join(', ')}\n`;
                             }
                         } else if (err.error) {
                             errorMessages = err.error;
-                        } else if (err.errorPago) {
-                            errorMessages = err.errorPago;
                         }
 
-                        if (errorMessages) {
-                            Swal.fire({
-                                title: 'Errores de Validación',
-                                text: errorMessages,
-                                icon: 'error',
-                                confirmButtonText: 'Aceptar'
-                            });
-                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Errores de Validación',
+                            text: errorMessages,
+                            confirmButtonColor: '#ef4444'
+                        });
 
                         throw new Error('Error en la respuesta del servidor');
                     });
                 }
-
                 return response.json();
             })
             .then(data => {
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: '¡Éxito!',
+                        title: '¡Cliente registrado!',
                         text: data.message,
-                        showConfirmButton: false,
-                        timer: 2000
+                        confirmButtonColor: '#10b981',
+                        timer: 2000,
+                        showConfirmButton: false
                     }).then(() => {
-                        // Limpiar formulario después del éxito
-                        form.reset();
-                        document.getElementById('preview-image').classList.add('hidden');
-                        document.getElementById('photo-placeholder').classList.remove('hidden');
-                        // Resetear selects
-                        clearSelect('provinces_id');
-                        clearSelect('districts_id');
+                        window.location.href = '{{ route("drives.index") }}';
                     });
                 }
             })
@@ -268,12 +359,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        // BUSCADOR DEPARTAMENTO PROVINCIA DISTRITO
+        // Departamento -> Provincia -> Distrito
         document.getElementById('regions_id').addEventListener('change', function() {
             const regionId = this.value;
             const selectedOption = this.options[this.selectedIndex];
-            
-            // Guardar el nombre del departamento
             document.getElementById('departamento_name').value = selectedOption.text;
             
             if (regionId !== '') {
@@ -288,8 +377,6 @@
         document.getElementById('provinces_id').addEventListener('change', function() {
             const provinceId = this.value;
             const selectedOption = this.options[this.selectedIndex];
-            
-            // Guardar el nombre de la provincia
             document.getElementById('provincia_name').value = selectedOption.text;
             
             if (provinceId !== '') {
@@ -302,12 +389,11 @@
 
         document.getElementById('districts_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
-            // Guardar el nombre del distrito
             document.getElementById('distrito_name').value = selectedOption.text;
         });
 
         function fetchProvinces(regionId) {
-            fetch(`/api/provinces/${regionId}`)
+            fetch(`${baseUrl}/api/provinces/${regionId}`)
                 .then(response => response.json())
                 .then(data => {
                     const provinceSelect = document.getElementById('provinces_id');
@@ -315,23 +401,23 @@
                     clearSelect('districts_id');
                     updateSelectOptions('provinces_id', data.provinces);
                 })
-                .catch(error => console.error('Error fetching provinces:', error));
+                .catch(error => console.error('Error:', error));
         }
 
         function fetchDistricts(provinceId) {
-            fetch(`/api/districts/${provinceId}`)
+            fetch(`${baseUrl}/api/districts/${provinceId}`)
                 .then(response => response.json())
                 .then(data => {
                     const districtSelect = document.getElementById('districts_id');
                     districtSelect.removeAttribute('disabled');
                     updateSelectOptions('districts_id', data.districts);
                 })
-                .catch(error => console.error('Error fetching districts:', error));
+                .catch(error => console.error('Error:', error));
         }
 
         function updateSelectOptions(selectId, options) {
             const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">Seleccione una opción</option>';
+            select.innerHTML = '<option value="">Seleccione</option>';
             options.forEach(option => {
                 const opt = document.createElement('option');
                 opt.value = option.id;
@@ -342,10 +428,9 @@
 
         function clearSelect(selectId) {
             const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">Seleccione una opción</option>';
+            select.innerHTML = '<option value="">Seleccione</option>';
             select.setAttribute('disabled', 'disabled');
             
-            // Limpiar campos hidden correspondientes
             if (selectId === 'provinces_id') {
                 document.getElementById('provincia_name').value = '';
                 document.getElementById('distrito_name').value = '';
@@ -376,61 +461,47 @@
         });
 
         // API DNI
-        const Inputnum_doc = document.getElementById('nro_documento');
-        const token =
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InN5c3RlbWNyYWZ0LnBlQGdtYWlsLmNvbSJ9.yuNS5hRaC0hCwymX_PjXRoSZJWLNNBeOdlLRSUGlHGA';
+        const inputDni = document.getElementById('nro_documento');
+        const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InN5c3RlbWNyYWZ0LnBlQGdtYWlsLmNvbSJ9.yuNS5hRaC0hCwymX_PjXRoSZJWLNNBeOdlLRSUGlHGA';
 
-        Inputnum_doc.addEventListener('input', () => {
-            const num_doc = Inputnum_doc.value;
-            if (num_doc.length === 8) {
-                fetch(`https://dniruc.apisperu.com/api/v1/dni/${num_doc}?token=${token}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error en la solicitud');
-                        }
-                        return response.json();
-                    })
+        inputDni.addEventListener('input', () => {
+            const dni = inputDni.value;
+            if (dni.length === 8) {
+                fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}?token=${token}`)
+                    .then(response => response.json())
                     .then(data => {
                         if (data.success === false) {
                             Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
+                                icon: 'warning',
+                                title: 'DNI no encontrado',
                                 text: data.message || 'No se pudo encontrar el DNI',
-                                showConfirmButton: false,
-                                timer: 2000
+                                timer: 2000,
+                                showConfirmButton: false
                             });
-                            document.getElementById('apellido_paterno').value = '';
-                            document.getElementById('apellido_materno').value = '';
-                            document.getElementById('nombres').value = '';
                         } else {
-                            document.getElementById('apellido_paterno').value = data
-                                .apellidoPaterno || '';
-                            document.getElementById('apellido_materno').value = data
-                                .apellidoMaterno || '';
+                            document.getElementById('apellido_paterno').value = data.apellidoPaterno || '';
+                            document.getElementById('apellido_materno').value = data.apellidoMaterno || '';
                             document.getElementById('nombres').value = data.nombres || '';
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'DNI encontrado',
+                                timer: 1000,
+                                showConfirmButton: false
+                            });
                         }
-
                     })
                     .catch(error => {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Hubo un problema con la solicitud',
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
+                        console.error('Error:', error);
                     });
-            } else {
-                document.getElementById('apellido_paterno').value = '';
-                document.getElementById('apellido_materno').value = '';
-                document.getElementById('nombres').value = '';
             }
         });
 
-        // Hacer las funciones globales para que puedan ser llamadas desde otros lugares
+        // Hacer funciones globales
         window.clearSelect = clearSelect;
         window.updateSelectOptions = updateSelectOptions;
         window.fetchProvinces = fetchProvinces;
         window.fetchDistricts = fetchDistricts;
-    })
-</script>
+    });
+    </script>
+</x-app-layout>

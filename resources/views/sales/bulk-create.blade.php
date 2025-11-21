@@ -360,13 +360,7 @@
 
             <!-- Tabla de Productos -->
             <div class="mt-6 bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-bold mb-4">Producto</h2>
-                <div class="mb-4 flex items-center justify-end">
-                    <div class="w-5/12">
-                        <input type="text" placeholder="Buscar por nombre del producto..."
-                            class="w-full p-2 border rounded" id="searchProductList_${tabId}">
-                    </div>
-                </div>
+                <h2 class="text-lg font-bold mb-4">Productos Agregados</h2>
                 <table class="w-full border-collapse border border-gray-300" id="orderTable_${tabId}">
                     <thead>
                         <tr class="bg-gray-200">
@@ -380,9 +374,6 @@
                         </tr>
                     </thead>
                     <tbody id="orderTableBody_${tabId}">
-                        <tr id="emptyRow_${tabId}">
-                            <td class="border p-2 text-center" colspan="7">No hay productos agregados</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -407,6 +398,38 @@
     // Inicializar eventos para un tab
     function initializeSaleTab(tabId) {
         const data = salesData.get(tabId);
+
+        // Inicializar DataTable para la tabla de productos
+        if ($.fn.DataTable) {
+            data.dataTable = $(`#orderTable_${tabId}`).DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
+                language: {
+                    search: "Buscar:",
+                    lengthMenu: "Mostrar _MENU_ productos",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ productos",
+                    infoEmpty: "0 productos",
+                    infoFiltered: "(filtrado de _MAX_ totales)",
+                    zeroRecords: "No se encontraron productos",
+                    emptyTable: "No hay productos agregados",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                },
+                dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                columnDefs: [
+                    { targets: [6], orderable: false },
+                    { targets: [0], className: 'text-center' },
+                    { targets: [4, 5], className: 'text-right' }
+                ],
+                order: [[0, 'asc']],
+                autoWidth: false
+            });
+        }
 
         // Evento para buscar DNI
         const dniInput = document.getElementById(`dni_personal_${tabId}`);
@@ -448,12 +471,6 @@
         const btnBuscar = document.getElementById(`btnBuscarProduct_${tabId}`);
         if (btnBuscar) {
             btnBuscar.addEventListener('click', () => fetchProducts(tabId));
-        }
-
-        // Evento para buscar en lista de productos
-        const searchList = document.getElementById(`searchProductList_${tabId}`);
-        if (searchList) {
-            searchList.addEventListener('input', () => filterProductList(tabId));
         }
 
         // Eventos para departamento/provincia/distrito
@@ -507,6 +524,12 @@
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
+                // Destruir DataTable antes de eliminar el contenido
+                const data = salesData.get(tabId);
+                if (data && data.dataTable) {
+                    data.dataTable.destroy();
+                }
+
                 document.getElementById(`tab-${tabId}`)?.remove();
                 document.getElementById(`content-${tabId}`)?.remove();
                 salesData.delete(tabId);
@@ -629,7 +652,7 @@
     function fetchProvinces(tabId) {
         const regionId = document.getElementById(`regions_id_${tabId}`).value;
         if (regionId !== 'todos') {
-            fetch(`/api/provinces/${regionId}`)
+            fetch(`${baseUrl}/api/provinces/${regionId}`)
                 .then(response => response.json())
                 .then(data => {
                     const provinceSelect = document.getElementById(`provinces_id_${tabId}`);
@@ -647,7 +670,7 @@
     function fetchDistricts(tabId) {
         const provinceId = document.getElementById(`provinces_id_${tabId}`).value;
         if (provinceId !== 'todos') {
-            fetch(`/api/districts/${provinceId}`)
+            fetch(`${baseUrl}/api/districts/${provinceId}`)
                 .then(response => response.json())
                 .then(data => {
                     const districtSelect = document.getElementById(`districts_id_${tabId}`);
@@ -744,7 +767,7 @@
             return;
         }
 
-        fetch(`/api/services?query=${inputValue}`)
+        fetch(`${baseUrl}/api/services?query=${inputValue}`)
             .then(response => response.json())
             .then(data => {
                 suggestionsList.innerHTML = "";
@@ -777,7 +800,7 @@
         const tiendaId = document.getElementById(`tienda_id_${tabId}`).value;
         const search = document.getElementById(`searchProduct_${tabId}`).value;
 
-        fetch('/api/product?tienda_id=' + tiendaId + '&search=' + search)
+        fetch(`${baseUrl}/api/product?tienda_id=${tiendaId}&search=${search}`)
             .then(res => res.json())
             .then(products => {
                 let allProducts = products
@@ -866,28 +889,20 @@
 
     function addProductToTable(tabId, product) {
         const data = salesData.get(tabId);
-        const emptyRow = document.getElementById(`emptyRow_${tabId}`);
-        if (emptyRow) {
-            emptyRow.remove();
-        }
-
         data.orderCount++;
-        const orderTableBody = document.getElementById(`orderTableBody_${tabId}`);
-        const orderRow = document.createElement("tr");
-        orderRow.setAttribute("data-product-id", product.item_id);
-        orderRow.innerHTML = `
-            <td class="border p-2 text-center">${data.orderCount}</td>
-            <td class="border p-2">${product.description}</td>
-            <td class="border p-2">
-                <input type="number" class="p-2 border rounded"
+
+        // Crear la fila con DataTables API
+        if (data.dataTable) {
+            const rowNode = data.dataTable.row.add([
+                data.orderCount,
+                product.description,
+                `<input type="number" class="p-2 border rounded"
                        value="${product.quantity}"
                        max="${product.maximum_stock}"
                        min="1"
                        style="width: 60px;"
-                       onchange="updatePriceAndTotal('${tabId}', ${product.item_id})">
-            </td>
-            <td class="border p-2">
-                <select class="p-2 border rounded" style="width: 120px;"
+                       onchange="updatePriceAndTotal('${tabId}', ${product.item_id})">`,
+                `<select class="p-2 border rounded" style="width: 120px;"
                         onchange="updatePriceAndTotal('${tabId}', ${product.item_id})"
                         id="priceSelect_${tabId}_${product.item_id}">
                     <option value="">Seleccionar precio</option>
@@ -897,15 +912,15 @@
                                 ${precio.id == product.priceId ? 'selected' : ''}>
                             ${precio.type} - ${precio.price}
                         </option>`).join('')}
-                </select>
-            </td>
-            <td class="border p-2" id="priceValue_${tabId}_${product.item_id}" style="text-align: right;">${product.unit_price}</td>
-            <td class="border p-2" id="totalValue_${tabId}_${product.item_id}" style="text-align: right;">${product.unit_price * product.quantity}</td>
-            <td class="border p-2 text-center">
-                <button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteProduct('${tabId}', ${product.item_id})">Eliminar</button>
-            </td>
-        `;
-        orderTableBody.appendChild(orderRow);
+                </select>`,
+                `<span id="priceValue_${tabId}_${product.item_id}">${product.unit_price}</span>`,
+                `<span id="totalValue_${tabId}_${product.item_id}">${product.unit_price * product.quantity}</span>`,
+                `<button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteProduct('${tabId}', ${product.item_id})">Eliminar</button>`
+            ]).draw(false).node();
+
+            // Agregar atributo data-product-id a la fila
+            $(rowNode).attr('data-product-id', product.item_id);
+        }
     }
 
     function updatePriceAndTotal(tabId, productId) {
@@ -935,33 +950,16 @@
     function deleteProduct(tabId, productId) {
         const data = salesData.get(tabId);
         data.quotationItems = data.quotationItems.filter(product => product.item_id != productId);
-        const row = document.querySelector(`#orderTableBody_${tabId} tr[data-product-id="${productId}"]`);
-        if (row) {
-            row.remove();
-        }
-        updateCalculations(tabId);
-    }
 
-    function filterProductList(tabId) {
-        const data = salesData.get(tabId);
-        const searchValue = document.getElementById(`searchProductList_${tabId}`).value.toLowerCase();
-        const filteredItems = data.quotationItems.filter(item =>
-            item.description.toLowerCase().includes(searchValue)
-        );
-
-        // Actualizar visualización
-        const orderTableBody = document.getElementById(`orderTableBody_${tabId}`);
-        const rows = orderTableBody.querySelectorAll('tr[data-product-id]');
-
-        rows.forEach(row => {
-            const productId = row.getAttribute('data-product-id');
-            const item = data.quotationItems.find(i => i.item_id == productId);
-            if (item && item.description.toLowerCase().includes(searchValue)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+        // Eliminar fila usando DataTables API
+        if (data.dataTable) {
+            const row = data.dataTable.row(`tr[data-product-id="${productId}"]`);
+            if (row.length) {
+                row.remove().draw(false);
             }
-        });
+        }
+
+        updateCalculations(tabId);
     }
 
     // Función para actualizar cálculos
