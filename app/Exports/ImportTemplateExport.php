@@ -33,31 +33,31 @@ class ImportTemplateExport implements FromArray, WithHeadings, WithColumnWidths
 
     public function array(): array
     {
-        // Obtener opciones de la base de datos para orientar al usuario
-        $tiendas = Tienda::pluck('nombre')->implode(', ');
-        $brands = Brand::pluck('name')->implode(', ');
-        $units = Unit::pluck('name')->implode(', ');
+        // Obtener la primera tienda como ejemplo
+        $tiendaEjemplo = Tienda::first();
+        $brandEjemplo = Brand::first();
+        $unitEjemplo = Unit::first();
 
         return [
             // Fila de ejemplo con sugerencias sobre qué ingresar
             [
-                'Ej: P001',
-                'Ej: 156001',
-                'Ej: Shampoo Hidratante 500ml',
-                'Ej: XYZ-123',
-                'Ej: Pasillo 3, Estante 2',
-                "Ej: $tiendas",
-                "Ej: $brands",
-                "Ej: $units",
-                'Ej: 100.00',   // Precio Compra
-                'Ej: 90.00',    // Precio Mayorista
-                'Ej: 110.00',   // Precio Sucursal A
-                'Ej: 115.00',   // Precio Sucursal B
-                'Ej: 50',       // Cantidad en Stock
-                'Ej: 10'        // Stock Mínimo
+                'P001',
+                '156001',
+                'Shampoo Hidratante 500ml',
+                'XYZ-123',
+                'Pasillo 3, Estante 2',
+                $tiendaEjemplo ? $tiendaEjemplo->nombre : 'Tienda Principal',
+                $brandEjemplo ? $brandEjemplo->name : 'Marca Ejemplo',
+                $unitEjemplo ? $unitEjemplo->name : 'Unidad',
+                '100.00',   // Precio Compra
+                '90.00',    // Precio Mayorista
+                '110.00',   // Precio Sucursal A
+                '115.00',   // Precio Sucursal B
+                '50',       // Cantidad en Stock
+                '10'        // Stock Mínimo
             ],
             // Primera fila de datos reales vacía (para que el usuario empiece a llenar aquí)
-            ['', '', '', '', '', '', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         ];
     }
 

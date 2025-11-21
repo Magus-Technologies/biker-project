@@ -124,6 +124,18 @@ Route::group(
 
         Route::get('/sale/pdf/nota/{id}', [SaleController::class, 'generatePDFNotaVenta'])->name('salesNota.pdf');
         Route::post('/sale/enviar-sunat/{id}', [SaleController::class, 'enviarSunat'])->name('sales.enviarSunat');
+
+        // PEDIDOS
+        Route::resource('pedidos', App\Http\Controllers\PedidoController::class);
+        Route::post('/pedido/cambiar-estado', [App\Http\Controllers\PedidoController::class, 'cambiarEstado'])->name('pedidos.cambiarEstado');
+        Route::get('/pedido/detalles/{id}', [App\Http\Controllers\PedidoController::class, 'detallesPedido'])->name('pedidos.detallesPedido');
+        Route::get('/pedido/convertir/{id}', [App\Http\Controllers\PedidoController::class, 'convertirAVenta'])->name('pedidos.convertirAVenta');
+        Route::post('/pedido/marcar-convertido', [App\Http\Controllers\PedidoController::class, 'marcarComoConvertido'])->name('pedidos.marcarConvertido');
+        Route::get('/pedido/filtro', [App\Http\Controllers\PedidoController::class, 'filtroPorFecha'])->name('pedidos.filtroPorFecha');
+
+        // DESPACHOS
+        Route::resource('despachos', App\Http\Controllers\DespachoController::class);
+
         //UNIDAD MEDIDA
         Route::resource('units', App\Http\Controllers\UnitController::class);
         Route::get('/units/search-api', [UnitController::class, 'search'])->name('units.search');
