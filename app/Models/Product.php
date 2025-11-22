@@ -78,6 +78,11 @@ class Product extends Model
         return $this->hasMany(Stock::class, 'product_id');  // hasMany en lugar de hasOne
     }
 
+    public function stock()  // ← SINGULAR (para compatibilidad)
+    {
+        return $this->hasOne(Stock::class, 'product_id');
+    }
+
     // Agregar esta función después de stocks():
     public function getStockByTienda($tiendaId)
     {
