@@ -14,22 +14,27 @@
                     class="w-full p-2 border rounded mb-2">
                 <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos"
                     class="w-full p-2 border rounded mb-2">
-                <input type="text" placeholder="Direccion del cliente" id="direccion"
-                    class="w-full p-2 border rounded mb-2">
-                <select name="region" id="regions_id" class="w-3/12 p-2 border rounded">
-                    <option value="todos">Seleccione un Departamento</option>
-                    @foreach ($regions as $region)
-                        <option value="{{ $region->id }}">{{ $region->name }}</option>
-                    @endforeach
-                </select>
-                <select name="" id="provinces_id" class="w-3/12 p-2 border rounded" disabled>
-                    <option value="todos">Seleccione una opción</option>
-                </select>
-                <select name="" id="districts_id" class="w-3/12 p-2 border rounded" disabled>
-                    <option value="todos">Seleccione una opción</option>
-                </select>
+
+                <!-- Campos de ubicación - se ocultan cuando viene de pedido -->
+                <div id="ubicacionFields">
+                    <input type="text" placeholder="Direccion del cliente" id="direccion"
+                        class="w-full p-2 border rounded mb-2">
+                    <select name="region" id="regions_id" class="w-3/12 p-2 border rounded">
+                        <option value="todos">Seleccione un Departamento</option>
+                        @foreach ($regions as $region)
+                            <option value="{{ $region->id }}">{{ $region->name }}</option>
+                        @endforeach
+                    </select>
+                    <select name="" id="provinces_id" class="w-3/12 p-2 border rounded" disabled>
+                        <option value="todos">Seleccione una opción</option>
+                    </select>
+                    <select name="" id="districts_id" class="w-3/12 p-2 border rounded" disabled>
+                        <option value="todos">Seleccione una opción</option>
+                    </select>
+                </div>
+
                 <!-- Botón que abre el modal -->
-                <button class="bg-yellow-400 p-2 rounded w-3/12" id="buscarProductos">Consultar Productos</button>
+                <button class="bg-yellow-400 p-2 rounded w-full mb-2" id="buscarProductos">Consultar Productos</button>
                 <div class="relative">
                     <label for="service" class="block font-medium text-gray-700">Servicio</label>
                     <input type="text" id="service" name="service" value="{{ old('service', 'TALLER') }}"
@@ -293,6 +298,12 @@
         pedidoId = urlParams.get('pedido_id');
 
         if (pedidoId) {
+            // Ocultar campos de ubicación cuando viene de pedido
+            const ubicacionFields = document.getElementById('ubicacionFields');
+            if (ubicacionFields) {
+                ubicacionFields.style.display = 'none';
+            }
+
             cargarDatosPedido(pedidoId);
         }
     });
@@ -674,7 +685,7 @@
         const tiendaId = document.getElementById("tienda_id").value;
         const search = searchInput.value;
         // Realizar la solicitud a la API
-        fetch('/api/product?tienda_id=' + tiendaId + '&search=' + search)
+        fetch(`${baseUrl}/api/product?tienda_id=` + tiendaId + '&search=' + search)
             .then(res => res.json())
             .then(data => {
                 let allProducts = data
@@ -952,15 +963,16 @@
                 return;
             }
 
-            if (!orderData.districts_id || orderData.districts_id === 'todos') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Campo requerido',
-                    text: 'Seleccione departamento, provincia y distrito',
-                    confirmButtonColor: '#3b82f6'
-                });
-                return;
-            }
+            // UBICACIÓN - OPCIONAL (comentado porque ahora permite NULL)
+            // if (!orderData.districts_id || orderData.districts_id === 'todos') {
+            //     Swal.fire({
+            //         icon: 'warning',
+            //         title: 'Campo requerido',
+            //         text: 'Seleccione departamento, provincia y distrito',
+            //         confirmButtonColor: '#3b82f6'
+            //     });
+            //     return;
+            // }
 
             // Validar método de pago si es contado
             if (orderData.payments_id === '1') {
