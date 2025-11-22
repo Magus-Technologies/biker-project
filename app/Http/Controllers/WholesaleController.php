@@ -85,7 +85,7 @@ class WholesaleController extends Controller
     public function store(Request $request)
     {
         try {
-            // 1️⃣ Crear la Venta
+            // 1. Crear la Venta Mayorista
             $wholesaler = Wholesaler::create([
                 'code' => $this->generateCodeWholesaler(),
                 'total_price' => $request->total,
@@ -93,8 +93,8 @@ class WholesaleController extends Controller
                 'customer_address' => $request->customer_address,
                 'customer_dni' => $request->customer_dni,
                 'igv' => $request->igv,
-                'mechanics_id' => $request->mechanics_id,
-                'districts_id' => $request->districts_id,
+                'mechanics_id' => $request->mechanics_id ? $request->mechanics_id : null,
+                'districts_id' => ($request->districts_id && $request->districts_id != 'todos') ? $request->districts_id : null,
             ]);
 
             // Insertar Productos

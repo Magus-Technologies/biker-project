@@ -178,6 +178,9 @@
                         class="w-full p-2 border rounded mb-2">
                     <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos_${tabId}"
                         class="w-full p-2 border rounded mb-2">
+
+                    {{-- CAMPOS OPCIONALES - Descomentar si se necesitan --}}
+                    {{--
                     <input type="text" placeholder="Direccion del cliente" id="direccion_${tabId}"
                         class="w-full p-2 border rounded mb-2">
                     <select name="region" id="regions_id_${tabId}" class="w-3/12 p-2 border rounded">
@@ -192,7 +195,15 @@
                     <select name="" id="districts_id_${tabId}" class="w-3/12 p-2 border rounded" disabled>
                         <option value="todos">Seleccione una opción</option>
                     </select>
-                    <button class="bg-yellow-400 p-2 rounded w-3/12" id="buscarProductos_${tabId}">Consultar Productos</button>
+                    --}}
+
+                    {{-- Campos ocultos para mantener compatibilidad --}}
+                    <input type="hidden" id="direccion_${tabId}" value="">
+                    <input type="hidden" id="regions_id_${tabId}" value="todos">
+                    <input type="hidden" id="provinces_id_${tabId}" value="todos">
+                    <input type="hidden" id="districts_id_${tabId}" value="todos">
+
+                    <button class="bg-yellow-400 p-2 rounded w-full mb-2" id="buscarProductos_${tabId}">Consultar Productos</button>
                     <div class="relative">
                         <label for="service_${tabId}" class="block font-medium text-gray-700">Servicio</label>
                         <input type="text" id="service_${tabId}" name="service" value="TALLER"
@@ -473,16 +484,16 @@
             btnBuscar.addEventListener('click', () => fetchProducts(tabId));
         }
 
-        // Eventos para departamento/provincia/distrito
-        const regionSelect = document.getElementById(`regions_id_${tabId}`);
-        if (regionSelect) {
-            regionSelect.addEventListener('change', () => fetchProvinces(tabId));
-        }
+        // UBICACIÓN - COMENTADO (campos ocultos)
+        // const regionSelect = document.getElementById(`regions_id_${tabId}`);
+        // if (regionSelect) {
+        //     regionSelect.addEventListener('change', () => fetchProvinces(tabId));
+        // }
 
-        const provinceSelect = document.getElementById(`provinces_id_${tabId}`);
-        if (provinceSelect) {
-            provinceSelect.addEventListener('change', () => fetchDistricts(tabId));
-        }
+        // const provinceSelect = document.getElementById(`provinces_id_${tabId}`);
+        // if (provinceSelect) {
+        //     provinceSelect.addEventListener('change', () => fetchDistricts(tabId));
+        // }
 
         // Evento para búsqueda de servicios
         const serviceInput = document.getElementById(`service_${tabId}`);
