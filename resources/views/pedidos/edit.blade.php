@@ -482,6 +482,9 @@
 
     function updateServiceTable() {
         const tbody = document.getElementById('serviceList');
+        // Si la tabla no existe (comentada), salir
+        if (!tbody) return;
+
         tbody.innerHTML = '';
 
         if (services.length === 0) {
