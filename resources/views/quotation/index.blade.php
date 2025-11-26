@@ -1,33 +1,38 @@
 <x-app-layout>
     <x-breadcrumb title="Lista de Cotizaciones" subtitle="cotizaciones" />
 
-    <div class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Contenedor principal -->
+    <div class="px-3 py-4">
         <!-- Header con controles -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-            <div class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
-                <!-- Filtros de fecha -->
-                <form id="formBuscarPorFecha" class="flex flex-wrap items-center gap-2 flex-1">
-                    <div class="flex items-center gap-2 shrink-0">
-                        <label class="text-sm font-medium text-gray-700">Desde:</label>
-                        <input type="date" id="fecha_desde" class="h-[38px] border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <label class="text-sm font-medium text-gray-700">Hasta:</label>
-                        <input type="date" id="fecha_hasta" class="h-[38px] border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-                    </div>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-sm text-sm whitespace-nowrap shrink-0 h-[38px] flex items-center">
-                        <i class="bi bi-search mr-2"></i>
-                        Buscar
-                    </button>
-                </form>
+        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+            <!-- Encabezado con filtros y botón agregar -->
+            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                    <!-- Filtros -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center flex-1">
+                        <div class="flex items-center gap-2">
+                            <label for="fecha_desde" class="text-xs font-medium text-gray-600">Desde:</label>
+                            <input type="date" id="fecha_desde" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                        </div>
 
-                <!-- Botón Agregar -->
-                <a href="{{ route('quotations.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-sm text-sm whitespace-nowrap shrink-0 h-[38px] flex items-center">
-                    <i class="bi bi-plus-lg mr-2"></i>
-                    Agregar
-                </a>
+                        <div class="flex items-center gap-2">
+                            <label for="fecha_hasta" class="text-xs font-medium text-gray-600">Hasta:</label>
+                            <input type="date" id="fecha_hasta" class="border border-gray-300 rounded-md py-2 px-3 text-xs">
+                        </div>
+
+                        <button type="button" onclick="finAllQuotations()" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
+                            <i class="bi bi-funnel mr-1"></i>Filtrar
+                        </button>
+                    </div>
+
+                    <!-- Botón Agregar -->
+                    <a href="{{ route('quotations.create') }}"
+                        class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center transition-colors text-sm">
+                        <i class="bi bi-plus-lg mr-1"></i>Agregar
+                    </a>
+                </div>
             </div>
-        </div>
 
         <!-- Mensajes de éxito/error -->
         @if (session('success'))
@@ -43,58 +48,71 @@
             </div>
         @endif
 
-        <!-- Tabla de cotizaciones -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <table id="quotationsTable" class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">DNI</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Mecánico</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SubTotal</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">IGV</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($quotations as $quotation)
+            <!-- Tabla -->
+            <div class="overflow-x-auto">
+                <table id="quotationsTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ $quotation->code }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ $quotation->customer_names_surnames ?? 'Sin cliente' }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ $quotation->customer_dni }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ $quotation->userRegister->name ?? 'Sin vendedor' }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ $quotation->mechanic->name ?? 'Sin mecánico' }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ number_format($quotation->total_price - $quotation->igv, 2) }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ number_format($quotation->igv, 2) }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ number_format($quotation->total_price, 2) }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">{{ $quotation->fecha_registro }}</td>
-                            <td class="px-3 py-2 whitespace-nowrap text-sm text-center">
-                                <div class="flex justify-center gap-1">
-                                    <button onclick="verDetalles({{ $quotation->id }})" class="text-blue-500 hover:text-blue-700 p-1" title="Ver detalles">
-                                        <i class="bi bi-eye-fill"></i>
-                                    </button>
-                                    <button onclick="editQuotation({{ $quotation->id }})" class="p-1 {{ $quotation->status_sale == '0' ? 'text-yellow-500 hover:text-yellow-700' : 'text-gray-400 cursor-not-allowed' }}" title="Editar" {{ $quotation->status_sale == '0' ? '' : 'disabled' }}>
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button onclick="deleteQuotation({{ $quotation->id }})" class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
-                                        <i class="bi bi-trash3-fill"></i>
-                                    </button>
-                                    <button onclick="generarPDF({{ $quotation->id }})" class="text-red-500 hover:text-red-700 p-1" title="Generar PDF">
-                                        <i class="bi bi-filetype-pdf"></i>
-                                    </button>
-                                    <button onclick="venderQuotation({{ $quotation->id }})" class="p-1 {{ $quotation->status_sale == '0' ? 'text-yellow-500 hover:text-yellow-700' : 'text-gray-400 cursor-not-allowed' }}" title="{{ $quotation->status_sale == '0' ? 'Vender' : 'Ya vendido' }}" {{ $quotation->status_sale == '0' ? '' : 'disabled' }}>
-                                        <i class="bi {{ $quotation->status_sale == '0' ? 'bi-cart-check' : 'bi-cart-x' }}"></i>
-                                    </button>
-                                </div>
-                            </td>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Item</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Cliente</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">DNI</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Vendedor</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Mecánico</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">SubTotal</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">IGV</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Fecha</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Acciones</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        @foreach ($quotations as $quotation)
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ $quotation->code }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $quotation->customer_names_surnames ?? 'Sin cliente' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $quotation->customer_dni }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $quotation->userRegister->name ?? 'Sin vendedor' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">{{ $quotation->mechanic->name ?? 'Sin mecánico' }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-right">S/. {{ number_format($quotation->total_price - $quotation->igv, 2) }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-right">S/. {{ number_format($quotation->igv, 2) }}</td>
+                                <td class="px-3 py-2 text-sm font-medium text-gray-900 text-right">S/. {{ number_format($quotation->total_price, 2) }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $quotation->fecha_registro }}</td>
+                                <td class="px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="verDetalles({{ $quotation->id }})" 
+                                                class="text-blue-600 hover:text-blue-800 transition-colors" 
+                                                title="Ver detalles">
+                                            <i class="bi bi-eye text-base"></i>
+                                        </button>
+                                        <button onclick="editQuotation({{ $quotation->id }})" 
+                                                class="{{ $quotation->status_sale == '0' ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-400 cursor-not-allowed' }} transition-colors" 
+                                                title="Editar" 
+                                                {{ $quotation->status_sale == '0' ? '' : 'disabled' }}>
+                                            <i class="bi bi-pencil-square text-base"></i>
+                                        </button>
+                                        <button onclick="deleteQuotation({{ $quotation->id }})" 
+                                                class="text-red-600 hover:text-red-800 transition-colors" 
+                                                title="Eliminar">
+                                            <i class="bi bi-trash3-fill text-base"></i>
+                                        </button>
+                                        <button onclick="generarPDF({{ $quotation->id }})" 
+                                                class="text-red-600 hover:text-red-800 transition-colors" 
+                                                title="Generar PDF">
+                                            <i class="bi bi-filetype-pdf text-base"></i>
+                                        </button>
+                                        <button onclick="venderQuotation({{ $quotation->id }})" 
+                                                class="{{ $quotation->status_sale == '0' ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-400 cursor-not-allowed' }} transition-colors" 
+                                                title="{{ $quotation->status_sale == '0' ? 'Vender' : 'Ya vendido' }}" 
+                                                {{ $quotation->status_sale == '0' ? '' : 'disabled' }}>
+                                            <i class="bi {{ $quotation->status_sale == '0' ? 'bi-cart-check' : 'bi-cart-x' }} text-base"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -158,18 +176,55 @@
     @endpush
 
     <style>
-        /* Centrar headers y datos */
-        #quotationsTable thead th {
-            text-align: center !important;
+        /* Estilos para el modal */
+        .modal-header {
+            border-bottom: none;
+            padding: 1.25rem 1.5rem;
         }
-        
-        #quotationsTable tbody td {
-            text-align: center !important;
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
         }
-        
-        /* Línea del encabezado más visible */
-        #quotationsTable thead th {
-            border-bottom: 2px solid #6b7280 !important;
+
+        .info-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section h4 {
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 0.875rem;
         }
     </style>
 
@@ -180,30 +235,36 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Inicializar DataTables
             quotationsTable = $('#quotationsTable').DataTable({
+                deferRender: true,
+                processing: false,
+                stateSave: false,
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 language: {
-                    processing: "Procesando...",
                     search: "Buscar:",
-                    lengthMenu: "Mostrar _MENU_ registros",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                    infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                    infoFiltered: "(filtrado de _MAX_ registros totales)",
-                    loadingRecords: "Cargando...",
-                    zeroRecords: "No se encontraron registros coincidentes",
-                    emptyTable: "No hay datos disponibles en la tabla",
+                    lengthMenu: "Mostrar _MENU_ cotizaciones",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ cotizaciones",
+                    infoEmpty: "0 cotizaciones",
+                    infoFiltered: "(filtrado de _MAX_ totales)",
+                    zeroRecords: "No se encontraron cotizaciones",
+                    emptyTable: "No hay cotizaciones registradas",
                     paginate: {
                         first: "Primero",
-                        previous: "Anterior",
+                        last: "Último",
                         next: "Siguiente",
-                        last: "Último"
+                        previous: "Anterior"
                     }
                 },
-                dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4 gap-2"lf>rt<"flex flex-col sm:flex-row justify-between items-center mt-4 gap-2"ip>',
-                order: [[8, 'desc']], // Ordenar por fecha descendente
+                dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
                 columnDefs: [
-                    { targets: [5, 6, 7], className: 'text-center' }, // Columnas de precios centradas
-                    { targets: 9, orderable: false } // Columna de acciones no ordenable
+                    { targets: [9], orderable: false }, // Acciones no ordenables
+                    { targets: [9], className: 'text-center' },
+                    { targets: [5, 6, 7], className: 'text-right' } // Montos alineados a la derecha
                 ],
-                pageLength: 15
+                order: [[8, 'desc']], // Ordenar por fecha descendente
+                autoWidth: false,
+                scrollX: false
             });
 
             // Configurar fechas
@@ -216,11 +277,7 @@
             finAllQuotations();
         });
 
-        // Buscar por fecha
-        document.getElementById('formBuscarPorFecha').addEventListener('submit', function(event) {
-            event.preventDefault();
-            finAllQuotations();
-        });
+
 
         function finAllQuotations() {
             let desde = document.getElementById('fecha_desde').value;
