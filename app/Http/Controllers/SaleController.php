@@ -136,11 +136,20 @@ class SaleController extends Controller
     {
         // return response()->json($request);
         try {
+            // Generar código único para NOTA DE VENTA sin cliente
+            $customerName = $request->customer_names_surnames;
+            
+            // Verificar si es NOTA DE VENTA y no tiene cliente
+            $documentType = DocumentType::find($request->document_type_id);
+            if ($documentType && $documentType->name === 'NOTA DE VENTA' && empty($customerName)) {
+                $customerName = $this->generateUniqueCustomerCode();
+            }
+            
             // 1. Crear la Venta
             $sale = Sale::create([
                 'code' => $this->generateCode(),
                 'total_price' => $request->total,
-                'customer_names_surnames' => $request->customer_names_surnames,
+                'customer_names_surnames' => $customerName,
                 'customer_address' => $request->customer_address,
                 'customer_dni' => $request->customer_dni,
                 'igv' => $request->igv,
@@ -462,7 +471,7 @@ class SaleController extends Controller
     {
         $documentTypeId = (int) $documentTypeId;
         if ($documentTypeId <= 0) {
-            throw new \Exception('ID de documento no v�lido');
+            throw new \Exception('ID de documento no vlido');
         }
         $ultimaVenta = Sale::where('document_type_id', $documentTypeId)
             ->orderByDesc('number')
@@ -471,5 +480,26 @@ class SaleController extends Controller
         $nuevoNumero = $ultimoNumero + 1;
 
         return (string) $nuevoNumero;
+    }
+
+    /**
+     * Genera un código único aleatorio para clientes sin nombre en NOTA DE VENTA
+     * Formato: 7 caracteres alfanuméricos en mayúsculas (ej: SDUP7FJ)
+     */
+    private function generateUniqueCustomerCode()
+    {
+        do {
+            // Generar código aleatorio de 7 caracteres (letras mayúsculas y números)
+            $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            $code = '';
+            for ($i = 0; $i < 7; $i++) {
+                $code .= $characters[rand(0, strlen($characters) - 1)];
+            }
+            
+            // Verificar que el código no exista ya en la base de datos
+            $exists = Sale::where('customer_names_surnames', $code)->exists();
+        } while ($exists);
+        
+        return $code;
     }
 }

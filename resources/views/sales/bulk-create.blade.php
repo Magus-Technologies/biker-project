@@ -1096,8 +1096,11 @@
             try {
                 const orderData = buildOrderData(tabId);
 
-                // Validación básica
-                if (!orderData.customer_dni || !orderData.customer_names_surnames) {
+                // Validación básica - Permitir NOTA DE VENTA sin cliente (se generará código automático)
+                const documentTypeId = orderData.document_type_id;
+                const isNotaDeVenta = documentTypeId == 6; // ID de NOTA DE VENTA
+                
+                if (!isNotaDeVenta && (!orderData.customer_dni || !orderData.customer_names_surnames)) {
                     errors.push(`Venta #${saleData.saleNumber}: Falta DNI o nombre del cliente`);
                     errorCount++;
                     continue;
