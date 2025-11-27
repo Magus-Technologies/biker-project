@@ -1,14 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <i class="fas fa-shopping-cart mr-2"></i>{{ __('Nueva Compra') }}
-            </h2>
-            <a href="{{ route('buys.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                <i class="fas fa-arrow-left mr-2"></i>Volver
-            </a>
-        </div>
-    </x-slot>
+    <x-breadcrumb title="Nueva Compra" subtitle="Crear nueva compra" />
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -309,9 +300,8 @@
             $('#product_search').on('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const firstResult = $('#search_results .search-result-item').first();
-                    if (firstResult.length) {
-                        addProductToCart(JSON.parse(firstResult.attr('data-product')));
+                    if (searchResultsProducts.length > 0) {
+                        addProductToCart(searchResultsProducts[0]);
                     }
                 }
             });
@@ -370,17 +360,21 @@
             });
         }
 
+        // Variable global para almacenar los productos de búsqueda
+        let searchResultsProducts = [];
+
         function displaySearchResults(products) {
             const resultsContainer = $('#search_results');
             resultsContainer.empty();
+            searchResultsProducts = products;
 
             if (products.length === 0) {
                 resultsContainer.html('<div class="p-3 text-gray-500">No se encontraron productos</div>');
             } else {
-                products.forEach(product => {
+                products.forEach((product, index) => {
                     const resultHtml = `
-                        <div class="search-result-item p-3 hover:bg-blue-50 cursor-pointer border-b" 
-                            data-product='${JSON.stringify(product)}' onclick='addProductToCart(${JSON.stringify(product).replace(/"/g, "&quot;")})'>
+                        <div class="search-result-item p-3 hover:bg-blue-50 cursor-pointer border-b"
+                            onclick="addProductToCart(searchResultsProducts[${index}])">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <p class="font-medium">${product.description}</p>

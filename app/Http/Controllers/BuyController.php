@@ -35,8 +35,14 @@ class BuyController extends Controller
     public function index()
     {
         $products = Product::where('status', 1)->with('brand', 'unit', 'prices', 'stocks')->get();
-        $suppliers = Supplier::where('status', 1)->get();  // ← Agregar esta línea
-        return view('buy.index', compact('products', 'suppliers'));  // ← Agregar 'suppliers' al compact
+        $suppliers = Supplier::where('status', 1)->get();
+
+        // Obtener todas las compras para la vista (igual que sales)
+        $buys = Buy::with(['documentType', 'userRegister', 'supplier', 'tienda'])
+            ->orderBy('fecha_registro', 'desc')
+            ->get();
+
+        return view('buy.index', compact('products', 'suppliers', 'buys'));
     }
     public function search(Request $request)
     {
@@ -452,9 +458,8 @@ class BuyController extends Controller
     }
 
     /**
-     * Obtener lista filtrada de compras
+     * Obtener lista filtrada de compras (para DataTables)
      */
-    // Reemplaza el método filteredList() completo:
     public function filteredList(Request $request)
     {
         $query = Buy::with(['documentType', 'userRegister']);
@@ -462,22 +467,20 @@ class BuyController extends Controller
         if ($request->fecha_desde) {
             $query->whereDate('fecha_registro', '>=', $request->fecha_desde);
         }
-        
+
         if ($request->fecha_hasta) {
             $query->whereDate('fecha_registro', '<=', $request->fecha_hasta);
         }
-        
+
         if ($request->products_status) {
             $query->where('delivery_status', $request->products_status === 'recibidos' ? 'received' : 'pending');
         }
 
-        // Eliminado: filtro por supplier_id ya que no se usa
+        // Obtener todos los datos sin paginación (DataTables maneja la paginación)
+        $buys = $query->orderBy('fecha_registro', 'desc')->get();
 
-        // Agregar paginación
-        $perPage = $request->per_page ?? 15;
-        $buys = $query->orderBy('fecha_registro', 'desc')->paginate($perPage);  
         // Agregar status de productos para la vista
-        $buys->getCollection()->each(function($buy) {
+        $buys->each(function($buy) {
             $buy->products_status = $buy->delivery_status === 'received' ? 'recibidos' : 'pendientes';
         });
 

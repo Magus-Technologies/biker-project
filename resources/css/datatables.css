@@ -178,10 +178,48 @@ select[name*="length"]:focus {
     font-size: 0.75rem;
 }
 
+/* Botón de búsqueda personalizado junto al input existente */
+.dataTables_wrapper .dataTables_filter label {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_filter .dt-search-button {
+    padding: 0.5rem 1rem !important;
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 0.375rem !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s;
+    white-space: nowrap;
+    line-height: 1.25rem;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dataTables_wrapper .dataTables_filter .dt-search-button:hover {
+    background-color: #2563eb !important;
+}
+
+.dataTables_wrapper .dataTables_filter .dt-search-button:active {
+    transform: scale(0.98);
+}
+
+/* Ajustar el input para que se vea bien con el botón */
+.dataTables_wrapper .dataTables_filter input[type="search"] {
+    margin-right: 0 !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter {
+    .dataTables_filter_custom {
         text-align: left;
         margin-bottom: 0.5rem;
     }
@@ -189,5 +227,18 @@ select[name*="length"]:focus {
     .dataTables_wrapper .dataTables_info,
     .dataTables_wrapper .dataTables_paginate {
         text-align: center;
+    }
+    
+    .dataTables_filter_custom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dataTables_filter_custom input[type="search"] {
+        width: 100% !important;
+    }
+    
+    .dataTables_filter_custom button {
+        width: 100%;
     }
 }

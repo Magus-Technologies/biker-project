@@ -114,52 +114,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200 text-xs">
-                    @foreach($buys as $index => $buy)
-                        <tr class="hover:bg-gray-50"
-                            data-fecha="{{ \Carbon\Carbon::parse($buy->fecha_registro)->format('Y-m-d') }}"
-                            data-products-status="{{ $buy->delivery_status }}">
-                            <td class="px-4 py-3 text-center text-sm">{{ $index + 1 }}</td>
-                            <td class="px-4 py-3 text-sm">{{ $buy->serie }}-{{ $buy->number }}</td>
-                            <td class="px-4 py-3 text-sm">
-                                {{ \Carbon\Carbon::parse($buy->fecha_registro)->format('d/m/Y') }}
-                            </td>
-                            <td class="px-4 py-3 text-sm text-right">
-                                S/ {{ number_format($buy->total_price, 2) }}
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                @if($buy->delivery_status === 'received')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        <i class="fas fa-check mr-1"></i>Recibidos
-                                    </span>
-                                @else
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        <i class="fas fa-truck mr-1"></i>Carretera
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <div class="flex space-x-2 justify-center">
-                                    <button onclick="viewDetails({{ $buy->id }})"
-                                            class="text-blue-600 hover:text-blue-900"
-                                            title="Ver detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button onclick="downloadPDF({{ $buy->id }})"
-                                            class="text-red-600 hover:text-red-900"
-                                            title="Descargar PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    @if($buy->delivery_status === 'pending')
-                                        <button onclick="receiveProducts({{ $buy->id }})"
-                                                class="text-green-600 hover:text-green-900"
-                                                title="Recibir productos">
-                                            <i class="fas fa-truck"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
+                    <!-- Datos cargados por DataTables -->
                 </tbody>
             </table>
         </div>
@@ -167,7 +122,7 @@
     </div>
 
     @push('modals')
-        @include('buy.partials.details-modal')
+        @include('buy.partials.modals')
     @endpush
     @include('buy.partials.import-modal')
     @include('buy.partials.reception-modal')
@@ -188,82 +143,119 @@
         document.getElementById('fecha_desde').value = lastMonth.toISOString().split('T')[0];
         document.getElementById('fecha_hasta').value = today.toISOString().split('T')[0];
 
-        // Inicializar DataTable SIN AJAX (datos ya en HTML)
-        if ($.fn.DataTable) {
-            buysTable = $('#buysTable').DataTable({
-                deferRender: true,
-                processing: false,
-                stateSave: false,
-                responsive: true,
-                pageLength: 15,
-                lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
-                language: {
-                    search: "Buscar:",
-                    lengthMenu: "Mostrar _MENU_ compras",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ compras",
-                    infoEmpty: "0 compras",
-                    infoFiltered: "(filtrado de _MAX_ totales)",
-                    zeroRecords: "No se encontraron compras",
-                    emptyTable: "No hay compras registradas",
-                    paginate: {
-                        first: "Primero",
-                        last: "Último",
-                        next: "Siguiente",
-                        previous: "Anterior"
+        // Inicializar DataTable
+        buysTable = $('#buysTable').DataTable({
+            ajax: {
+                url: '{{ route("buy.filteredList") }}',
+                data: function (d) {
+                    return {
+                        fecha_desde: document.getElementById('fecha_desde').value,
+                        fecha_hasta: document.getElementById('fecha_hasta').value,
+                        products_status: document.getElementById('products_status').value
+                    };
+                },
+                dataSrc: '' // Respuesta directa sin anidamiento
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    className: 'text-center',
+                    orderable: false
+                },
+                {
+                    data: null,
+                    render: function (data) {
+                        return data.serie + '-' + data.number;
                     }
                 },
-                dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
-                columnDefs: [
-                    { targets: [5], orderable: false }, // Acciones no ordenables
-                    { targets: [5], className: 'text-center' },
-                    { targets: [3], className: 'text-right' } // Total alineado a la derecha
-                ],
-                order: [[2, 'desc']], // Ordenar por fecha descendente
-                autoWidth: false,
-                scrollX: false
-            });
-
-            // Filtro personalizado de DataTables (como sales)
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    if (settings.nTable.id !== 'buysTable') {
-                        return true;
+                {
+                    data: 'fecha_registro',
+                    render: function (data) {
+                        return new Date(data).toLocaleDateString('es-PE');
                     }
+                },
+                {
+                    data: 'total_price',
+                    render: function (data) {
+                        return 'S/ ' + parseFloat(data).toFixed(2);
+                    },
+                    className: 'text-right'
+                },
+                {
+                    data: 'products_status',
+                    render: function (data) {
+                        return getStatusBadge(data);
+                    },
+                    className: 'text-center'
+                },
+                {
+                    data: null,
+                    render: function (data) {
+                        let actions = `
+                        <div class="flex space-x-2 justify-center">
+                            <button onclick="viewDetails(${data.id})"
+                                    class="text-blue-600 hover:text-blue-900"
+                                    title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="downloadPDF(${data.id})"
+                                    class="text-red-600 hover:text-red-900"
+                                    title="Descargar PDF">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                    `;
 
-                    let fechaDesde = document.getElementById('fecha_desde').value;
-                    let fechaHasta = document.getElementById('fecha_hasta').value;
-                    let productsStatus = document.getElementById('products_status').value;
-
-                    // Obtener la fila usando la API de DataTables
-                    let row = settings.aoData[dataIndex].nTr;
-                    if (!row) return true;
-
-                    // Filtrar por rango de fechas
-                    if (fechaDesde || fechaHasta) {
-                        let rowFecha = row.dataset.fecha;
-                        if (rowFecha) {
-                            if (fechaDesde && rowFecha < fechaDesde) return false;
-                            if (fechaHasta && rowFecha > fechaHasta) return false;
+                        if (data.products_status === 'pendientes') {
+                            actions += `
+                            <button onclick="receiveProducts(${data.id})"
+                                    class="text-green-600 hover:text-green-900"
+                                    title="Recibir productos">
+                                <i class="fas fa-truck"></i>
+                            </button>
+                        `;
                         }
-                    }
 
-                    // Filtrar por estado de productos
-                    if (productsStatus) {
-                        let rowStatus = row.dataset.productsStatus;
-                        let expectedStatus = productsStatus === 'recibidos' ? 'received' : 'pending';
-                        if (rowStatus !== expectedStatus) return false;
-                    }
-
-                    return true;
+                        actions += `</div>`;
+                        return actions;
+                    },
+                    orderable: false,
+                    className: 'text-center'
                 }
-            );
-        }
+            ],
+            pageLength: 15,
+            lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
+            language: {
+                search: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ compras",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ compras",
+                infoEmpty: "0 compras",
+                infoFiltered: "(filtrado de _MAX_ totales)",
+                zeroRecords: "No se encontraron compras",
+                emptyTable: "No hay compras registradas",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                },
+                loadingRecords: "Cargando...",
+                processing: "Procesando..."
+            },
+            dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+            order: [[2, 'desc']], // Ordenar por fecha descendente
+            responsive: true,
+            autoWidth: false,
+            scrollX: false
+        });
     });
 
-    // Función para filtrar compras (redibujar DataTable con filtros)
+    // Función para filtrar compras (recarga DataTable)
     function filterBuys() {
         if (buysTable) {
-            buysTable.draw();
+            buysTable.ajax.reload();
         }
     }
 
@@ -276,6 +268,15 @@
         document.getElementById('fecha_hasta').value = today.toISOString().split('T')[0];
         document.getElementById('products_status').value = '';
         filterBuys();
+    }
+
+    // Función para obtener badge de estado
+    function getStatusBadge(status) {
+        const badges = {
+            'recibidos': '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i>Recibidos</span>',
+            'pendientes': '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-truck mr-1"></i>Carretera</span>'
+        };
+        return badges[status] || status;
     }
 
     // Función para exportar reportes
