@@ -1,84 +1,88 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{-- Registro de Socios --}}
-        </h2>
-    </x-slot>
-    <div class="w-3/4 mx-auto py-8" id="descripDoc" role="tabpanel" aria-labelledby="descripDoc-tab">
-        <form class="p-6 bg-white rounded-lg shadow-md" id="formService">
-            @csrf
-            <h5 class="text-lg font-semibold text-gray-800 mb-4">Detalle del problema</h5>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="num_doc" class="block text-sm font-medium text-gray-700">N° motor</label>
-                    <div class="flex mt-2">
-                        <input name="nro_motor" id="nro_motor" type="text" placeholder="Ingrese numero de motor"
-                            class="block w-full  border border-gray-300 rounded-md shadow-sm">
-                        <button id="buscarDrive" class="ml-2 py-2 px-4 bg-yellow-500 text-white rounded-md"
+    <x-breadcrumb 
+        title="Registrar Servicio" 
+        parent="Servicios" 
+        parentUrl="{{ route('services.index') }}"
+        subtitle="Nuevo Servicio" 
+    />
+
+    <div class="px-3 py-4">
+        <div class="w-full" id="descripDoc" role="tabpanel" aria-labelledby="descripDoc-tab">
+            <form class="p-4 sm:p-6 bg-white rounded-lg shadow-md" id="formService">
+                @csrf
+                <h5 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Detalle del Servicio</h5>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                <div class="w-full">
+                    <label for="num_doc" class="block text-sm font-medium text-gray-700 mb-1">Nº Motor *</label>
+                    <div class="flex gap-2">
+                        <input name="nro_motor" id="nro_motor" type="text" placeholder="Ingrese número de motor" required
+                            class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <button id="buscarDrive" class="py-2 px-3 sm:px-4 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition flex-shrink-0"
                             type="button" onclick="searchDrive()">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
                 </div>
-                <div>
-                    <label for="datos_driver" class="block text-sm font-medium text-gray-700">Nombres y
-                        apellidos</label>
-                    <div class="flex mt-2">
-                        <input name="datos_driver" id="datos_driver" type="text" placeholder="Ingrese Documento"
-                            class="block w-full  border border-gray-300 rounded-md shadow-sm">
-
-                    </div>
+                <div class="w-full">
+                    <label for="datos_driver" class="block text-sm font-medium text-gray-700 mb-1">Nombres y Apellidos</label>
+                    <input name="datos_driver" id="datos_driver" type="text" placeholder="Nombres del conductor" readonly
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-50">
                 </div>
-                <div>
-                    <div class=" mt-2">
-                        <input name="drive_id" id="drive_id" type="hidden"
-                            class="block w-full  border border-gray-300 rounded-md shadow-sm">
-                    </div>
-                </div>
-
-                <div class="flex flex-col mt-2 col-span-2" id="listaVehiculos">
-
-                </div>
-                <input name="car_id" id="car_id" type="hidden"
-                    class="block w-full  border border-gray-300 rounded-md shadow-sm">
+                <input name="drive_id" id="drive_id" type="hidden">
+                <input name="car_id" id="car_id" type="hidden">
             </div>
 
-
-            <div id="modalMecanicos"
-                class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-                <div class="bg-white p-6 rounded-lg shadow-md w-1/3">
-                    <h3 class="text-xl font-semibold mb-4">Mecánicos Disponibles</h3>
-                    <div id="listaMecanicosModal"></div>
-                    <button onclick="cerrarModal()"
-                        class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg">Cerrar</button>
-                </div>
+            <!-- Lista de Vehículos -->
+            <div class="mb-4">
+                <div class="flex flex-col gap-2" id="listaVehiculos"></div>
             </div>
-            <div>
-                <div class="flex mt-2">
-                    <input name="datos_mecanico" id="datos_mecanico" type="text"
-                        class="block w-full  border border-gray-300 rounded-md shadow-sm">
-                    <input name="mechanics_id" id="mechanics_id" type="hidden"
-                        class="block w-full  border border-gray-300 rounded-md shadow-sm">
+
+            <!-- Mecánico -->
+            <div class="mb-4">
+                <label for="datos_mecanico" class="block text-sm font-medium text-gray-700 mb-1">Mecánico Asignado *</label>
+                <div class="flex gap-2">
+                    <input name="datos_mecanico" id="datos_mecanico" type="text" placeholder="Seleccione un mecánico" readonly required
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-50">
+                    <input name="mechanics_id" id="mechanics_id" type="hidden">
                     <button onclick="mostrarModal()" type="button"
-                        class="px-4 py-2 bg-green-500 text-white rounded-lg  whitespace-nowrap">Seleccionar
-                        Mecánico</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label for="detalle" class="block text-sm font-medium text-gray-700">Detalle</label>
-                    <textarea name="detalle" id="detalle" cols="50" rows="5"
-                        class="block w-full p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                        placeholder="Escribe aquí..."></textarea>
+                        class="py-2 px-3 sm:px-4 bg-green-500 text-white rounded-md hover:bg-green-600 transition whitespace-nowrap flex-shrink-0">
+                        <i class="bi bi-person-plus mr-1"></i>Seleccionar
+                    </button>
                 </div>
             </div>
 
-            <div class="flex justify-center space-x-4 mt-6">
-                <button id="registrar"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+            <!-- Detalle -->
+            <div class="mb-6">
+                <label for="detalle" class="block text-sm font-medium text-gray-700 mb-1">Detalle del Problema *</label>
+                <textarea name="detalle" id="detalle" rows="5" required
+                    class="block w-full p-3 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    placeholder="Describa el problema del vehículo..."></textarea>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row justify-center gap-3 pt-6 border-t">
+                <button id="registrar" type="button"
+                    class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition font-medium text-sm"
                     onclick="guardarServicio()">
-                    Registrar
+                    <i class="bi bi-check-circle mr-2"></i>Registrar Servicio
                 </button>
+                <a href="{{ route('services.index') }}"
+                    class="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition font-medium text-center text-sm">
+                    <i class="bi bi-x-circle mr-2"></i>Cancelar
+                </a>
+            </div>
+
+            <!-- Modal Mecánicos -->
+            <div id="modalMecanicos"
+                class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4">
+                <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+                    <h3 class="text-lg sm:text-xl font-semibold mb-4 border-b pb-2">Mecánicos Disponibles</h3>
+                    <div id="listaMecanicosModal" class="space-y-2"></div>
+                    <button onclick="cerrarModal()" type="button"
+                        class="mt-4 w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                        <i class="bi bi-x-circle mr-2"></i>Cerrar
+                    </button>
+                </div>
             </div>
         </form>
     </div>

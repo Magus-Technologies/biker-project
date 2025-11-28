@@ -8,86 +8,89 @@
     />
 
     <div class="px-3 py-4">
-        <div class="max-w-5xl mx-auto" id="vehiculo" role="tabpanel" aria-labelledby="vehiculo-tab">
-        <form class="p-6 bg-white rounded-lg shadow-md" id="formGarantine" enctype="multipart/form-data">
+        <div class="w-full" id="vehiculo" role="tabpanel" aria-labelledby="vehiculo-tab">
+        <form class="p-4 sm:p-6 bg-white rounded-lg shadow-md" id="formGarantine" enctype="multipart/form-data">
             @csrf
-            <h5 class="text-lg font-semibold text-gray-800 mb-4">Datos de Garantia</h5>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="num_doc" class="block text-sm font-medium text-gray-700">Nr documento</label>
-                    <div class="flex mt-2">
-                        <input name="n_documento" id="n_documento" type="text" placeholder="Ingrese Documento"
-                            class="block w-full  border border-gray-300 rounded-md shadow-sm">
-                        <button class="ml-2 py-2 px-4 bg-yellow-500 text-white rounded-md" type="button"
+            <h5 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Datos de Garantía</h5>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                <div class="w-full">
+                    <label for="num_doc" class="block text-sm font-medium text-gray-700 mb-1">Nº Documento *</label>
+                    <div class="flex gap-2">
+                        <input name="n_documento" id="n_documento" type="text" placeholder="Ingrese Documento" required
+                            class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <button class="py-2 px-3 sm:px-4 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition flex-shrink-0" type="button"
                             onclick="apiDNI()">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
                 </div>
-                <div>
-                    <label for="datos_cliente" class="block text-sm font-medium text-gray-700">Nombres y
-                        apellidos</label>
-                    <div class="flex mt-2">
-                        <input name="datos_cliente" id="datos_cliente" type="text" placeholder="Ingrese Documento"
-                            class="block w-full  border border-gray-300 rounded-md shadow-sm">
-
-                    </div>
+                <div class="w-full">
+                    <label for="datos_cliente" class="block text-sm font-medium text-gray-700 mb-1">Nombres y Apellidos *</label>
+                    <input name="datos_cliente" id="datos_cliente" type="text" placeholder="Nombres completos" required
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label for="marca" class="block text-sm font-medium text-gray-700">Marca</label>
+            
+            <h5 class="text-lg font-semibold text-gray-800 mb-4 mt-6 border-b pb-2">Datos del Vehículo</h5>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                <div class="w-full">
+                    <label for="marca" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
                     <input type="text" name="marca"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div>
-                    <label for="modelo" class="block text-sm font-medium text-gray-700">Modelo</label>
+                <div class="w-full">
+                    <label for="modelo" class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
                     <input type="text" name="modelo"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div>
-                    <label for="anio" class="block text-sm font-medium text-gray-700">Año</label>
+                <div class="w-full">
+                    <label for="anio" class="block text-sm font-medium text-gray-700 mb-1">Año</label>
                     <input type="text" name="anio"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label for="color" class="block text-sm font-medium text-gray-700">Color</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                <div class="w-full">
+                    <label for="color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
                     <input type="text" name="color"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div>
-                    <label for="nro_motor" class="block text-sm font-medium text-gray-700">Numero de motor</label>
-                    <input type="text" name="nro_motor"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                <div class="w-full">
+                    <label for="nro_motor" class="block text-sm font-medium text-gray-700 mb-1">Número de Motor *</label>
+                    <input type="text" name="nro_motor" required
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div>
-                    <label for="nro_chasis" class="block text-sm font-medium text-gray-700">Numero de chasis</label>
+                <div class="w-full">
+                    <label for="nro_chasis" class="block text-sm font-medium text-gray-700 mb-1">Número de Chasis</label>
                     <input type="text" name="nro_chasis"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div>
-                    <label for="nro_chasis" class="block text-sm font-medium text-gray-700">Numero de celular</label>
+                <div class="w-full">
+                    <label for="celular" class="block text-sm font-medium text-gray-700 mb-1">Número de Celular</label>
                     <input type="text" name="celular"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">NUMERO DE KILOMETRAJE</label>
-                    <div id="kilometraje-group" class="flex space-x-4">
+                <div class="mb-6 w-full lg:col-span-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kilometraje</label>
+                    <div id="kilometraje-group" class="flex flex-wrap gap-2">
                         <button type="button"
-                            class="km-btn px-4 py-2 rounded-lg border border-gray-300 bg-gray-200 text-gray-700 focus:outline-none"
-                            data-value="500">500</button>
+                            class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
+                            data-value="0-5000">0-5000 km</button>
                         <button type="button"
-                            class="km-btn px-4 py-2 rounded-lg border border-gray-300 bg-gray-200 text-gray-700 focus:outline-none"
-                            data-value="2500">2500</button>
+                            class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
+                            data-value="5000-10000">5000-10000 km</button>
                         <button type="button"
-                            class="km-btn px-4 py-2 rounded-lg border border-gray-300 bg-gray-200 text-gray-700 focus:outline-none"
-                            data-value="5000">5000</button>
+                            class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
+                            data-value="10000-15000">10000-15000 km</button>
+                        <button type="button"
+                            class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
+                            data-value="15000-20000">15000-20000 km</button>
+                        <button type="button"
+                            class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
+                            data-value="20000+">20000+ km</button>
                     </div>
                     <input type="hidden" name="kilometrajes" id="kilometrajes">
-                    <!-- Guardar� los seleccionados separados por coma, ejemplo: 500,2500 -->
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Boleta y DUA <span
@@ -110,12 +113,16 @@
                 </div>
             </div>
 
-            <div class="flex justify-center space-x-4 mt-6">
+            <div class="flex flex-col sm:flex-row justify-center gap-3 mt-6 pt-6 border-t">
                 <button id="registrar"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+                    class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition font-medium text-sm"
                     type="submit">
-                    Registrar
+                    <i class="bi bi-check-circle mr-2"></i>Registrar Garantía
                 </button>
+                <a href="{{ route('garantines.index') }}"
+                    class="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition font-medium text-center text-sm">
+                    <i class="bi bi-x-circle mr-2"></i>Cancelar
+                </a>
             </div>
         </form>
     </div>
@@ -185,57 +192,25 @@
     updateBoletaDuaList();
 
 
-    // Puedes poner este script al final de tu archivo blade o en tu secci�n de scripts
+    // Manejo de botones de kilometraje - Simplificado
     document.addEventListener('DOMContentLoaded', function() {
         const btns = document.querySelectorAll('.km-btn');
         const input = document.getElementById('kilometrajes');
-        // Ordenar los valores para control
-        const orderedValues = [500, 2500, 5000];
-        // Estado seleccionado
-        let selected = [];
 
         btns.forEach(btn => {
             btn.addEventListener('click', function() {
-                const val = parseInt(this.getAttribute('data-value'));
-                const idx = orderedValues.indexOf(val);
-
-                // Si ya est� seleccionado, lo deselecciona solo si los posteriores no est�n seleccionados
-                if (selected.includes(val)) {
-                    // Solo permite quitar si no hay posteriores seleccionados
-                    const posteriores = orderedValues.slice(idx + 1);
-                    const posterioresMarcados = posteriores.some(v => selected.includes(v));
-                    if (posterioresMarcados) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Primero desmarque los siguientes',
-                            text: 'Debe desmarcar primero los kilometrajes mayores antes de este.',
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                        return;
-                    }
-                    // Quitar la selecci�n
-                    selected = selected.filter(v => v !== val);
-                    this.classList.remove('bg-green-500', 'text-white');
-                    this.classList.add('bg-gray-200', 'text-gray-700');
-                } else {
-                    // Solo permite marcar si el anterior est� marcado (o es el primero)
-                    if (idx === 0 || selected.includes(orderedValues[idx - 1])) {
-                        selected.push(val);
-                        selected = selected.sort((a, b) => a - b);
-                        this.classList.remove('bg-gray-200', 'text-gray-700');
-                        this.classList.add('bg-green-500', 'text-white');
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Seleccione el anterior',
-                            text: 'Debe marcar primero el kilometraje anterior.',
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    }
-                }
-                input.value = selected.join(',');
+                // Remover selección de todos los botones
+                btns.forEach(b => {
+                    b.classList.remove('bg-blue-500', 'text-white');
+                    b.classList.add('bg-gray-200', 'text-gray-700');
+                });
+                
+                // Seleccionar el botón clickeado
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-blue-500', 'text-white');
+                
+                // Guardar el valor
+                input.value = this.getAttribute('data-value');
             });
         });
     });
@@ -306,7 +281,7 @@
             formdata.append('boleta_dua[]', file);
         });
 
-        // Env�a la petici�n por fetch
+        // Envia la peticion por fetch
         fetch('{{ route('garantines.store') }}', {
                 method: 'POST',
                 body: formdata
@@ -327,7 +302,7 @@
 
                         if (errorMessages) {
                             Swal.fire({
-                                title: 'Errores de Validaci�n',
+                                title: 'Errores de Validacion',
                                 text: errorMessages,
                                 icon: 'error',
                                 confirmButtonText: 'Aceptar'
@@ -343,15 +318,29 @@
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: '�Exito!',
+                        title: '¡Éxito!',
                         text: data.message,
-                        showConfirmButton: false,
-                        timer: 2000
+                        confirmButtonColor: '#3b82f6'
+                    }).then(() => {
+                        window.location.href = '{{ route("garantines.index") }}';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Error al registrar la garantía',
+                        confirmButtonColor: '#ef4444'
                     });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al procesar la solicitud',
+                    confirmButtonColor: '#ef4444'
+                });
             });
     });
 </script>

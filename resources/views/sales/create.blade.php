@@ -10,72 +10,74 @@
             <!-- Formulario de Cliente -->
             <div class="col-span-2 bg-white p-6 rounded-lg shadow">
                 <h2 class="text-lg font-bold mb-4">Cliente</h2>
-                <input type="text" id="dni_personal" placeholder="Ingrese Documento"
-                    class="w-full p-2 border rounded mb-2">
-                <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos"
-                    class="w-full p-2 border rounded mb-2">
-
-                <!-- Campos de ubicación - se ocultan cuando viene de pedido -->
-                <div id="ubicacionFields">
-                    <input type="text" placeholder="Direccion del cliente" id="direccion"
-                        class="w-full p-2 border rounded mb-2">
-                    <select name="region" id="regions_id" class="w-3/12 p-2 border rounded">
-                        <option value="todos">Seleccione un Departamento</option>
-                        @foreach ($regions as $region)
-                            <option value="{{ $region->id }}">{{ $region->name }}</option>
-                        @endforeach
-                    </select>
-                    <select name="" id="provinces_id" class="w-3/12 p-2 border rounded" disabled>
-                        <option value="todos">Seleccione una opción</option>
-                    </select>
-                    <select name="" id="districts_id" class="w-3/12 p-2 border rounded" disabled>
-                        <option value="todos">Seleccione una opción</option>
-                    </select>
-                </div>
-
-                <!-- Botón que abre el modal -->
-                <button class="bg-yellow-400 p-2 rounded w-full mb-2" id="buscarProductos">Consultar Productos</button>
-                <div class="relative">
-                    <label for="service" class="block font-medium text-gray-700">Servicio</label>
-                    <input type="text" id="service" name="service" value="{{ old('service', 'TALLER') }}"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm" autocomplete="off">
-
-                    <!-- Dropdown de Sugerencias -->
-                    <div id="serviceDropdown"
-                        class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                        <ul id="serviceSuggestions" class="max-h-40 overflow-y-auto"></ul>
+                
+                <!-- Grid de 2 columnas para campos de cliente -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <input type="text" id="dni_personal" placeholder="Ingrese Documento"
+                            class="w-full p-2 border rounded text-sm">
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos"
+                            class="w-full p-2 border rounded text-sm">
                     </div>
                 </div>
 
-                <div class="mt-3">
-                    <label for="service_price" class="block font-medium text-gray-700">Precio del Servicio</label>
-                    <input type="number" id="service_price" name="service_price" value="{{ old('service_price', 60) }}"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
+                <!-- Campo oculto para dirección (compatibilidad) -->
+                <input type="hidden" id="direccion" value="">
+
+                <!-- Grid de 2 columnas para servicio y precio -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="relative">
+                        <label for="service" class="block text-sm font-medium text-gray-700 mb-1">Servicio</label>
+                        <input type="text" id="service" name="service" value="{{ old('service', 'TALLER') }}"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" autocomplete="off">
+                        <div id="serviceDropdown"
+                            class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                            <ul id="serviceSuggestions" class="max-h-40 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="service_price" class="block text-sm font-medium text-gray-700 mb-1">Precio del Servicio</label>
+                        <input type="number" id="service_price" name="service_price" value="{{ old('service_price', 60) }}"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    </div>
                 </div>
 
-                <button type="button" id="addService" class="bg-blue-500 text-white px-4 py-2 mt-3 rounded-md">Agregar
-                    Servicio</button>
+                <!-- Grid de 2 columnas para botones -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <button class="bg-yellow-400 hover:bg-yellow-500 p-2 rounded transition font-medium text-sm" id="buscarProductos">
+                        <i class="bi bi-search mr-1"></i>Consultar Productos
+                    </button>
+                    <button type="button" id="addService" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
+                        <i class="bi bi-plus-circle mr-1"></i>Agregar Servicio
+                    </button>
+                </div>
+                <!-- Selector de Mecánico -->
+                <div class="mt-4">
+                    <label for="mecanico_select" class="block text-sm font-medium text-gray-700 mb-1">Mecánico</label>
+                    <div class="flex gap-2">
+                        <select id="mecanico_select" class="flex-1 p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            <option value="">Seleccionar mecánico</option>
+                        </select>
+                        <button onclick="mostrarModal()" type="button" 
+                            class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-sm"
+                            title="Buscar mecánico">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <input name="mechanics_id" id="mechanics_id" type="hidden">
+                </div>
+
+                <!-- Modal Mecánicos -->
                 <div id="modalMecanicos"
-                    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
                     <div class="bg-white p-6 rounded-lg shadow-md w-1/3">
                         <h3 class="text-xl font-semibold mb-4">Mecánicos Disponibles</h3>
                         <div id="listaMecanicosModal"></div>
                         <button onclick="closeModal('modalMecanicos')"
                             class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg">Cerrar</button>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex mt-2">
-                        <input name="datos_mecanico" id="datos_mecanico" type="text"
-                            class="block w-6/12  border border-gray-300 rounded-md shadow-sm">
-                        <input name="mechanics_id" id="mechanics_id" type="hidden"
-                            class="block w-full  border border-gray-300 rounded-md shadow-sm">
-                        <button onclick="eliminarMecanico()" type="button"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg mr-11">X</button>
-                        <button onclick="mostrarModal()" type="button"
-                            class="px-4 py-2 bg-green-500 text-white rounded-lg  whitespace-nowrap">Seleccionar
-                            Mecánico</button>
-
                     </div>
                 </div>
                 <!-- Modal -->
@@ -139,17 +141,6 @@
             <!-- Detalle del Pedido -->
             <div class="bg-white p-6 rounded-lg shadow">
                 <h2 class="text-lg font-bold mb-4">Documento</h2>
-                <div>
-                    <label class="font-bold">Empresa </label>
-                    <!-- Se agrega id para capturar el valor -->
-                    <select id="companies_id" class="w-full p-2 border rounded">
-                        <option value="">Seleccione</option>
-                        @foreach ($companies as $company)
-                            <option value="{{ $company->id }}">{{ $company->razon_social }} - {{ $company->ruc }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
                 <div>
                     <label class="font-bold">Tipo pago</label>
                     <!-- Se agrega id para capturar el valor -->
@@ -298,12 +289,6 @@
         pedidoId = urlParams.get('pedido_id');
 
         if (pedidoId) {
-            // Ocultar campos de ubicación cuando viene de pedido
-            const ubicacionFields = document.getElementById('ubicacionFields');
-            if (ubicacionFields) {
-                ubicacionFields.style.display = 'none';
-            }
-
             cargarDatosPedido(pedidoId);
         }
     });
@@ -537,15 +522,38 @@
             });
         }
     }
-    // agregar mecanico
-    function seleccionarMecanico(id, datos) {
-        document.getElementById('mechanics_id').value = id;
-        document.getElementById('datos_mecanico').value = datos;
+    // Cargar mecánicos al iniciar
+    function cargarMecanicos() {
+        fetch("{{ route('mecanicosDisponibles') }}")
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('mecanico_select');
+                select.innerHTML = '<option value="">Seleccionar mecánico</option>';
+                
+                data.forEach(mecanico => {
+                    const option = document.createElement('option');
+                    option.value = mecanico.id;
+                    option.textContent = `${mecanico.name} ${mecanico.apellidos}`;
+                    select.appendChild(option);
+                });
+            });
     }
 
-    function eliminarMecanico() {
-        document.getElementById('mechanics_id').value = '';
-        document.getElementById('datos_mecanico').value = '';
+    // Evento cuando cambia el select
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarMecanicos();
+        
+        document.getElementById('mecanico_select').addEventListener('change', function() {
+            document.getElementById('mechanics_id').value = this.value;
+        });
+    });
+
+    // Funciones del modal
+    function seleccionarMecanico(id, datos) {
+        document.getElementById('mechanics_id').value = id;
+        const select = document.getElementById('mecanico_select');
+        select.value = id;
+        cerrarModal();
     }
 
     function mostrarModal() {
@@ -559,8 +567,8 @@
                 data.forEach(mecanico => {
                     let row = `
                     <div class="flex justify-between items-center p-2 border-b">
-                        <span>${mecanico.name} ${mecanico.apellidos} </span>
-                        <button onclick="seleccionarMecanico(${mecanico.id}, '${mecanico.name} ${mecanico.apellidos}'); cerrarModal()" 
+                        <span>${mecanico.name} ${mecanico.apellidos}</span>
+                        <button onclick="seleccionarMecanico(${mecanico.id}, '${mecanico.name} ${mecanico.apellidos}')" 
                             class="px-3 py-1 bg-blue-500 text-white rounded-lg" type="button">
                             Asignar
                         </button>
@@ -573,66 +581,6 @@
 
     function cerrarModal() {
         document.getElementById('modalMecanicos').classList.add('hidden');
-    }
-    // BUSCADOR DEPARTAMENTO PROVINCIA DISTRITO
-    document.getElementById('regions_id').addEventListener('change', function() {
-        const regionId = this.value;
-        if (regionId !== 'Seleccione un Departamento') {
-            fetchProvinces(regionId);
-        } else {
-            clearSelect('provinces_id');
-            clearSelect('districts_id');
-        }
-    });
-    document.getElementById('provinces_id').addEventListener('change', function() {
-        const provinceId = this.value;
-        if (provinceId !== 'todos') {
-            fetchDistricts(provinceId);
-        } else {
-            clearSelect('districts_id');
-        }
-    });
-
-    function fetchProvinces(regionId) {
-        fetch(`${baseUrl}/api/provinces/${regionId}`)
-            .then(response => response.json())
-            .then(data => {
-                const provinceSelect = document.getElementById('provinces_id');
-                provinceSelect.removeAttribute(
-                    'disabled');
-                clearSelect('districts_id');
-                updateSelectOptions('provinces_id', data.provinces);
-                console.log('data.provinces', data.provinces);
-            })
-            .catch(error => console.error('Error fetching provinces:', error));
-    }
-
-    function updateSelectOptions(selectId, options) {
-        const select = document.getElementById(selectId);
-        select.innerHTML = '<option value="todos">Seleccione una opción</option>';
-        options.forEach(option => {
-            const opt = document.createElement('option');
-            opt.value = option.id;
-            opt.textContent = option.name;
-            select.appendChild(opt);
-        });
-    }
-
-    function clearSelect(selectId) {
-        const select = document.getElementById(selectId);
-        select.innerHTML = '<option value="todos">Seleccione una opción</option>';
-    }
-
-    function fetchDistricts(provinceId) {
-        fetch(`${baseUrl}/api/districts/${provinceId}`)
-            .then(response => response.json())
-            .then(data => {
-                const districtSelect = document.getElementById('districts_id');
-                districtSelect.removeAttribute(
-                    'disabled');
-                updateSelectOptions('districts_id', data.districts);
-            })
-            .catch(error => console.error('Error fetching districts:', error));
     }
 
     /// AGREGANDO SERVICIOS
@@ -688,6 +636,11 @@
         fetch(`${baseUrl}/api/product?tienda_id=` + tiendaId + '&search=' + search)
             .then(res => res.json())
             .then(data => {
+                console.log('Datos recibidos de la API:', data);
+                if (data.length > 0) {
+                    console.log('Primer producto:', data[0]);
+                    console.log('Stock del primer producto:', data[0].stock);
+                }
                 let allProducts = data
                     .filter(product => !quotationItems.some(item => item.item_id === product.id))
                     .map(product => ({
@@ -696,7 +649,7 @@
                         selectedPrice: ""
                     }));
                 products = [...allProducts];
-                console.log(products)
+                console.log('Productos procesados:', products);
                 renderProducts(products);
             })
             .catch(error => console.error('Error:', error));
@@ -711,30 +664,36 @@
     function renderProducts(productList) {
         productTable.innerHTML = "";
         productList.forEach(product => {
+            const stockActual = product.stock?.quantity ?? 0;
+            const stockMinimo = product.stock?.minimum_stock ?? 0;
+            const sinStock = stockActual === 0;
+            const stockBajo = stockActual > 0 && stockActual <= stockMinimo;
+            
             const row = document.createElement("tr");
             row.innerHTML = `
                     <td class="px-2 py-1 border">${product.code_sku}</td>
                     <td class="px-2 py-1 border">${product.description}</td>
-                    <td class="px-2 py-1 border">${product.location}</td>
-                    <td class="px-2 py-1 border">${product.stock?.quantity || 0}</td>
-<td class="px-2 py-1 border">${product.stock?.minimum_stock || 0}</td>
+                    <td class="px-2 py-1 border">${product.location || '-'}</td>
+                    <td class="px-2 py-1 border ${sinStock ? 'bg-red-100 text-red-700 font-bold' : stockBajo ? 'bg-yellow-100 text-yellow-700' : ''}">${stockActual}</td>
+                    <td class="px-2 py-1 border">${stockMinimo}</td>
                     <td class="px-2 py-1 border">
-                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id}" value="1" min="1" max="${product.stock?.quantity || 0}" data-product-id="${product.id}">
+                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id}" value="1" min="1" max="${stockActual}" data-product-id="${product.id}" ${sinStock ? 'disabled' : ''}>
                     </td>
                     <td class="px-2 py-1 border">
-                        <select class="p-2 border rounded data-price-id-${product.id}" data-product-id="${product.id}">
+                        <select class="p-2 border rounded data-price-id-${product.id}" data-product-id="${product.id}" ${sinStock ? 'disabled' : ''}>
                             <option value="">Seleccionar precio</option>
                             ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - ${price.price}</option>`).join('')}
                         </select>
                     </td>
                     <td class="px-2 py-1 border subtotal-cell" id="subtotal-${product.id}">0</td>
                     <td class="px-2 py-1 border">
-                        <button class="bg-blue-500 text-white px-3 py-1 rounded" data-product-id="${product.id}"  onclick="agregarProducto(${product.id})">Agregar</button>
+                        <button class="bg-blue-500 text-white px-3 py-1 rounded ${sinStock ? 'opacity-50 cursor-not-allowed' : ''}" data-product-id="${product.id}" onclick="agregarProducto(${product.id})" ${sinStock ? 'disabled' : ''}>Agregar</button>
                     </td>
                 `;
             productTable.appendChild(row);
-            addSubtotalEvents(row, product.id);
-
+            if (!sinStock) {
+                addSubtotalEvents(row, product.id);
+            }
         });
     }
     // calcular subtotal de productos en el modal y tabla
@@ -906,7 +865,6 @@
             order_date: document.getElementById("orderDate").value,
             currency: document.getElementById("orderCurrency").value,
             document_type_id: document.getElementById("documentType").value,
-            companies_id: document.getElementById("companies_id").value,
             nro_dias: document.getElementById("nro_dias").value,
             fecha_vencimiento: document.getElementById("fecha_vencimiento").value,
             igv: parseAmount("igvAmount"),
@@ -933,15 +891,7 @@
                 return;
             }
 
-            if (!orderData.companies_id) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Campo requerido',
-                    text: 'Seleccione una empresa',
-                    confirmButtonColor: '#3b82f6'
-                });
-                return;
-            }
+
 
             if (!orderData.payments_id) {
                 Swal.fire({

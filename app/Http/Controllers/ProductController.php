@@ -9,18 +9,18 @@ use App\Models\ProductPrice;
 use App\Models\Stock;
 use App\Models\Unit;
 // use App\Models\Warehouse; // Obsoleto
+use App\Imports\ProductsImport;
+use App\Models\ScannedCode;
+use App\Models\Tienda;
+use App\Models\UnitType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException as ValidationValidationException;
 use Illuminate\Validation\Rule;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException as ValidationValidationException;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use App\Imports\ProductsImport;
-use App\Models\UnitType;
-use App\Models\Tienda;
-use App\Models\ScannedCode;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -34,6 +34,7 @@ class ProductController extends Controller
         $products = Product::where('status', 1)->with('brand', 'unit', 'prices', 'stocks.tienda')->get();
         return view('product.index', compact('products', 'tiendas'));
     }
+
     public function export(Request $request)
     {
         // Obtén el parámetro 'filter' enviado desde la vista
@@ -131,7 +132,7 @@ class ProductController extends Controller
                 public function map($stock): array
                 {
                     return [
-                        $stock->product->description ?? '', // o product code, según lo que necesites
+                        $stock->product->description ?? '',  // o product code, según lo que necesites
                         $stock->quantity,
                         $stock->minimum_stock,
                     ];
@@ -147,15 +148,18 @@ class ProductController extends Controller
 
             return Excel::download(new class($query) implements FromQuery, WithHeadings, WithMapping {
                 protected $query;
+
                 public function __construct($query)
                 {
                     $this->query = $query;
                 }
+
                 public function query()
                 {
                     // Seleccionamos los campos de la tabla product_prices
                     return $this->query->select('id', 'product_id', 'price');
                 }
+
                 public function headings(): array
                 {
                     return [
@@ -163,6 +167,7 @@ class ProductController extends Controller
                         'Precio',
                     ];
                 }
+
                 public function map($row): array
                 {
                     return [
@@ -179,15 +184,16 @@ class ProductController extends Controller
     {
         $buscar = $request->buscar;
         $query = Product::where('status', 1)
-            ->with('brand', 'unit', 'images', 'prices', 'stocks.tienda'); // ← Quité 'warehouse' y agregué 'stocks.tienda'
+            ->with('brand', 'unit', 'images', 'prices', 'stocks.tienda');  // ← Quité 'warehouse' y agregué 'stocks.tienda'
 
         if (!empty($buscar)) {
             $query->where(function ($q) use ($buscar) {
-                $q->where('description', 'like', "%{$buscar}%")
+                $q
+                    ->where('description', 'like', "%{$buscar}%")
                     ->orWhere('code', 'like', "%{$buscar}%");
             });
         }
-        
+
         // Filtro de ejemplo por si se quiere buscar por tienda en el futuro
         // if ($request->has('tienda_id') && $request->tienda_id !== 'todos') {
         //     $query->where('tienda_id', $request->tienda_id);
@@ -205,17 +211,19 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
     public function descargarPlantilla()
     {
         return Excel::download(new ImportTemplateExport, 'Plantilla_Importacion.xlsx');
     }
+
     public function import(Request $request)
     {
         $request->validate([
             'importFile' => 'required|mimes:xlsx,csv',
         ]);
 
-        DB::beginTransaction(); // Inicia la transacción
+        DB::beginTransaction();  // Inicia la transacción
 
         try {
             $import = new ProductsImport(auth()->id());
@@ -252,14 +260,14 @@ class ProductController extends Controller
             // **SEGUNDA IMPORTACIÓN (REAL) SOLO SI NO HUBO ERRORES**
             Excel::import(new ProductsImport(auth()->id()), $request->file('importFile'));
 
-            DB::commit(); // ✅ Confirmamos los cambios si no hay errores
+            DB::commit();  // ✅ Confirmamos los cambios si no hay errores
 
             return response()->json([
                 'success' => true,
                 'message' => 'Importación completada correctamente.'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack(); // Se revierte cualquier cambio si ocurre un error inesperado
+            DB::rollBack();  // Se revierte cualquier cambio si ocurre un error inesperado
 
             return response()->json([
                 'success' => false,
@@ -267,7 +275,6 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -280,6 +287,7 @@ class ProductController extends Controller
         $tiendas = Tienda::where('status', 1)->get();
         return view('product.create', compact('brands', 'units', 'tiendas'));
     }
+
     public function generateCode()
     {
         $lastCodigo = Product::max('code') ?? '0000000';
@@ -287,7 +295,7 @@ class ProductController extends Controller
         return str_pad($nextCodigo, 7, '0', STR_PAD_LEFT);
     }
 
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $messages = [
             'description.string' => 'La descripción debe ser un texto.',
@@ -319,7 +327,7 @@ class ProductController extends Controller
             'control_type' => 'required|in:cantidad,codigo_unico',
         ];
         // Eliminado: validación de tienda ya no es necesaria porque siempre usaremos almacén central
-        
+
         try {
             $validated = $request->validate($validationRules, $messages);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -331,7 +339,7 @@ class ProductController extends Controller
 
         // Asegurar que el control_type se guarde correctamente
         $validated['control_type'] = $request->control_type;
-        
+
         DB::beginTransaction();
 
         try {
@@ -381,28 +389,22 @@ class ProductController extends Controller
 
             // Crear stock en almacén central si hay cantidad
             if ($quantity > 0) {
-                // Obtener el almacén central (warehouse con type='central')
-                $almacenCentral = \App\Models\Warehouse::where('type', 'central')->where('status', 1)->first();
-                
-                if ($almacenCentral) {
-                    $stock = Stock::create([
-                        'product_id' => $product->id,
-                        'warehouse_id' => $almacenCentral->id, // Usar warehouse_id en lugar de tienda_id
-                        'quantity' => $request->quantity,
-                        'minimum_stock' => $request->minimum_stock,
-                    ]);
+                // Crear stock con tienda_id NULL para almacén central
+                $stock = Stock::create([
+                    'product_id' => $product->id,
+                    'tienda_id' => null,  // NULL indica almacén central
+                    'quantity' => $request->quantity,
+                    'minimum_stock' => $request->minimum_stock,
+                ]);
 
-                    // Si es control por código único, guardar códigos escaneados
-                    if ($request->control_type === 'codigo_unico' && $request->scanned_codes) {
-                        foreach ($request->scanned_codes as $code) {
-                            ScannedCode::create([
-                                'stock_id' => $stock->id,
-                                'code' => $code
-                            ]);
-                        }
+                // Si es control por código único, guardar códigos escaneados
+                if ($request->control_type === 'codigo_unico' && $request->scanned_codes) {
+                    foreach ($request->scanned_codes as $code) {
+                        ScannedCode::create([
+                            'stock_id' => $stock->id,
+                            'code' => $code
+                        ]);
                     }
-                } else {
-                    throw new \Exception('No se encontró el almacén central. Contacte al administrador.');
                 }
             }
 
@@ -424,15 +426,21 @@ class ProductController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    } 
+    }
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        try {
+            $product = Product::with('brand', 'unit', 'prices', 'images', 'stocks.tienda')->findOrFail($id);
+            return view('product.show', compact('product'));
+        } catch (\Throwable $th) {
+            return redirect()->route('products.index')->with('error', 'Producto no encontrado');
+        }
     }
+
     public function determineUnitType($unitName)
     {
         $unitTypeMappings = [
@@ -452,7 +460,6 @@ class ProductController extends Controller
         return UnitType::firstOrCreate(['name' => 'Otro'])->id;
     }
 
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -463,16 +470,15 @@ class ProductController extends Controller
             $product = Product::with('brand', 'unit', 'prices')->findOrFail($id);
             $units = Unit::all();
             $tiendas = Tienda::where('status', 1)->get();
-           // Cambio: Obtener stock del almacén central en lugar de por tiendas
-            $productStock = Stock::where('product_id', $product->id)
-                                ->where('warehouse_id', 1) // Solo almacén central
-                                ->with('warehouse', 'scannedCodes')
-                                ->get();
             
-            // Ya no necesitamos tiendas para la gestión de stock
-            return view('product.edit', compact('product', 'units', 'productStock'));
+            // Obtener stock del producto (puede ser por tienda o sin tienda para almacén central)
+            $productStock = Stock::where('product_id', $product->id)
+                ->with('tienda', 'scannedCodes')
+                ->get();
+
+            return view('product.edit', compact('product', 'units', 'productStock', 'tiendas'));
         } catch (\Throwable $th) {
-            return redirect()->route('product.index');
+            return redirect()->route('products.index')->with('error', 'Error al cargar el producto: ' . $th->getMessage());
         }
     }
 
@@ -539,9 +545,9 @@ class ProductController extends Controller
                     if ($image) {
                         $imagePath = public_path($image->image_path);
                         if (file_exists($imagePath)) {
-                            unlink($imagePath); // Eliminar archivo físico
+                            unlink($imagePath);  // Eliminar archivo físico
                         }
-                        $image->delete(); // Eliminar registro en la base de datos
+                        $image->delete();  // Eliminar registro en la base de datos
                     }
                 }
             }
@@ -560,7 +566,7 @@ class ProductController extends Controller
 
             // Manejar los precios
             $prices = $validated['prices'] ?? [];
-            $product->prices()->delete(); // Elimina precios anteriores
+            $product->prices()->delete();  // Elimina precios anteriores
 
             $priceData = [];
             foreach ($prices as $type => $price) {
@@ -596,29 +602,29 @@ class ProductController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $action = $request->action; // 'increase' o 'decrease'
+
+            $action = $request->action;  // 'increase' o 'decrease'
             $quantity = $request->quantity;
             // Eliminado: ya no usamos tienda_id, solo almacén central
 
             $stock = Stock::where('product_id', $productId)
-                        ->where('warehouse_id', 1) // Solo almacén central
-                        ->first();
-                        
+                ->whereNull('tienda_id')  // Almacén central (tienda_id NULL)
+                ->first();
+
             if (!$stock) {
                 $stock = Stock::create([
                     'product_id' => $productId,
-                    'warehouse_id' => 1, // Almacén central fijo
+                    'tienda_id' => null,  // Almacén central
                     'quantity' => 0,
                     'minimum_stock' => 0
                 ]);
             }
-            
+
             $product = Product::find($productId);
-            
+
             if ($action === 'increase') {
                 $stock->quantity += $quantity;
-                
+
                 // Si es control por código único, guardar códigos
                 if ($product->control_type === 'codigo_unico' && $request->scanned_codes) {
                     foreach ($request->scanned_codes as $code) {
@@ -628,15 +634,15 @@ class ProductController extends Controller
                         ]);
                     }
                 }
-            } else { // decrease
+            } else {  // decrease
                 if ($product->control_type === 'codigo_unico') {
                     // Para código único: eliminar códigos específicos seleccionados
                     if ($request->codes_to_remove) {
                         $removedCount = 0;
                         foreach ($request->codes_to_remove as $codeId) {
                             $scannedCode = ScannedCode::where('stock_id', $stock->id)
-                                                    ->where('id', $codeId)
-                                                    ->first();
+                                ->where('id', $codeId)
+                                ->first();
                             if ($scannedCode) {
                                 $scannedCode->delete();
                                 $removedCount++;
@@ -653,18 +659,18 @@ class ProductController extends Controller
                     // Para control por cantidad: disminuir normalmente
                     $stock->quantity -= $quantity;
                 }
-                
-                if ($stock->quantity < 0) $stock->quantity = 0;
+
+                if ($stock->quantity < 0)
+                    $stock->quantity = 0;
             }
-            
+
             $stock->save();
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Stock actualizado correctamente'
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -680,20 +686,20 @@ class ProductController extends Controller
             // Eliminado: ya no necesitamos tienda_id
 
             $stock = Stock::where('product_id', $productId)
-                        ->where('warehouse_id', 1) // Solo almacén central
-                        ->with('scannedCodes')
-                        ->first();
-                        
+                ->whereNull('tienda_id')  // Almacén central (tienda_id NULL)
+                ->with('scannedCodes')
+                ->first();
+
             if (!$stock) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se encontró stock para este producto en la tienda especificada'
+                    'message' => 'No se encontró stock para este producto en el almacén central'
                 ], 404);
             }
-            
+
             return response()->json([
                 'success' => true,
-                'codes' => $stock->scannedCodes->map(function($code) {
+                'codes' => $stock->scannedCodes->map(function ($code) {
                     return [
                         'id' => $code->id,
                         'code' => $code->code,
@@ -701,7 +707,6 @@ class ProductController extends Controller
                     ];
                 })
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

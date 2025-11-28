@@ -34,7 +34,7 @@
         <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded mb-3 text-sm">
             <p class="text-blue-800">
                 <i class="bi bi-info-circle mr-1"></i>
-                <strong>Instrucciones:</strong> Haz clic en "Nueva Venta" para agregar más ventas. Cada pestaña es una venta independiente. Al finalizar, haz clic en "Guardar Todas" para procesar todas las ventas.
+                <strong>Instrucciones:</strong> Haz clic en "Nueva Venta" para agregar más ventas. Cada pestaña es una venta independiente. Puedes guardar cada venta individualmente con el botón "Guardar Esta Venta" o guardar todas a la vez con "Guardar Todas".
             </p>
         </div>
 
@@ -174,28 +174,18 @@
                 <!-- Formulario de Cliente -->
                 <div class="col-span-2 bg-white p-6 rounded-lg shadow">
                     <h2 class="text-lg font-bold mb-4">Cliente</h2>
-                    <input type="text" id="dni_personal_${tabId}" placeholder="Ingrese Documento"
-                        class="w-full p-2 border rounded mb-2">
-                    <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos_${tabId}"
-                        class="w-full p-2 border rounded mb-2">
-
-                    {{-- CAMPOS OPCIONALES - Descomentar si se necesitan --}}
-                    {{--
-                    <input type="text" placeholder="Direccion del cliente" id="direccion_${tabId}"
-                        class="w-full p-2 border rounded mb-2">
-                    <select name="region" id="regions_id_${tabId}" class="w-3/12 p-2 border rounded">
-                        <option value="todos">Seleccione un Departamento</option>
-                        @foreach ($regions as $region)
-                            <option value="{{ $region->id }}">{{ $region->name }}</option>
-                        @endforeach
-                    </select>
-                    <select name="" id="provinces_id_${tabId}" class="w-3/12 p-2 border rounded" disabled>
-                        <option value="todos">Seleccione una opción</option>
-                    </select>
-                    <select name="" id="districts_id_${tabId}" class="w-3/12 p-2 border rounded" disabled>
-                        <option value="todos">Seleccione una opción</option>
-                    </select>
-                    --}}
+                    
+                    <!-- Grid de 2 columnas para campos de cliente -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <input type="text" id="dni_personal_${tabId}" placeholder="Ingrese Documento"
+                                class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos_${tabId}"
+                                class="w-full p-2 border rounded text-sm">
+                        </div>
+                    </div>
 
                     {{-- Campos ocultos para mantener compatibilidad --}}
                     <input type="hidden" id="direccion_${tabId}" value="">
@@ -203,22 +193,49 @@
                     <input type="hidden" id="provinces_id_${tabId}" value="todos">
                     <input type="hidden" id="districts_id_${tabId}" value="todos">
 
-                    <button class="bg-yellow-400 p-2 rounded w-full mb-2" id="buscarProductos_${tabId}">Consultar Productos</button>
-                    <div class="relative">
-                        <label for="service_${tabId}" class="block font-medium text-gray-700">Servicio</label>
-                        <input type="text" id="service_${tabId}" name="service" value="TALLER"
-                            class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm" autocomplete="off">
-                        <div id="serviceDropdown_${tabId}"
-                            class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                            <ul id="serviceSuggestions_${tabId}" class="max-h-40 overflow-y-auto"></ul>
+                    <!-- Grid de 2 columnas para servicio y precio -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="relative">
+                            <label for="service_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Servicio</label>
+                            <input type="text" id="service_${tabId}" name="service" value="TALLER"
+                                class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" autocomplete="off">
+                            <div id="serviceDropdown_${tabId}"
+                                class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                                <ul id="serviceSuggestions_${tabId}" class="max-h-40 overflow-y-auto"></ul>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="service_price_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Precio del Servicio</label>
+                            <input type="number" id="service_price_${tabId}" name="service_price" value="60"
+                                class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <label for="service_price_${tabId}" class="block font-medium text-gray-700">Precio del Servicio</label>
-                        <input type="number" id="service_price_${tabId}" name="service_price" value="60"
-                            class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
+                    
+                    <!-- Grid de 2 columnas para botones -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 p-2 rounded transition font-medium text-sm" id="buscarProductos_${tabId}">
+                            <i class="bi bi-search mr-1"></i>Consultar Productos
+                        </button>
+                        <button type="button" id="addService_${tabId}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
+                            <i class="bi bi-plus-circle mr-1"></i>Agregar Servicio
+                        </button>
                     </div>
-                    <button type="button" id="addService_${tabId}" class="bg-blue-500 text-white px-4 py-2 mt-3 rounded-md">Agregar Servicio</button>
+
+                    <!-- Selector de Mecánico -->
+                    <div class="mt-4">
+                        <label for="mecanico_select_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Mecánico</label>
+                        <div class="flex gap-2">
+                            <select id="mecanico_select_${tabId}" class="flex-1 p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                                <option value="">Seleccionar mecánico</option>
+                            </select>
+                            <button onclick="mostrarModalMecanicos('${tabId}')" type="button" 
+                                class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-sm"
+                                title="Buscar mecánico">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <input name="mechanics_id" id="mechanics_id_${tabId}" type="hidden">
+                    </div>
 
                     <!-- Modal Mecánicos -->
                     <div id="modalMecanicos_${tabId}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
@@ -226,18 +243,6 @@
                             <h3 class="text-xl font-semibold mb-4">Mecánicos Disponibles</h3>
                             <div id="listaMecanicosModal_${tabId}"></div>
                             <button onclick="closeModalTab('modalMecanicos_${tabId}')" class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg">Cerrar</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex mt-2">
-                            <input name="datos_mecanico" id="datos_mecanico_${tabId}" type="text"
-                                class="block w-6/12 border border-gray-300 rounded-md shadow-sm" readonly>
-                            <input name="mechanics_id" id="mechanics_id_${tabId}" type="hidden">
-                            <button onclick="eliminarMecanicoTab('${tabId}')" type="button"
-                                class="px-4 py-2 bg-red-500 text-white rounded-lg mr-11">X</button>
-                            <button onclick="mostrarModalMecanicos('${tabId}')" type="button"
-                                class="px-4 py-2 bg-green-500 text-white rounded-lg whitespace-nowrap">Seleccionar Mecánico</button>
                         </div>
                     </div>
 
@@ -292,15 +297,6 @@
                 <!-- Detalle del Pedido -->
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h2 class="text-lg font-bold mb-4">Documento</h2>
-                    <div>
-                        <label class="font-bold">Empresa</label>
-                        <select id="companies_id_${tabId}" class="w-full p-2 border rounded">
-                            <option value="">Seleccione</option>
-                            @foreach ($companies as $company)
-                                <option value="{{ $company->id }}">{{ $company->razon_social }} - {{ $company->ruc }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div>
                         <label class="font-bold">Tipo pago</label>
                         <select id="paymentType_${tabId}" class="w-full p-2 border rounded">
@@ -402,6 +398,13 @@
                     <tbody id="serviceList_${tabId}"></tbody>
                 </table>
             </div>
+
+            <!-- Botón para guardar esta venta individual -->
+            <div class="mt-6 flex justify-center gap-3 pt-4 border-t">
+                <button onclick="saveSingleSale('${tabId}')" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md">
+                    <i class="bi bi-save mr-2"></i>Guardar Esta Venta
+                </button>
+            </div>
         </div>
         `;
     }
@@ -500,6 +503,9 @@
         if (serviceInput) {
             serviceInput.addEventListener('input', () => searchServices(tabId));
         }
+
+        // Cargar mecánicos en el select
+        cargarMecanicosTab(tabId);
     }
 
     // Funciones de Tab Management
@@ -625,6 +631,27 @@
     }
 
     // Funciones de Mecánicos
+    function cargarMecanicosTab(tabId) {
+        fetch("{{ route('mecanicosDisponibles') }}")
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById(`mecanico_select_${tabId}`);
+                select.innerHTML = '<option value="">Seleccionar mecánico</option>';
+                
+                data.forEach(mecanico => {
+                    const option = document.createElement('option');
+                    option.value = mecanico.id;
+                    option.textContent = `${mecanico.name} ${mecanico.apellidos}`;
+                    select.appendChild(option);
+                });
+
+                // Evento cuando cambia el select
+                select.addEventListener('change', function() {
+                    document.getElementById(`mechanics_id_${tabId}`).value = this.value;
+                });
+            });
+    }
+
     function mostrarModalMecanicos(tabId) {
         openModalTab(`modalMecanicos_${tabId}`);
         fetch("{{ route('mecanicosDisponibles') }}")
@@ -650,13 +677,9 @@
 
     function seleccionarMecanico(tabId, id, datos) {
         document.getElementById(`mechanics_id_${tabId}`).value = id;
-        document.getElementById(`datos_mecanico_${tabId}`).value = datos;
+        const select = document.getElementById(`mecanico_select_${tabId}`);
+        select.value = id;
         closeModalTab(`modalMecanicos_${tabId}`);
-    }
-
-    function eliminarMecanicoTab(tabId) {
-        document.getElementById(`mechanics_id_${tabId}`).value = '';
-        document.getElementById(`datos_mecanico_${tabId}`).value = '';
     }
 
     // Funciones de Ubicación
@@ -832,26 +855,31 @@
         productTable.innerHTML = "";
 
         productList.forEach(product => {
+            const stockActual = product.stock?.quantity ?? 0;
+            const stockMinimo = product.stock?.minimum_stock ?? 0;
+            const sinStock = stockActual === 0;
+            const stockBajo = stockActual > 0 && stockActual <= stockMinimo;
+            
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td class="px-2 py-1 border">${product.code_sku}</td>
                 <td class="px-2 py-1 border">${product.description}</td>
-                <td class="px-2 py-1 border">${product.location}</td>
-                <td class="px-2 py-1 border">${product.stock?.quantity || 0}</td>
-                <td class="px-2 py-1 border">${product.stock?.minimum_stock || 0}</td>
+                <td class="px-2 py-1 border">${product.location || '-'}</td>
+                <td class="px-2 py-1 border ${sinStock ? 'bg-red-100 text-red-700 font-bold' : stockBajo ? 'bg-yellow-100 text-yellow-700' : ''}">${stockActual}</td>
+                <td class="px-2 py-1 border">${stockMinimo}</td>
                 <td class="px-2 py-1 border">
-                    <input type="number" class="p-2 border rounded" value="1" min="1" max="${product.stock?.quantity || 0}"
-                        id="qty_${tabId}_${product.id}" onchange="updateModalSubtotal('${tabId}', ${product.id})">
+                    <input type="number" class="p-2 border rounded" value="1" min="1" max="${stockActual}"
+                        id="qty_${tabId}_${product.id}" onchange="updateModalSubtotal('${tabId}', ${product.id})" ${sinStock ? 'disabled' : ''}>
                 </td>
                 <td class="px-2 py-1 border">
-                    <select class="p-2 border rounded" id="price_${tabId}_${product.id}" onchange="updateModalSubtotal('${tabId}', ${product.id})">
+                    <select class="p-2 border rounded" id="price_${tabId}_${product.id}" onchange="updateModalSubtotal('${tabId}', ${product.id})" ${sinStock ? 'disabled' : ''}>
                         <option value="">Seleccionar precio</option>
                         ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - ${price.price}</option>`).join('')}
                     </select>
                 </td>
                 <td class="px-2 py-1 border" id="subtotal_${tabId}_${product.id}">0</td>
                 <td class="px-2 py-1 border">
-                    <button class="bg-blue-500 text-white px-3 py-1 rounded" onclick="agregarProducto('${tabId}', ${product.id})">Agregar</button>
+                    <button class="bg-blue-500 text-white px-3 py-1 rounded ${sinStock ? 'opacity-50 cursor-not-allowed' : ''}" onclick="agregarProducto('${tabId}', ${product.id})" ${sinStock ? 'disabled' : ''}>Agregar</button>
                 </td>
             `;
             productTable.appendChild(row);
@@ -1043,7 +1071,6 @@
             order_date: document.getElementById(`orderDate_${tabId}`).value,
             currency: document.getElementById(`orderCurrency_${tabId}`).value,
             document_type_id: document.getElementById(`documentType_${tabId}`).value,
-            companies_id: document.getElementById(`companies_id_${tabId}`).value,
             nro_dias: document.getElementById(`nro_dias_${tabId}`).value,
             fecha_vencimiento: document.getElementById(`fecha_vencimiento_${tabId}`).value,
             igv: parseFloat(document.getElementById(`igvAmount_${tabId}`).textContent.replace("S/ ", "")) || 0,
@@ -1052,6 +1079,108 @@
             services: data.services,
             payments: getSalePaymentMethods(tabId)
         };
+    }
+
+    // Función para guardar una venta individual
+    async function saveSingleSale(tabId) {
+        const saleData = salesData.get(tabId);
+        if (!saleData) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontró la venta',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: '¿Guardar esta venta?',
+            html: `<p>Venta #${saleData.saleNumber}</p>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!result.isConfirmed) return;
+
+        Swal.fire({
+            title: 'Guardando venta...',
+            html: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            const orderData = buildOrderData(tabId);
+
+            // Validación básica
+            const documentTypeId = orderData.document_type_id;
+            const isNotaDeVenta = documentTypeId == 6;
+            
+            if (!isNotaDeVenta && (!orderData.customer_dni || !orderData.customer_names_surnames)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Datos incompletos',
+                    text: 'Falta DNI o nombre del cliente',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+
+            if (orderData.products.length === 0 && orderData.services.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin productos',
+                    text: 'Agregue al menos un producto o servicio',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+
+            const response = await fetch('{{ route('sales.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al guardar la venta');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Venta guardada!',
+                text: `Venta #${saleData.saleNumber} guardada exitosamente`,
+                confirmButtonColor: '#10b981'
+            }).then(() => {
+                // Cerrar la pestaña guardada
+                closeTab(tabId);
+                
+                // Si no quedan más pestañas, redirigir al índice
+                if (salesData.size === 0) {
+                    window.location.href = '{{ route("sales.index") }}';
+                }
+            });
+
+        } catch (error) {
+            console.error('Error guardando venta:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Error al guardar la venta',
+                confirmButtonColor: '#ef4444'
+            });
+        }
     }
 
     // Función para guardar todas las ventas

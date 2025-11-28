@@ -115,7 +115,7 @@
                                     </button>
                                 </td>
                                 <td class="px-3 py-2 text-center">
-                                    <a href="" class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar">
+                                    <a href="{{ route('garantines.edit', $garantia->id) }}" class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar">
                                         <i class="bi bi-pencil text-base"></i>
                                     </a>
                                 </td>

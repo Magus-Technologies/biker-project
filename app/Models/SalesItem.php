@@ -10,6 +10,7 @@ class SalesItem extends Model
     use HasFactory;
 
     protected $table = 'sale_items';
+
     protected $fillable = [
         'sale_id',
         'item_id',
@@ -26,12 +27,14 @@ class SalesItem extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'item_id');
     }
+
     public function service()
     {
-        return $this->belongsTo(ServiceSale::class);
+        return $this->belongsTo(ServiceSale::class, 'item_id');
     }
+
     public function item()
     {
         return $this->morphTo();
