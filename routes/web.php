@@ -1,30 +1,31 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BuyController;
 use App\Http\Controllers\ClienteMayoristaController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\WholesaleController;
-use App\Http\Controllers\CustomerController;
 use App\Models\Product;
 use App\Models\Wholesaler;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BuyController;
 
 /*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+ * |--------------------------------------------------------------------------
+ * | Web Routes
+ * |--------------------------------------------------------------------------
+ * |
+ * | Here is where you can register web routes for your application. These
+ * | routes are loaded by the RouteServiceProvider and all of them will
+ * | be assigned to the "web" middleware group. Make something great!
+ * |
+ */
 Route::get('/csrf-token', function () {
     return response()->json(['token' => csrf_token()]);
 });
@@ -49,40 +50,37 @@ Route::group(
 
         Route::resource('users', App\Http\Controllers\UserController::class);
         Route::get('users/{userId}/delete', [App\Http\Controllers\UserController::class, 'destroy']);
-        //CLIENTES
+        // CLIENTES
         Route::resource('drives', App\Http\Controllers\CustomerController::class);
         Route::get('/drives/{id}/details', [CustomerController::class, 'getDetails'])->name('drives.details');
-        //MECANICOS
+        // MECANICOS
         Route::resource('mechanics', App\Http\Controllers\MechanicController::class);
         Route::get('mechanic/MecanicosDisponibles', [App\Http\Controllers\MechanicController::class, 'MecanicosDisponibles'])->name('obtener.MecanicosDisponibles');
-        //VEHICULOS
+        // VEHICULOS
         Route::resource('cars', App\Http\Controllers\CarController::class);
         Route::get('car/buscarPorPlaca', [App\Http\Controllers\CarController::class, 'searchDriverPorPlaca'])->name('buscar.DriverPorPlaca');
         Route::get('car/buscarDrive', [App\Http\Controllers\CarController::class, 'searchBuscarDriver'])->name('buscar.Driver');
         Route::get('car/buscarPornroMotor', [App\Http\Controllers\CarController::class, 'searchBuscarVehiculo'])->name('buscar.Vehiculo');
         // PRODUCTOS
-        Route::resource('products', App\Http\Controllers\ProductController::class);
-        Route::post('/products/{product}/manage-stock', [App\Http\Controllers\ProductController::class, 'manageStock'])->name('products.manage-stock');
-        Route::get('/products/{productId}/stock-codes', [App\Http\Controllers\ProductController::class, 'getStockCodes'])->name('products.getStockCodes');
-        Route::get('product/search', [App\Http\Controllers\ProductController::class, 'search'])->name('products.search');
-        Route::get('product/export', [App\Http\Controllers\ProductController::class, 'export'])->name('products.export');
+        Route::resource('products', ProductController::class);
+        Route::post('/products/{product}/manage-stock', [ProductController::class, 'manageStock'])->name('products.manage-stock');
+        Route::get('/products/{productId}/stock-codes', [ProductController::class, 'getStockCodes'])->name('products.getStockCodes');
+        Route::get('product/search', [ProductController::class, 'search'])->name('products.search');
+        Route::get('product/export', [ProductController::class, 'export'])->name('products.export');
         Route::get('/productos/{id}/imagenes', function ($id) {
             $product = Product::findOrFail($id);
             return response()->json($product->images);
         })->name('products.images');
 
         // Route::get('product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
-        Route::get('/plantilla-descargar', [App\Http\Controllers\ProductController::class, 'descargarPlantilla'])->name('plantilla.descargar');
-        Route::post('/product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
-
-
+        Route::get('/plantilla-descargar', [ProductController::class, 'descargarPlantilla'])->name('plantilla.descargar');
+        Route::post('/product/import', [ProductController::class, 'import'])->name('products.import');
 
         // PRECIOS DE PRODUCTOS
         Route::get('/precios-productos', [App\Http\Controllers\PreciosProductosController::class, 'index'])->name('precios-productos.index');
         Route::get('/precios-productos/export-excel', [App\Http\Controllers\PreciosProductosController::class, 'exportExcel'])->name('precios-productos.export-excel');
         Route::get('/precios-productos/export-pdf', [App\Http\Controllers\PreciosProductosController::class, 'exportPdf'])->name('precios-productos.export-pdf');
         Route::get('/precios-productos/detalles', [App\Http\Controllers\PreciosProductosController::class, 'getDetallesPrecio'])->name('precios-productos.detalles');
-
 
         // STOCK MINIMO
         Route::get('/stock-minimo', [App\Http\Controllers\StockMinController::class, 'index'])->name('stock-minimo.index');
@@ -100,22 +98,22 @@ Route::group(
             Route::post('/devoluciones/exportar', [App\Http\Controllers\DevolucionesController::class, 'export'])->name('devoluciones.export');
         });
 
-        //SERVICIOS
-        Route::resource('services', App\Http\Controllers\ServiceController::class);
+        // SERVICIOS
+        Route::resource('services', ServiceController::class);
         Route::get('/service/listado', [ServiceController::class, 'filtroPorfecha'])->name('service.filtroPorfecha');
         Route::post('/service/cambiarEstado', [ServiceController::class, 'cambiarEstado'])->name('service.cambiarEstado');
         Route::get('/service/detalles', [ServiceController::class, 'verDetalles'])->name('service.verDetalles');
 
-        //GARANTIAS
+        // GARANTIAS
         Route::resource('garantines', App\Http\Controllers\GarantineController::class);
-        //TRABAJADORES CON SUS ROLES
+        // TRABAJADORES CON SUS ROLES
         Route::resource('workers', App\Http\Controllers\UserController::class);
         Route::middleware('auth')->group(function () {
             Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
-        //VENTAS
+        // VENTAS
         Route::get('/sales/bulk-create', [SaleController::class, 'bulkCreate'])->name('sales.bulk-create');
         Route::resource('sales', SaleController::class);
         Route::get('/sale/listado', [SaleController::class, 'filtroPorfecha'])->name('sales.filtroPorfecha');
@@ -138,8 +136,10 @@ Route::group(
         Route::post('/despacho/marcar-entregado', [App\Http\Controllers\DespachoController::class, 'marcarEntregado'])->name('despachos.marcarEntregado');
         Route::post('/despacho/marcar-pendiente', [App\Http\Controllers\DespachoController::class, 'marcarPendiente'])->name('despachos.marcarPendiente');
         Route::get('/despacho/filtrar', [App\Http\Controllers\DespachoController::class, 'filtrar'])->name('despachos.filtrar');
+        Route::get('/despacho/detalles/{id}', [App\Http\Controllers\DespachoController::class, 'detalles'])->name('despachos.detalles');
+        Route::post('/despacho/guardar', [App\Http\Controllers\DespachoController::class, 'guardar'])->name('despachos.guardar');
 
-        //UNIDAD MEDIDA
+        // UNIDAD MEDIDA
         Route::resource('units', App\Http\Controllers\UnitController::class);
         Route::get('/units/search-api', [UnitController::class, 'search'])->name('units.search');
         // COTIZACIONES
@@ -149,7 +149,7 @@ Route::group(
         Route::get('/quotation/pdf/{id}', [QuotationController::class, 'generatePDF'])->name('quotations.pdf');
         Route::post('/quotation/cotizacion/vender/{id}', [QuotationController::class, 'vender'])->name('quotations.vender');
         Route::get('quotation/mecanicos-disponibles', [App\Http\Controllers\QuotationController::class, 'MecanicosDisponibles'])->name('mecanicosDisponibles');
-        //MAYORISTA
+        // MAYORISTA
         Route::resource('wholesalers', WholesaleController::class);
         Route::get('/wholesaler/listado', [WholesaleController::class, 'filtroPorfecha'])->name('wholesalers.filtroPorfecha');
         Route::get('/wholesaler/detalles/{id}', [WholesaleController::class, 'detallesWholesaler'])->name('wholesalers.detallesWholesaler');
@@ -199,7 +199,6 @@ Route::group(
 
             return view('buy.receive', compact('buy', 'tiendas'));
         })->name('buy.receive');
-
 
         // Agregar estas nuevas rutas:
         Route::get('/buy/filtered-list', [BuyController::class, 'filteredList'])->name('buy.filteredList');

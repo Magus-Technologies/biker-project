@@ -34,24 +34,52 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // });
 Route::get('/product', function (Request $request) {
     $tiendaId = $request->input('tienda_id');
-    $query = $request->input('search');
+    $query = $request->input('search', '');
 
-    $productosQuery = Product::with('brand', 'unit', 'tienda', 'prices') // Removed 'stock' eager load
+    $productosQuery = Product::with('brand', 'unit', 'tienda', 'prices', 'stocks')
         ->where(function ($q) use ($query) {
             $q->where('code_sku', 'like', "%{$query}%")
                 ->orWhere('code_bar', 'like', "%{$query}%")
-                ->orWhere('description', 'like', "%{$query}%"); // Added description search
+                ->orWhere('description', 'like', "%{$query}%");
         });
 
-    if ($tiendaId !== 'todos') {
-        $productosQuery->where('tienda_id', $tiendaId);
-    }
+    // No filtrar por tienda_id del producto porque puede estar vacío
+    // if ($tiendaId !== 'todos') {
+    //     $productosQuery->where('tienda_id', $tiendaId);
+    // }
 
     $productos = $productosQuery->get();
 
     // Manually attach the correct stock for the given tiendaId
     $productos->each(function ($product) use ($tiendaId) {
-        $product->stock = $product->getStockByTienda($tiendaId);
+        if ($tiendaId === 'todos') {
+            // Si es "todos", sumar todos los stocks del producto
+            $totalQuantity = $product->stocks->sum('quantity');
+            $minStock = $product->stocks->min('minimum_stock') ?? 0;
+            
+            $product->stock = (object)[
+                'quantity' => $totalQuantity,
+                'minimum_stock' => $minStock
+            ];
+        } else {
+            // Si es una tienda específica, obtener el stock de esa tienda
+            $stockTienda = $product->stocks->firstWhere('tienda_id', $tiendaId);
+            
+            if ($stockTienda) {
+                $product->stock = (object)[
+                    'quantity' => $stockTienda->quantity,
+                    'minimum_stock' => $stockTienda->minimum_stock
+                ];
+            } else {
+                $product->stock = (object)[
+                    'quantity' => 0,
+                    'minimum_stock' => 0
+                ];
+            }
+        }
+        
+        // Limpiar la relación stocks para no enviarla en el JSON
+        unset($product->stocks);
     });
 
     return response()->json($productos);

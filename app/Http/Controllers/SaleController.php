@@ -156,7 +156,7 @@ class SaleController extends Controller
                 'serie' => $this->generateSerie($request->document_type_id),
                 'number' => $this->generateNumero($request->document_type_id),
                 'document_type_id' => $request->document_type_id,
-                'companies_id' => $request->companies_id,
+                'companies_id' => $request->companies_id ?? 1, // Valor por defecto: 1
                 'payments_id' => $request->payments_id,
                 'mechanics_id' => $request->mechanics_id ? $request->mechanics_id : null,
                 'districts_id' => ($request->districts_id && $request->districts_id != 'todos') ? $request->districts_id : null,

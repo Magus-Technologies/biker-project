@@ -55,8 +55,8 @@ class GarantineController extends Controller
                 $path = $file->storeAs('garantias/boleta_dua', $filename, 'public');
                 $pdfPaths[] = [
                     'original_name' => $file->getClientOriginalName(),
-                    'stored_path'   => $path,
-                    'url'           => \Storage::disk('public')->url($path),
+                    'stored_path' => $path,
+                    'url' => \Storage::disk('public')->url($path),
                 ];
             }
         }
@@ -95,6 +95,7 @@ class GarantineController extends Controller
             ]);
         }
     }
+
     /**
      * Display the specified resource.
      */
@@ -102,6 +103,7 @@ class GarantineController extends Controller
     {
         //
     }
+
     public function generateCode()
     {
         $lastCodigo = Garantine::max('codigo') ?? '0000000';
@@ -114,7 +116,12 @@ class GarantineController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        try {
+            $garantine = Garantine::findOrFail($id);
+            return view('garantine.edit', compact('garantine'));
+        } catch (\Throwable $th) {
+            return redirect()->route('garantines.index')->with('error', 'Garantía no encontrada');
+        }
     }
 
     /**
@@ -122,7 +129,66 @@ class GarantineController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $messages = [
+            'n_documento.required' => 'El numero de documento es obligatorio.',
+            'datos_cliente.required' => 'Los datos del cliente son obligatorio.',
+            'nro_motor.unique' => 'El numero de motor ya ha sido registrado.',
+            'boleta_dua.*.mimes' => 'Solo se permiten archivos PDF.',
+        ];
+
+        try {
+            $request->validate([
+                'n_documento' => 'required|string',
+                'datos_cliente' => 'required|string',
+                'nro_motor' => 'required|unique:garantines,nro_motor,' . $id,
+                'boleta_dua.*' => 'nullable|mimes:pdf',
+            ], $messages);
+        } catch (ValidationValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        try {
+            $garantine = Garantine::findOrFail($id);
+
+            // Manejo de PDFs
+            $pdfPaths = json_decode($garantine->boleta_dua_pdfs, true) ?? [];
+
+            if ($request->hasFile('boleta_dua')) {
+                foreach ($request->file('boleta_dua') as $file) {
+                    $filename = uniqid('boleta_dua_') . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('garantias/boleta_dua', $filename, 'public');
+                    $pdfPaths[] = [
+                        'original_name' => $file->getClientOriginalName(),
+                        'stored_path' => $path,
+                        'url' => \Storage::disk('public')->url($path),
+                    ];
+                }
+            }
+
+            $garantine->update([
+                'marca' => $request->marca,
+                'modelo' => $request->modelo,
+                'anio' => $request->anio,
+                'nro_chasis' => $request->nro_chasis,
+                'nro_motor' => $request->nro_motor,
+                'color' => $request->color,
+                'nro_documento' => $request->n_documento,
+                'nombres_apellidos' => $request->datos_cliente,
+                'celular' => $request->celular,
+                'kilometrajes' => $request->kilometrajes,
+                'boleta_dua_pdfs' => json_encode($pdfPaths),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'La Garantía ha sido actualizada con éxito!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la garantía: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

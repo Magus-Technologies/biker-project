@@ -298,7 +298,7 @@ async function verDetalles(saleId) {
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
                             <tr>
-                                <th>Tipo</th>
+                                <th>Código</th>
                                 <th>Descripción</th>
                                 <th class="text-center">Cantidad</th>
                                 <th class="text-end">Precio Unit.</th>
@@ -309,13 +309,13 @@ async function verDetalles(saleId) {
         `;
         
         data.sale.sale_items.forEach(item => {
-            let tipo = item.item_type.includes("Product") ? "Producto" : "Servicio";
+            let codigo = item.item.code_sku || item.item.code || '-';
             let descripcion = item.item.description || item.item.name;
             let total = (item.quantity * parseFloat(item.unit_price)).toFixed(2);
             
             html += `
                 <tr>
-                    <td>${tipo}</td>
+                    <td>${codigo}</td>
                     <td>${descripcion}</td>
                     <td class="text-center">${item.quantity}</td>
                     <td class="text-end">S/. ${parseFloat(item.unit_price).toFixed(2)}</td>
