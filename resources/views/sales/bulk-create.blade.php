@@ -187,6 +187,20 @@
                         </div>
                     </div>
 
+                    <!-- Grid de 2 columnas para modelo de moto y teléfono -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="motorcycle_model_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Modelo de Moto</label>
+                            <input type="text" id="motorcycle_model_${tabId}" placeholder="Ej: Honda CBR 600"
+                                class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label for="phone_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Número de Teléfono</label>
+                            <input type="tel" id="phone_${tabId}" placeholder="Ej: 999 999 999"
+                                class="w-full p-2 border rounded text-sm">
+                        </div>
+                    </div>
+
                     {{-- Campos ocultos para mantener compatibilidad --}}
                     <input type="hidden" id="direccion_${tabId}" value="">
                     <input type="hidden" id="regions_id_${tabId}" value="todos">
@@ -1065,6 +1079,8 @@
             customer_dni: document.getElementById(`dni_personal_${tabId}`).value.trim(),
             customer_names_surnames: document.getElementById(`nombres_apellidos_${tabId}`).value.trim(),
             customer_address: document.getElementById(`direccion_${tabId}`).value.trim(),
+            motorcycle_model: document.getElementById(`motorcycle_model_${tabId}`).value.trim(),
+            phone: document.getElementById(`phone_${tabId}`).value.trim(),
             districts_id: document.getElementById(`districts_id_${tabId}`).value,
             mechanics_id: document.getElementById(`mechanics_id_${tabId}`).value,
             payments_id: document.getElementById(`paymentType_${tabId}`).value,

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <i class="fas fa-truck-loading mr-2"></i>{{ __('Recepción de Productos') }}
+            <i class="bi bi-truck-loading mr-2"></i>{{ __('Recepción de Productos') }}
         </h2>
     </x-slot>
 
@@ -14,7 +14,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <h4 class="font-semibold text-blue-800 mb-2">
-                                    <i class="fas fa-file-invoice mr-2"></i>Información de Compra
+                                    <i class="bi bi-file-invoice mr-2"></i>Información de Compra
                                 </h4>
                                 <p><strong>Número:</strong> <span id="buyNumber"></span></p>
                                 <p><strong>Fecha:</strong> <span id="buyDate"></span></p>
@@ -22,14 +22,14 @@
                             </div>
                             <div>
                                 <h4 class="font-semibold text-blue-800 mb-2">
-                                    <i class="fas fa-truck mr-2"></i>Proveedor
+                                    <i class="bi bi-truck mr-2"></i>Proveedor
                                 </h4>
                                 <p><strong>Nombre:</strong> <span id="supplierName"></span></p>
                                 <p><strong>Documento:</strong> <span id="supplierDocument"></span></p>
                             </div>
                             <div>
                                 <h4 class="font-semibold text-blue-800 mb-2">
-                                    <i class="fas fa-store mr-2"></i>Tienda Destino
+                                    <i class="bi bi-store mr-2"></i>Tienda Destino
                                 </h4>
                                 <p><strong>Tienda:</strong> <span id="tiendaName"></span></p>
                                 <div class="mt-2">
@@ -50,7 +50,7 @@
                     <!-- Scanner de Códigos -->
                     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                         <h4 class="font-semibold text-yellow-800 mb-3">
-                            <i class="fas fa-barcode mr-2"></i>Scanner de Códigos de Barra
+                            <i class="bi bi-barcode mr-2"></i>Scanner de Códigos de Barra
                         </h4>
                         <div class="flex gap-4 items-end">
                             <div class="flex-1">
@@ -65,11 +65,11 @@
                             </div>
                             <button onclick="processBarcodeManually()" 
                                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-plus mr-2"></i>Agregar
+                                <i class="bi bi-plus mr-2"></i>Agregar
                             </button>
                             <button onclick="clearBarcode()" 
                                     class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-trash mr-2"></i>Limpiar
+                                <i class="bi bi-trash mr-2"></i>Limpiar
                             </button>
                         </div>
                         
@@ -115,11 +115,11 @@
                     <div class="mt-6 flex justify-end space-x-4">
                         <button onclick="window.history.back()" 
                                 class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            <i class="fas fa-arrow-left mr-2"></i>Volver
+                            <i class="bi bi-arrow-left mr-2"></i>Volver
                         </button>
                         <button onclick="saveReception()" 
                                 class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                            <i class="fas fa-check mr-2"></i>Confirmar Recepción
+                            <i class="bi bi-check mr-2"></i>Confirmar Recepción
                         </button>
                     </div>
                 </div>
@@ -228,7 +228,7 @@
                                 <div class="space-y-2">
                                     <button onclick="startScanning(${product.id}, ${index})" 
                                             class="text-blue-600 hover:text-blue-900 text-sm">
-                                        <i class="fas fa-barcode mr-1"></i>
+                                        <i class="bi bi-barcode mr-1"></i>
                                         Escanear (${scannedCodesForProduct.length}/${requiredCodes})
                                     </button>
                                     <div id="codes_display_${index}" class="text-xs text-gray-600">
@@ -236,7 +236,7 @@
                                             `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 mr-1 mb-1">
                                                 ${code}
                                                 <button onclick="removeScannedCode(${index}, '${code}')" class="ml-1 text-green-600 hover:text-green-900">
-                                                    <i class="fas fa-times"></i>
+                                                    <i class="bi bi-times"></i>
                                                 </button>
                                             </span>`
                                         ).join('')}

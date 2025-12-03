@@ -13,7 +13,7 @@
                         <!-- Información de la Compra -->
                         <div class="bg-green-50 p-6 rounded-lg mb-6">
                             <h3 class="text-lg font-semibold mb-4 text-green-800">
-                                <i class="fas fa-file-invoice mr-2"></i>Información de la Compra
+                                <i class="bi bi-file-invoice mr-2"></i>Información de la Compra
                             </h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
@@ -49,14 +49,14 @@
                     <!-- Búsqueda de Productos -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-6">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800">
-                            <i class="fas fa-search mr-2"></i>Buscar Productos
+                            <i class="bi bi-search mr-2"></i>Buscar Productos
                         </h3>
                         
                         <div class="relative">
                             <input type="text" id="product_search" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10" 
                                    placeholder="Buscar por código, SKU, código de barras o nombre...">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
+                                <i class="bi bi-search text-gray-400"></i>
                             </div>
                             
                             <!-- Lista de resultados -->
@@ -70,7 +70,7 @@
                     <div class="bg-white border rounded-lg mb-6">
                         <div class="bg-gray-100 px-4 py-3 border-b">
                             <h3 class="text-lg font-semibold text-gray-800">
-                                <i class="fas fa-shopping-basket mr-2"></i>Productos de la Compra
+                                <i class="bi bi-shopping-basket mr-2"></i>Productos de la Compra
                             </h3>
                         </div>
                         
@@ -88,7 +88,7 @@
                                 <tbody id="products_tbody">
                                     <tr id="no_products_row">
                                         <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                            <i class="fas fa-box-open text-4xl mb-2"></i>
+                                            <i class="bi bi-box-open text-4xl mb-2"></i>
                                             <p>No hay productos agregados</p>
                                         </td>
                                     </tr>
@@ -100,7 +100,7 @@
                     <!-- Métodos de Pago -->
                     <div class="bg-yellow-50 p-4 rounded-lg mb-6">
                         <h3 class="text-lg font-semibold mb-4 text-yellow-800">
-                            <i class="fas fa-credit-card mr-2"></i>Métodos de Pago
+                            <i class="bi bi-credit-card mr-2"></i>Métodos de Pago
                         </h3>
                         
                         <div id="payment_methods_container">
@@ -128,7 +128,7 @@
                                             class="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                         <button type="button" onclick="openInstallmentsModal(0)" 
                                                 class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-r-md text-xs">
-                                            <i class="fas fa-cog"></i>
+                                            <i class="bi bi-cog"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -137,7 +137,7 @@
                         </div>
                         
                         <button type="button" id="add_payment_method" class="text-sm text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-plus mr-1"></i>Agregar método de pago
+                            <i class="bi bi-plus mr-1"></i>Agregar método de pago
                         </button>
                     </div>
                     
@@ -175,11 +175,11 @@
                     <div class="flex justify-end space-x-4">
                         <button type="button" onclick="window.location.href='{{ route('buys.index') }}'"
                                 class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded">
-                            <i class="fas fa-times mr-2"></i>Cancelar
+                            <i class="bi bi-times mr-2"></i>Cancelar
                         </button>
                         
                         <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
-                            <i class="fas fa-save mr-2"></i>Guardar Compra
+                            <i class="bi bi-save mr-2"></i>Guardar Compra
                         </button>
                     </div>
                 </form>
@@ -193,10 +193,10 @@
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4 bg-green-500 text-white p-3 rounded-t">
                     <h3 class="text-lg font-medium flex items-center">
-                        <i class="fas fa-barcode mr-2"></i>Escanear Códigos
+                        <i class="bi bi-barcode mr-2"></i>Escanear Códigos
                     </h3>
                     <button type="button" onclick="closeScanModal()" class="text-white hover:text-gray-300">
-                        <i class="fas fa-times"></i>
+                        <i class="bi bi-times"></i>
                     </button>
                 </div>
                 
@@ -208,7 +208,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-green-600 font-bold">
-                                <i class="fas fa-check-circle mr-1"></i>
+                                <i class="bi bi-check-circle mr-1"></i>
                                 <span id="scan_current_count">1</span> de <span id="scan_total_needed">1</span> códigos escaneados
                             </p>
                         </div>
@@ -223,7 +223,7 @@
                                 placeholder="Escanee o ingrese el código...">
                         <button type="button" id="btnAgregarCodigo" 
                                 class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-r-md">
-                            <i class="fas fa-plus"></i> Agregar
+                            <i class="bi bi-plus"></i> Agregar
                         </button>
                     </div>
                     <small class="text-gray-500">Presione Enter después de escanear o use el botón Agregar</small>
@@ -243,7 +243,7 @@
                     </button>
                     <button type="button" id="btnConfirmarCodigos" 
                             class="bg-green-500 hover:bg-green-700 text-white font-medium py-2 px-4 rounded">
-                        <i class="fas fa-check mr-2"></i>Confirmar
+                        <i class="bi bi-check mr-2"></i>Confirmar
                     </button>
                 </div>
             </div>
@@ -256,10 +256,10 @@
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4 bg-blue-500 text-white p-3 rounded-t">
                     <h3 class="text-lg font-medium flex items-center">
-                        <i class="fas fa-calendar-alt mr-2"></i>Configurar Cuotas de Pago
+                        <i class="bi bi-calendar-alt mr-2"></i>Configurar Cuotas de Pago
                     </h3>
                     <button type="button" onclick="closeInstallmentsModal()" class="text-white hover:text-gray-300">
-                        <i class="fas fa-times"></i>
+                        <i class="bi bi-times"></i>
                     </button>
                 </div>
                 
@@ -274,7 +274,7 @@
                     </button>
                     <button type="button" id="btnConfirmarCuotas" 
                             class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
-                        <i class="fas fa-check mr-2"></i>Confirmar Cuotas
+                        <i class="bi bi-check mr-2"></i>Confirmar Cuotas
                     </button>
                 </div>
             </div>
@@ -413,7 +413,7 @@
             const scanButtonHtml = product.control_type === 'codigo_unico' && deliveryStatus !== 'pending'
                 ? `<button type="button" class="scan-codes-btn bg-green-500 hover:bg-green-700 text-white px-2 py-1 rounded text-xs ml-2" 
                           onclick="openScanModal(${product.id}, '${product.description}')">
-                      <i class="fas fa-barcode mr-1"></i>Escanear
+                      <i class="bi bi-barcode mr-1"></i>Escanear
                    </button>` 
                 : '';
 
@@ -452,7 +452,7 @@
                     <td class="px-4 py-3">
                         <button type="button" onclick="removeProduct(${product.id})" 
                                 class="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded text-xs">
-                            <i class="fas fa-trash"></i>
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -488,7 +488,7 @@
                 $('#products_tbody').html(`
                     <tr id="no_products_row">
                         <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                            <i class="fas fa-box-open text-4xl mb-2"></i>
+                            <i class="bi bi-box-open text-4xl mb-2"></i>
                             <p>No hay productos agregados</p>
                         </td>
                     </tr>
@@ -587,7 +587,7 @@
             const codeHtml = `<div class="flex justify-between items-center mb-1">
                 <span>${scannedCodes.length}. ${code}</span>
                 <button type="button" onclick="removeScannedCode('${code}')" class="text-red-400 hover:text-red-600">
-                    <i class="fas fa-times"></i>
+                    <i class="bi bi-times"></i>
                 </button>
             </div>`;
             $('#codigosEscaneadosList').append(codeHtml);
@@ -617,7 +617,7 @@
                 const codeHtml = `<div class="flex justify-between items-center mb-1">
                     <span>${index + 1}. ${c}</span>
                     <button type="button" onclick="removeScannedCode('${c}')" class="text-red-400 hover:text-red-600">
-                        <i class="fas fa-times"></i>
+                        <i class="bi bi-times"></i>
                     </button>
                 </div>`;
                 $('#codigosEscaneadosList').append(codeHtml);
@@ -645,7 +645,7 @@
             // Actualizar botón
             const scanBtn = row.find('.scan-codes-btn');
             scanBtn.removeClass('bg-green-500 hover:bg-green-700').addClass('bg-blue-500 hover:bg-blue-700');
-            scanBtn.html(`<i class="fas fa-check mr-1"></i>Escaneado (${scannedCodes.length})`);
+            scanBtn.html(`<i class="bi bi-check mr-1"></i>Escaneado (${scannedCodes.length})`);
             
             closeScanModal();
             showAlert('Códigos confirmados correctamente', 'success');
@@ -680,7 +680,7 @@
                                    class="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                             <button type="button" onclick="openInstallmentsModal(${paymentMethodIndex})" 
                                     class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-r-md text-xs">
-                                <i class="fas fa-cog"></i>
+                                <i class="bi bi-cog"></i>
                             </button>
                         </div>
                     </div>
@@ -694,7 +694,7 @@
                     <div class="md:col-span-4 text-right">
                         <button type="button" onclick="$(this).closest('.payment-method-row').remove(); updatePaymentMethodsAmounts();" 
                                 class="text-red-600 hover:text-red-800 text-sm">
-                            <i class="fas fa-trash mr-1"></i>Eliminar
+                            <i class="bi bi-trash mr-1"></i>Eliminar
                         </button>
                     </div>
                 </div>
@@ -776,7 +776,7 @@
                 processData: false,
                 contentType: false,
                 beforeSend: function() {
-                    $('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...');
+                    $('button[type="submit"]').prop('disabled', true).html('<i class="bi bi-spinner fa-spin mr-2"></i>Guardando...');
                 },
                 success: function(response) {
                     if (response.success) {
@@ -791,7 +791,7 @@
                     showAlert(response?.message || 'Error al guardar la compra', 'error');
                 },
                 complete: function() {
-                    $('button[type="submit"]').prop('disabled', false).html('<i class="fas fa-save mr-2"></i>Guardar Compra');
+                    $('button[type="submit"]').prop('disabled', false).html('<i class="bi bi-save mr-2"></i>Guardar Compra');
                 }
             });
         }
@@ -900,7 +900,7 @@
                 
                 <div class="mt-4 p-3 bg-yellow-50 rounded">
                     <p class="text-sm text-yellow-800">
-                        <i class="fas fa-info-circle mr-1"></i>
+                        <i class="bi bi-info-circle mr-1"></i>
                         Puede modificar los montos y fechas según sus necesidades. 
                         La suma total debe coincidir con el monto del método de pago.
                     </p>
