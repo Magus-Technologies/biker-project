@@ -15,7 +15,7 @@
             <!-- Encabezado con filtros -->
             <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
                 <h3 class="text-base font-semibold text-gray-700 mb-3 flex items-center">
-                    <i class="fas fa-filter mr-2 text-blue-600"></i>Filtros de Búsqueda
+                    <i class="bi bi-filter mr-2 text-blue-600"></i>Filtros de Búsqueda
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -48,34 +48,34 @@
                 <div class="flex gap-2 flex-wrap">
                     <button onclick="filterBuys()"
                         class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
-                        <i class="fas fa-search mr-1"></i>Buscar
+                        <i class="bi bi-search mr-1"></i>Buscar
                     </button>
                     <button onclick="clearFilters()"
                         class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
-                        <i class="fas fa-eraser mr-1"></i>Limpiar
+                        <i class="bi bi-eraser mr-1"></i>Limpiar
                     </button>
                     <button onclick="exportReports('pdf')"
                         class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
-                        <i class="fas fa-file-pdf mr-1"></i>PDF
+                        <i class="bi bi-file-pdf mr-1"></i>PDF
                     </button>
                     <button onclick="exportReports('excel')"
                         class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
-                        <i class="fas fa-file-excel mr-1"></i>Excel
+                        <i class="bi bi-file-excel mr-1"></i>Excel
                     </button>
                     <button onclick="showImportModal()"
                         class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
-                        <i class="fas fa-upload mr-1"></i>Importar
+                        <i class="bi bi-upload mr-1"></i>Importar
                     </button>
                     <button onclick="downloadTemplate()"
                         class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md text-xs transition-colors">
-                        <i class="fas fa-download mr-1"></i>Plantilla
+                        <i class="bi bi-download mr-1"></i>Plantilla
                     </button>
                 </div>
 
                 <!-- Botón Nueva Compra -->
                 <a href="{{ route('buys.create') }}"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center transition-colors text-sm">
-                    <i class="fas fa-plus mr-1"></i>Nueva Compra
+                    <i class="bi bi-plus mr-1"></i>Nueva Compra
                 </a>
             </div>
         </div>
@@ -85,7 +85,7 @@
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <h3 class="text-base font-semibold text-gray-700 flex items-center">
-                <i class="fas fa-list mr-2 text-blue-600"></i>Lista de Compras
+                <i class="bi bi-list mr-2 text-blue-600"></i>Lista de Compras
             </h3>
         </div>
 
@@ -129,11 +129,11 @@
                             <td class="px-4 py-3 text-center">
                                 @if($buy->delivery_status === 'received')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        <i class="fas fa-check mr-1"></i>Recibidos
+                                        <i class="bi bi-check mr-1"></i>Recibidos
                                     </span>
                                 @else
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        <i class="fas fa-truck mr-1"></i>Carretera
+                                        <i class="bi bi-truck mr-1"></i>Carretera
                                     </span>
                                 @endif
                             </td>
@@ -142,18 +142,18 @@
                                     <button onclick="viewDetails({{ $buy->id }})"
                                             class="text-blue-600 hover:text-blue-900"
                                             title="Ver detalles">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="bi bi-eye"></i>
                                     </button>
                                     <button onclick="downloadPDF({{ $buy->id }})"
                                             class="text-red-600 hover:text-red-900"
                                             title="Descargar PDF">
-                                        <i class="fas fa-file-pdf"></i>
+                                        <i class="bi bi-file-pdf"></i>
                                     </button>
                                     @if($buy->delivery_status === 'pending')
                                         <button onclick="receiveProducts({{ $buy->id }})"
                                                 class="text-green-600 hover:text-green-900"
                                                 title="Recibir productos">
-                                            <i class="fas fa-truck"></i>
+                                            <i class="bi bi-truck"></i>
                                         </button>
                                     @endif
                                 </div>
@@ -340,7 +340,7 @@
 
         const submitButton = document.querySelector('#uploadForm button[type="submit"]');
         const originalText = submitButton.innerHTML;
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Procesando...';
+        submitButton.innerHTML = '<i class="bi bi-spinner fa-spin mr-1"></i>Procesando...';
         submitButton.disabled = true;
 
         fetch('{{ route("buy.processImport") }}', {
@@ -491,7 +491,7 @@
 
         const importButton = document.querySelector('button[onclick="importSelectedBuys()"]');
         const originalText = importButton.innerHTML;
-        importButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Importando...';
+        importButton.innerHTML = '<i class="bi bi-spinner fa-spin mr-1"></i>Importando...';
         importButton.disabled = true;
 
         fetch('{{ route("buy.importSelected") }}', {
@@ -578,12 +578,12 @@
                 content.innerHTML = `
                 <div class="error-container">
                     <div class="text-danger mb-4">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
                     </div>
                     <h6 class="text-danger">Error al cargar los detalles</h6>
                     <p class="text-muted mb-3">${error.message}</p>
                     <button class="btn btn-outline-primary" onclick="showBuyDetailsModal(${buyId})">
-                        <i class="fas fa-sync-alt me-1"></i>Reintentar
+                        <i class="bi bi-sync-alt me-1"></i>Reintentar
                     </button>
                 </div>
             `;
@@ -594,12 +594,12 @@
         const content = document.getElementById('buyDetailsContent');
 
         const deliveryStatusBadge = buy.delivery_status === 'received'
-            ? '<span class="status-badge status-active"><i class="fas fa-check-circle me-1"></i>Recibidos</span>'
-            : '<span class="status-badge status-inactive"><i class="fas fa-clock me-1"></i>Pendientes</span>';
+            ? '<span class="status-badge status-active"><i class="bi bi-check-circle me-1"></i>Recibidos</span>'
+            : '<span class="status-badge status-inactive"><i class="bi bi-clock me-1"></i>Pendientes</span>';
 
         const paymentTypeBadge = buy.payment_type === 'cash'
-            ? '<span class="modal-badge bg-success text-white"><i class="fas fa-money-bill me-1"></i>Contado</span>'
-            : '<span class="modal-badge bg-warning text-dark"><i class="fas fa-credit-card me-1"></i>Crédito</span>';
+            ? '<span class="modal-badge bg-success text-white"><i class="bi bi-money-bill me-1"></i>Contado</span>'
+            : '<span class="modal-badge bg-warning text-dark"><i class="bi bi-credit-card me-1"></i>Crédito</span>';
 
         let html = `
         <div class="compra-details-container">
@@ -610,13 +610,13 @@
                             Compra ${buy.serie}-${buy.number}
                         </h2>
                         <p class="mb-2 opacity-75" style="font-size: 1rem;">
-                            <i class="fas fa-calendar me-1"></i>${new Date(buy.fecha_registro).toLocaleDateString()}
+                            <i class="bi bi-calendar me-1"></i>${new Date(buy.fecha_registro).toLocaleDateString()}
                         </p>
                         <div class="mt-3 d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
                             ${deliveryStatusBadge}
                             ${paymentTypeBadge}
                             <span class="modal-badge bg-primary text-white">
-                                <i class="fas fa-dollar-sign me-1"></i>S/ ${parseFloat(buy.total_price).toFixed(2)}
+                                <i class="bi bi-dollar-sign me-1"></i>S/ ${parseFloat(buy.total_price).toFixed(2)}
                             </span>
                         </div>
                     </div>
@@ -626,7 +626,7 @@
             <div class="info-grid-single">
                 <div class="info-section">
                     <h4>
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="bi bi-shopping-cart"></i>
                         Información de la Compra
                     </h4>
                     <div class="info-row">
@@ -659,10 +659,10 @@
             <div class="border-bottom border-gray-200 mb-4">
                 <nav class="nav nav-tabs" id="buyTabs">
                     <button class="tab-button active" onclick="showTab('products')" id="productsTab">
-                        <i class="fas fa-box me-1"></i>Productos
+                        <i class="bi bi-box me-1"></i>Productos
                     </button>
                     <button class="tab-button" onclick="showTab('installments')" id="installmentsTab">
-                        <i class="fas fa-credit-card me-1"></i>Cuotas
+                        <i class="bi bi-credit-card me-1"></i>Cuotas
                         ${buy.payment_methods && buy.payment_methods.some(pm => pm.credit_installments && pm.credit_installments.length > 0)
                 ? `<span class="badge bg-danger ms-1">${buy.payment_methods.reduce((total, pm) => total + (pm.credit_installments ? pm.credit_installments.length : 0), 0)}</span>`
                 : ''}
@@ -676,12 +676,12 @@
                         <table class="table modal-table">
                             <thead>
                                 <tr>
-                                    <th><i class="fas fa-box me-1"></i>Producto</th>
-                                    <th><i class="fas fa-qrcode me-1"></i>SKU</th>
-                                    <th><i class="fas fa-sort-numeric-up me-1"></i>Cantidad</th>
-                                    <th><i class="fas fa-dollar-sign me-1"></i>Precio Unit.</th>
-                                    <th><i class="fas fa-calculator me-1"></i>Subtotal</th>
-                                    <th><i class="fas fa-tags me-1"></i>Códigos</th>
+                                    <th><i class="bi bi-box me-1"></i>Producto</th>
+                                    <th><i class="bi bi-qrcode me-1"></i>SKU</th>
+                                    <th><i class="bi bi-sort-numeric-up me-1"></i>Cantidad</th>
+                                    <th><i class="bi bi-dollar-sign me-1"></i>Precio Unit.</th>
+                                    <th><i class="bi bi-calculator me-1"></i>Subtotal</th>
+                                    <th><i class="bi bi-tags me-1"></i>Códigos</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -718,7 +718,7 @@
             html += `
             <tr>
                 <td colspan="6" class="text-center py-5 text-muted">
-                    <i class="fas fa-inbox display-6 d-block mb-3"></i>
+                    <i class="bi bi-inbox display-6 d-block mb-3"></i>
                     <h6>No hay productos registrados</h6>
                 </td>
             </tr>
@@ -753,11 +753,11 @@
                         const actionButton = installment.status === 'pendiente'
                             ? `<button onclick="markInstallmentPaid(${installment.id})"
                                   class="btn btn-success btn-sm">
-                              <i class="fas fa-check me-1"></i>Marcar Pagado
+                              <i class="bi bi-check me-1"></i>Marcar Pagado
                            </button>`
                             : `<button onclick="markInstallmentPending(${installment.id})"
                                   class="btn btn-warning btn-sm">
-                              <i class="fas fa-undo me-1"></i>Marcar Pendiente
+                              <i class="bi bi-undo me-1"></i>Marcar Pendiente
                            </button>`;
 
                         installmentsHtml += `
@@ -783,13 +783,13 @@
                     <table class="table modal-table">
                         <thead>
                             <tr>
-                                <th class="text-center"><i class="fas fa-hashtag me-1"></i>Cuota #</th>
-                                <th><i class="fas fa-credit-card me-1"></i>Método de Pago</th>
-                                <th class="text-center"><i class="fas fa-dollar-sign me-1"></i>Monto</th>
-                                <th class="text-center"><i class="fas fa-calendar me-1"></i>F. Vencimiento</th>
-                                <th class="text-center"><i class="fas fa-info-circle me-1"></i>Estado</th>
-                                <th class="text-center"><i class="fas fa-calendar-check me-1"></i>F. Pagado</th>
-                                <th class="text-center"><i class="fas fa-cogs me-1"></i>Acciones</th>
+                                <th class="text-center"><i class="bi bi-hashtag me-1"></i>Cuota #</th>
+                                <th><i class="bi bi-credit-card me-1"></i>Método de Pago</th>
+                                <th class="text-center"><i class="bi bi-dollar-sign me-1"></i>Monto</th>
+                                <th class="text-center"><i class="bi bi-calendar me-1"></i>F. Vencimiento</th>
+                                <th class="text-center"><i class="bi bi-info-circle me-1"></i>Estado</th>
+                                <th class="text-center"><i class="bi bi-calendar-check me-1"></i>F. Pagado</th>
+                                <th class="text-center"><i class="bi bi-cogs me-1"></i>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -806,7 +806,7 @@
             html += `
             <div class="text-center py-5">
                 <div class="text-muted">
-                    <i class="fas fa-info-circle display-6 d-block mb-3"></i>
+                    <i class="bi bi-info-circle display-6 d-block mb-3"></i>
                     <h6>No hay cuotas de crédito</h6>
                     <p class="mb-0">Esta compra no tiene cuotas de crédito registradas</p>
                 </div>
@@ -825,9 +825,9 @@
 
     function getInstallmentStatusBadge(status) {
         const badges = {
-            'pendiente': '<span class="modal-badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Pendiente</span>',
-            'pagado': '<span class="modal-badge bg-success text-white"><i class="fas fa-check me-1"></i>Pagado</span>',
-            'vencido': '<span class="modal-badge bg-danger text-white"><i class="fas fa-exclamation me-1"></i>Vencido</span>'
+            'pendiente': '<span class="modal-badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Pendiente</span>',
+            'pagado': '<span class="modal-badge bg-success text-white"><i class="bi bi-check me-1"></i>Pagado</span>',
+            'vencido': '<span class="modal-badge bg-danger text-white"><i class="bi bi-exclamation me-1"></i>Vencido</span>'
         };
         return badges[status] || status;
     }
@@ -974,8 +974,8 @@
             };
 
             const controlBadge = isUniqueCode
-                ? '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="fas fa-qrcode mr-1"></i>Código Único</span>'
-                : '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="fas fa-sort-numeric-up mr-1"></i>Cantidad</span>';
+                ? '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="bi bi-qrcode mr-1"></i>Código Único</span>'
+                : '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="bi bi-sort-numeric-up mr-1"></i>Cantidad</span>';
 
             const quantityInput = `<input type="number"
                                      id="quantity_${item.product.id}"
@@ -988,7 +988,7 @@
             const actionButton = isUniqueCode
                 ? `<button onclick="openScanModal(${item.product.id}, '${item.product.description}', ${item.quantity})"
                        class="bg-orange-500 hover:bg-orange-700 text-white text-xs px-3 py-1 rounded">
-                   <i class="fas fa-qrcode mr-1"></i>Escanear
+                   <i class="bi bi-qrcode mr-1"></i>Escanear
                </button>`
                 : '<span class="text-xs text-gray-500">-</span>';
 
@@ -1079,7 +1079,7 @@
                 `<div class="flex justify-between items-center py-1 text-green-400">
                         <span class="text-sm font-mono">${index + 1}. ${code}</span>
                         <button onclick="removeScannedCode(${index})" class="text-red-400 hover:text-red-300 text-xs ml-2">
-                            <i class="fas fa-times"></i>
+                            <i class="bi bi-times"></i>
                         </button>
                      </div>`
             ).join('')}
@@ -1161,7 +1161,7 @@
 
         const processButton = document.querySelector('button[onclick="processReception()"]');
         const originalText = processButton.innerHTML;
-        processButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Procesando...';
+        processButton.innerHTML = '<i class="bi bi-spinner fa-spin mr-1"></i>Procesando...';
         processButton.disabled = true;
 
         fetch(`/buy/${currentReceptionData.id}/process-reception`, {

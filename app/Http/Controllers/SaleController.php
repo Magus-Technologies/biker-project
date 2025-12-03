@@ -152,6 +152,8 @@ class SaleController extends Controller
                 'customer_names_surnames' => $customerName,
                 'customer_address' => $request->customer_address,
                 'customer_dni' => $request->customer_dni,
+                'motorcycle_model' => $request->motorcycle_model,
+                'phone' => $request->phone,
                 'igv' => $request->igv,
                 'serie' => $this->generateSerie($request->document_type_id),
                 'number' => $this->generateNumero($request->document_type_id),

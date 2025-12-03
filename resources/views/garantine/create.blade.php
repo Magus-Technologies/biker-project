@@ -79,16 +79,16 @@
                             data-value="0-5000">0-5000 km</button>
                         <button type="button"
                             class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
-                            data-value="5000-10000">5000-10000 km</button>
+                            data-value="5000-10000">500-2500 km</button>
                         <button type="button"
                             class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
-                            data-value="10000-15000">10000-15000 km</button>
-                        <button type="button"
+                            data-value="10000-15000">2500-5000 km</button>
+                        <!-- <button type="button"
                             class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
-                            data-value="15000-20000">15000-20000 km</button>
-                        <button type="button"
+                            data-value="15000-20000">15000-20000 km</button> -->
+                        <!-- <button type="button"
                             class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
-                            data-value="20000+">20000+ km</button>
+                            data-value="20000+">20000+ km</button> -->
                     </div>
                     <input type="hidden" name="kilometrajes" id="kilometrajes">
                 </div>

@@ -19,6 +19,8 @@ class Sale extends Model
         'customer_dni',
         'customer_names_surnames',
         'customer_address',
+        'motorcycle_model',
+        'phone',
         'code',
         'igv',
         'quotation_id',
