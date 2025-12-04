@@ -41,13 +41,13 @@
 
                     <div class="mb-4">
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                            placeholder="Username or email"
+                            placeholder="Usuario o correo electrónico"
                             class="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-600 bg-transparent" />
                         <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-red-500" />
                     </div>
 
                     <div class="mb-4 relative">
-                        <input id="password" type="password" name="password" required placeholder="Password"
+                        <input id="password" type="password" name="password" required placeholder="Contraseña"
                             class="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-600 bg-transparent pr-10" />
                         <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
                                                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -70,7 +70,7 @@
                     <div class="mb-4">
                         <button type="submit"
                             class="w-full py-2 text-white font-semibold rounded bg-gradient-to-r from-blue-600 to-pink-500 hover:from-blue-700 hover:to-pink-600 transition">
-                            LOGIN
+                            INICIAR SESIÓN
                         </button>
                     </div>
 

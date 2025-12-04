@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BuyController;
 use App\Http\Controllers\ClienteMayoristaController;
 use App\Http\Controllers\CustomerController;

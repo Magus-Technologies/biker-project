@@ -6,68 +6,90 @@
         </h2>
     </x-slot>
     <div class="container mx-auto p-2 text-sm">
-        <div class="grid grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 gap-6">
             <!-- Formulario de Cliente -->
-            <div class="col-span-2 bg-white p-6 rounded-lg shadow">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <!-- Primera fila: Modelo de Moto y Fecha/Hora -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="motorcycle_model" class="text-xs text-gray-500 uppercase font-semibold block mb-1">Modelo de Moto</label>
+                        <input type="text" id="motorcycle_model" placeholder="Ingrese modelo de moto"
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    </div>
+                    <div class="flex justify-end items-end">
+                        <input type="text" id="fechaHora" value="" 
+                            class="p-2 border border-gray-300 rounded-md shadow-sm text-sm bg-gray-50 text-right" 
+                            readonly style="width: 200px;">
+                    </div>
+                </div>
+                
+                <!-- Segunda fila: Número de Celular y Mecánico -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="phone" class="text-xs text-gray-500 uppercase font-semibold block mb-1">Número de Celular</label>
+                        <input type="tel" id="phone" placeholder="Ej: 999 999 999"
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" maxlength="9">
+                    </div>
+                    <div>
+                        <label for="mecanico_select" class="text-xs text-gray-500 uppercase font-semibold block mb-1">Mecánico</label>
+                        <div class="flex gap-2">
+                            <select id="mecanico_select" class="flex-1 p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                                <option value="">Seleccionar mecánico</option>
+                            </select>
+                            <button onclick="mostrarModal()" type="button" 
+                                class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-sm"
+                                title="Buscar mecánico">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <input name="mechanics_id" id="mechanics_id" type="hidden">
+                    </div>
+                </div>
+                
                 <h2 class="text-lg font-bold mb-4">Cliente</h2>
                 
                 <!-- Grid de 2 columnas para campos de cliente -->
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
+                        <label for="dni_personal" class="text-xs text-gray-500 uppercase font-semibold block mb-1">Documento</label>
                         <input type="text" id="dni_personal" placeholder="Ingrese Documento"
-                            class="w-full p-2 border rounded text-sm">
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
                     </div>
                     <div>
+                        <label for="nombres_apellidos" class="text-xs text-gray-500 uppercase font-semibold block mb-1">Nombre del Cliente</label>
                         <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos"
-                            class="w-full p-2 border rounded text-sm">
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
                     </div>
                 </div>
 
-                <!-- Campo oculto para dirección (compatibilidad) -->
+                <!-- Campos ocultos para compatibilidad -->
                 <input type="hidden" id="direccion" value="">
+                <input type="hidden" id="districts_id" value="todos">
 
-                <!-- Grid de 2 columnas para servicio y precio -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Buscador de Productos con Autocompletado -->
+                <div class="mb-4">
                     <div class="relative">
-                        <label for="service" class="block text-sm font-medium text-gray-700 mb-1">Servicio</label>
-                        <input type="text" id="service" name="service" value="{{ old('service', 'TALLER') }}"
-                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" autocomplete="off">
-                        <div id="serviceDropdown"
-                            class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                            <ul id="serviceSuggestions" class="max-h-40 overflow-y-auto"></ul>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Buscar Producto</label>
+                        <div class="flex gap-2">
+                            <div class="flex-1 relative">
+                                <input type="text" id="searchProductInput" 
+                                    placeholder="Escriba para buscar productos..."
+                                    autocomplete="off"
+                                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500">
+                                <!-- Dropdown de resultados -->
+                                <div id="searchProductResults" 
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+                                    <!-- Los resultados se cargarán aquí -->
+                                </div>
+                            </div>
+                            <button type="button" onclick="addSelectedProduct()" 
+                                class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition text-sm whitespace-nowrap">
+                                <i class="bi bi-plus-circle mr-1"></i>Agregar
+                            </button>
                         </div>
+                        <!-- Campo oculto para guardar el producto seleccionado -->
+                        <input type="hidden" id="selectedProduct" value="">
                     </div>
-
-                    <div>
-                        <label for="service_price" class="block text-sm font-medium text-gray-700 mb-1">Precio del Servicio</label>
-                        <input type="number" id="service_price" name="service_price" value="{{ old('service_price', 60) }}"
-                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
-                    </div>
-                </div>
-
-                <!-- Grid de 2 columnas para botones -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <button class="bg-yellow-400 hover:bg-yellow-500 p-2 rounded transition font-medium text-sm" id="buscarProductos">
-                        <i class="bi bi-search mr-1"></i>Consultar Productos
-                    </button>
-                    <button type="button" id="addService" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
-                        <i class="bi bi-plus-circle mr-1"></i>Agregar Servicio
-                    </button>
-                </div>
-                <!-- Selector de Mecánico -->
-                <div class="mt-4">
-                    <label for="mecanico_select" class="block text-sm font-medium text-gray-700 mb-1">Mecánico</label>
-                    <div class="flex gap-2">
-                        <select id="mecanico_select" class="flex-1 p-2 border border-gray-300 rounded-md shadow-sm text-sm">
-                            <option value="">Seleccionar mecánico</option>
-                        </select>
-                        <button onclick="mostrarModal()" type="button" 
-                            class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-sm"
-                            title="Buscar mecánico">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                    <input name="mechanics_id" id="mechanics_id" type="hidden">
                 </div>
 
                 <!-- Modal Mecánicos -->
@@ -80,160 +102,12 @@
                             class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg">Cerrar</button>
                     </div>
                 </div>
-                <!-- Modal -->
-                <div id="buscarProductosModal"
-                    class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4 hidden">
-                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
-                        <h3 class="text-lg font-bold mb-4">Productos</h3>
-
-                        <!-- Campo de búsqueda dentro del modal -->
-                        <div class="mb-4 flex items-center ">
-                            <div class="w-8/12">
-                                <input type="text" placeholder="Buscar por nombre del producto..."
-                                    class="w-full p-2 border rounded" id="searchProduct">
-                            </div>
-                            <div>
-                                <button class="bg-blue-500 text-white px-4 py-2  rounded-md rounded-l-none mr-5"
-                                    id="btnBuscarProduct">Buscar</button>
-                            </div>
-                            <div class="w-3/12">
-                                <label for="tienda_id" class="block font-medium text-gray-700">Tienda</label>
-                                <select id="tienda_id" name="tienda_id"
-                                    class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                                    <option value="todos">Todas</option>
-                                    @foreach ($tiendas as $tienda)
-                                        <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
-                                    @endforeach
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                        <!-- Tabla con los productos -->
-                        <div class="overflow-x-auto overflow-y-auto h-80">
-                            <table class="min-w-full table-auto text-xs">
-                                <thead class="bg-gray-200 sticky top-0">
-                                    <tr>
-                                        <th class="px-2 py-1 border">Código</th>
-                                        <th class="px-2 py-1 border">Descripción</th>
-                                        <th class="px-2 py-1 border">Ubicación</th>
-                                        <th class="px-2 py-1 border">Stock Actual</th>
-                                        <th class="px-2 py-1 border">Stock Mínimo</th>
-                                        <th class="px-2 py-1 border">Cantidad</th>
-                                        <th class="px-2 py-1 border">Seleccionar Precio</th>
-                                        <th class="px-2 py-1 border">Subtotal</th>
-                                        <th class="px-2 py-1 border">Agregar</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productTable">
-                                    <!-- Productos generados dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Botón de cerrar modal -->
-                        <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-                            onclick="closeModal('buscarProductosModal')">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-            <!-- Detalle del Pedido -->
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-bold mb-4">Documento</h2>
-                <div>
-                    <label class="font-bold">Tipo pago</label>
-                    <!-- Se agrega id para capturar el valor -->
-                    <select id="paymentType" class="w-full p-2 border rounded">
-                        <option value="">Seleccione</option>
-                        @foreach ($paymentsType as $payment)
-                            <option value="{{ $payment->id }}">{{ $payment->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <!-- Campos adicionales ocultos -->
-                <div id="creditFields" class="mt-3 hidden">
-                    <label for="nro_dias">Número de días:</label>
-                    <input type="number" id="nro_dias" class="w-full p-2 border rounded" min="1">
-
-                    <label for="fecha_vencimiento" class="mt-2">Fecha de vencimiento:</label>
-                    <input type="date" id="fecha_vencimiento" class="w-full p-2 border rounded">
-                </div>
-                <div class="mt-3" id="paymentMethodContainer1">
-                    <label class="font-bold">Metodo pago</label>
-                    <!-- Se agrega id para capturar el valor -->
-                    <select id="paymentMethod1" class="w-full p-2 border rounded">
-                        <option value="">Seleccione</option>
-                        @foreach ($paymentsMethod as $payment)
-                            <option value="{{ $payment->id }}">{{ $payment->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mt-2" id="paymentMethodContainer2">
-                    <input type="checkbox" id="togglePaymentFields" class="mr-2">
-                    <label for="togglePaymentFields">Agregar método de pago y monto</label>
-                </div>
-                <div id="paymentFieldsContainer" class="mt-2 hidden">
-                    <div>
-                        <label class="font-bold">Método de pago</label>
-                        <select id="paymentMethod2" class="w-full p-2 border rounded">
-                            <option value="">Seleccione</option>
-                            @foreach ($paymentsMethod as $payment)
-                                <option value="{{ $payment->id }}">{{ $payment->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mt-2">
-                        <label class="font-bold">Monto a pagar</label>
-                        <input type="number" id="paymentAmount2" class="w-full p-2 border rounded"
-                            placeholder="Ingrese el monto">
-                    </div>
-                </div>
-                <div>
-                    <label class="font-bold">Tipo de documento</label>
-                    <!-- Se agrega id para capturar el valor -->
-                    <select id="documentType" class="w-full p-2 border rounded">
-                        <option value="">Seleccione</option>
-                        @foreach ($documentTypes as $documentType)
-                            <option value="{{ $documentType->id }}">{{ $documentType->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <label>Fecha</label>
-                <!-- Se agrega id para la fecha -->
-                <input type="date" id="orderDate" value="{{ date('Y-m-d') }}"
-                    class="w-full p-2 border rounded mb-4">
-                <label>Moneda</label>
-                <!-- Si la moneda es fija, también se puede capturar -->
-                <input type="text" id="orderCurrency" value="SOLES" class="w-full p-2 border rounded mb-4">
-                <!-- Subtotal -->
-                <div class="bg-gray-200 text-gray-800 p-1 rounded text-center text-sm font-bold mb-2">
-                    Subtotal: <span id="subtotalAmount">S/ 0.00</span>
-                </div>
-                <!-- IGV (18%) -->
-                <div class="bg-gray-200 text-gray-800 p-1 rounded text-center text-sm font-bold mb-2">
-                    IGV (18%): <span id="igvAmount">S/ 0.00</span>
-                </div>
-
-                <div class="bg-indigo-500 text-white p-1 rounded text-center text-sm font-bold" id="totalAmount">
-                    S/ 0.00
-                </div>
-                <div class="mt-4">
-                    <!-- Botón para guardar la orden -->
-                    <button class="bg-blue-500 text-white p-2 rounded" onclick="saveSales()">Guardar</button>
-                </div>
             </div>
         </div>
 
         <!-- Tabla de Productos (Detalle del Pedido) -->
         <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-lg font-bold mb-4">Producto</h2>
-            <div class="mb-4 flex items-center justify-end ">
-                <div class="w-5/12">
-                    <input type="text" placeholder="Buscar por nombre del producto..."
-                        class="w-full p-2 border rounded" id="searchProductList">
-                </div>
-            </div>
+            <h2 class="text-lg font-bold mb-4">Productos</h2>
 
             <table class="w-full border-collapse border border-gray-300" id="orderTable">
                 <thead>
@@ -254,8 +128,33 @@
                 </tbody>
             </table>
         </div>
+        
         <!-- Tabla para listar servicios -->
-        <div class="mt-5">
+        <div class="mt-5 bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-bold mb-4">Servicios</h2>
+            
+            <!-- Agregar Servicio (arriba de tabla de servicios) -->
+            <div class="mb-4 grid grid-cols-12 gap-2 items-end">
+                <div class="col-span-5 relative">
+                    <label for="service" class="block text-sm font-medium text-gray-700 mb-1">Servicio</label>
+                    <input type="text" id="service" name="service" value="{{ old('service', 'TALLER') }}"
+                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" autocomplete="off">
+                    <div id="serviceDropdown"
+                        class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                        <ul id="serviceSuggestions" class="max-h-40 overflow-y-auto"></ul>
+                    </div>
+                </div>
+                <div class="col-span-4">
+                    <label for="service_price" class="block text-sm font-medium text-gray-700 mb-1">Precio del Servicio</label>
+                    <input type="number" id="service_price" name="service_price" value="{{ old('service_price', 60) }}"
+                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                </div>
+                <div class="col-span-3">
+                    <button type="button" id="addService" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
+                        <i class="bi bi-plus-circle mr-1"></i>Agregar Servicio
+                    </button>
+                </div>
+            </div>
             <table class="w-full border-collapse border border-gray-300">
                 <thead>
                     <tr class="bg-gray-200">
@@ -269,8 +168,145 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Configurar Documento, Totales y Botón Guardar (todo en un mismo card) -->
+        <div class="mt-5 bg-white p-4 rounded-lg shadow">
+            <div class="flex flex-col items-end">
+                <!-- Botón Configurar Documento -->
+                <button type="button" onclick="abrirPanelDocumento()" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition text-sm mb-3 w-auto">
+                    <i class="bi bi-file-earmark-text mr-1"></i>Configurar Documento de Venta
+                </button>
+                
+                <!-- Resumen del documento configurado -->
+                <div id="documentoResumen" class="hidden p-3 bg-gray-50 rounded-lg w-auto mb-3">
+                    <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                        <i class="bi bi-check-circle-fill text-green-500"></i>
+                        Documento Configurado
+                    </h3>
+                    <div class="text-xs text-gray-600 space-y-1">
+                        <p><strong>Tipo:</strong> <span id="resumenTipoDoc">-</span></p>
+                        <p><strong>Pago:</strong> <span id="resumenTipoPago">-</span></p>
+                        <p><strong>Método:</strong> <span id="resumenMetodoPago">-</span></p>
+                    </div>
+                </div>
+                
+                <!-- Totales alineados a la derecha -->
+                <div class="space-y-2 w-auto mb-4">
+                    <div class="bg-gray-200 text-gray-800 p-2 rounded text-center text-sm font-bold whitespace-nowrap">
+                        Subtotal: <span id="subtotalAmount">S/ 0.00</span>
+                    </div>
+                    <div class="bg-gray-200 text-gray-800 p-2 rounded text-center text-sm font-bold whitespace-nowrap">
+                        IGV (18%): <span id="igvAmount">S/ 0.00</span>
+                    </div>
+                    <div class="bg-indigo-500 text-white p-2 rounded text-center text-sm font-bold whitespace-nowrap" id="totalAmount">
+                        S/ 0.00
+                    </div>
+                </div>
+                
+                <!-- Botón Guardar -->
+                <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition text-lg" onclick="saveSales()">
+                    <i class="bi bi-save mr-2"></i>Guardar Venta
+                </button>
+            </div>
+        </div>
 
     </div>
+    
+    <!-- Panel lateral para configurar documento -->
+    <div id="panelDocumento" class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
+        <div class="sticky top-0 bg-blue-600 text-white p-6 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-file-earmark-text text-2xl"></i>
+                <h2 class="text-xl font-bold">Documento de Venta</h2>
+            </div>
+            <button onclick="cerrarPanelDocumento()" class="text-white hover:bg-white/20 rounded-full p-2 transition">
+                <i class="bi bi-x-lg text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="font-bold">Tipo pago <span class="text-red-500">*</span></label>
+                <select id="paymentType" class="w-full p-2 border rounded">
+                    <option value="">Seleccione</option>
+                    @foreach ($paymentsType as $payment)
+                        <option value="{{ $payment->id }}">{{ $payment->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div id="creditFields" class="hidden">
+                <label>Número de días:</label>
+                <input type="number" id="nro_dias" class="w-full p-2 border rounded" min="1">
+                <label class="mt-2">Fecha de vencimiento:</label>
+                <input type="date" id="fecha_vencimiento" class="w-full p-2 border rounded">
+            </div>
+            
+            <div id="paymentMethodContainer1">
+                <label class="font-bold">Método pago <span class="text-red-500">*</span></label>
+                <select id="paymentMethod1" class="w-full p-2 border rounded">
+                    <option value="">Seleccione</option>
+                    @foreach ($paymentsMethod as $payment)
+                        <option value="{{ $payment->id }}">{{ $payment->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div id="paymentMethodContainer2">
+                <input type="checkbox" id="togglePaymentFields" class="mr-2">
+                <label>Agregar método de pago y monto</label>
+            </div>
+            
+            <div id="paymentFieldsContainer" class="hidden">
+                <div>
+                    <label class="font-bold">Método de pago</label>
+                    <select id="paymentMethod2" class="w-full p-2 border rounded">
+                        <option value="">Seleccione</option>
+                        @foreach ($paymentsMethod as $payment)
+                            <option value="{{ $payment->id }}">{{ $payment->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mt-2">
+                    <label class="font-bold">Monto a pagar</label>
+                    <input type="number" id="paymentAmount2" class="w-full p-2 border rounded" placeholder="Ingrese el monto">
+                </div>
+            </div>
+            
+            <div>
+                <label class="font-bold">Tipo de documento <span class="text-red-500">*</span></label>
+                <select id="documentType" class="w-full p-2 border rounded">
+                    <option value="">Seleccione</option>
+                    @foreach ($documentTypes as $documentType)
+                        <option value="{{ $documentType->id }}">{{ $documentType->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div>
+                <label class="font-bold">Fecha</label>
+                <input type="date" id="orderDate" value="{{ date('Y-m-d') }}" class="w-full p-2 border rounded">
+            </div>
+            
+            <div>
+                <label class="font-bold">Moneda</label>
+                <input type="text" id="orderCurrency" value="SOLES" class="w-full p-2 border rounded" readonly>
+            </div>
+        </div>
+        
+        <div class="sticky bottom-0 bg-white border-t p-4 flex gap-3">
+            <button onclick="cerrarPanelDocumento()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                Cancelar
+            </button>
+            <button onclick="aplicarDocumento()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                <i class="bi bi-check-lg mr-2"></i>Aplicar
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay oscuro -->
+    <div id="overlayDocumento" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="cerrarPanelDocumento()"></div>
 </x-app-layout>
 
 <script>
@@ -282,16 +318,336 @@
     const orderTableBody = document.getElementById("orderTableBody");
     let payments = [];
     let pedidoId = null; // Para guardar el ID del pedido si viene de conversión
+    let documentoData = {}; // Para guardar la configuración del documento
+    
+    // Funciones para el panel de documento
+    function abrirPanelDocumento() {
+        document.getElementById('panelDocumento').classList.remove('translate-x-full');
+        document.getElementById('overlayDocumento').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarPanelDocumento() {
+        document.getElementById('panelDocumento').classList.add('translate-x-full');
+        document.getElementById('overlayDocumento').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function aplicarDocumento() {
+        const tipoDocSelect = document.getElementById('documentType');
+        const tipoPagoSelect = document.getElementById('paymentType');
+        const metodoPagoSelect = document.getElementById('paymentMethod1');
+        
+        const tipoDoc = tipoDocSelect?.options[tipoDocSelect.selectedIndex]?.text || '-';
+        const tipoPago = tipoPagoSelect?.options[tipoPagoSelect.selectedIndex]?.text || '-';
+        const metodoPago = metodoPagoSelect?.options[metodoPagoSelect.selectedIndex]?.text || '-';
+        
+        // Validar campos obligatorios
+        if (!tipoDocSelect?.value || !tipoPagoSelect?.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos obligatorios',
+                text: 'Debes seleccionar el tipo de documento y tipo de pago',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        if (tipoPagoSelect.value === '1' && !metodoPagoSelect?.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo obligatorio',
+                text: 'Debes seleccionar un método de pago',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        // Guardar valores
+        documentoData = {
+            paymentType: tipoPagoSelect?.value,
+            paymentMethod1: metodoPagoSelect?.value,
+            documentType: tipoDocSelect?.value,
+            tipoDocText: tipoDoc,
+            tipoPagoText: tipoPago,
+            metodoPagoText: metodoPago
+        };
+        
+        // Actualizar resumen
+        document.getElementById('resumenTipoDoc').textContent = tipoDoc;
+        document.getElementById('resumenTipoPago').textContent = tipoPago;
+        document.getElementById('resumenMetodoPago').textContent = metodoPago;
+        document.getElementById('documentoResumen').classList.remove('hidden');
+        
+        // Cerrar panel
+        cerrarPanelDocumento();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Documento configurado',
+            text: 'La configuración se ha guardado correctamente',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
 
+    // Actualizar fecha y hora
+    function actualizarFechaHora() {
+        const ahora = new Date();
+        const opciones = { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit',
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false 
+        };
+        const fechaHoraFormateada = ahora.toLocaleString('es-PE', opciones).replace(',', '');
+        document.getElementById('fechaHora').value = fechaHoraFormateada;
+    }
+    
     // Verificar si viene de un pedido
     document.addEventListener('DOMContentLoaded', function() {
+        // Actualizar fecha y hora cada segundo
+        actualizarFechaHora();
+        setInterval(actualizarFechaHora, 1000);
+        
         const urlParams = new URLSearchParams(window.location.search);
         pedidoId = urlParams.get('pedido_id');
 
         if (pedidoId) {
             cargarDatosPedido(pedidoId);
         }
+        
+        // Inicializar buscador de productos
+        initProductSearch();
     });
+    
+    // Función para inicializar el buscador de productos
+    function initProductSearch() {
+        const searchProductInput = document.getElementById('searchProductInput');
+        if (searchProductInput) {
+            searchProductInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length >= 1) {
+                    searchProductsAutocomplete(searchTerm);
+                } else {
+                    hideProductResults();
+                }
+            });
+
+            // Cerrar dropdown al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                const resultsDiv = document.getElementById('searchProductResults');
+                const inputDiv = document.getElementById('searchProductInput');
+                if (resultsDiv && !resultsDiv.contains(e.target) && e.target !== inputDiv) {
+                    hideProductResults();
+                }
+            });
+        }
+    }
+    
+    // Función para buscar productos con autocompletado
+    function searchProductsAutocomplete(searchTerm) {
+        const url = `${baseUrl}/api/product?tienda_id=todos&search=${searchTerm}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                displayProductResults(Array.isArray(data) ? data : []);
+            })
+            .catch(error => {
+                console.error('Error buscando productos:', error);
+                hideProductResults();
+            });
+    }
+    
+    // Función para mostrar resultados de búsqueda
+    function displayProductResults(products) {
+        const resultsDiv = document.getElementById('searchProductResults');
+        
+        if (!resultsDiv) {
+            console.error('No se encontró el div de resultados');
+            return;
+        }
+        
+        if (products.length === 0) {
+            resultsDiv.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No se encontraron productos</div>';
+            resultsDiv.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        products.forEach(product => {
+            const stockQuantity = product.stock?.quantity || 0;
+            const stockColor = stockQuantity === 0 ? 'text-red-600' : (stockQuantity <= (product.stock?.minimum_stock || 0) ? 'text-yellow-600' : 'text-green-600');
+            
+            // Obtener el primer precio disponible
+            const firstPrice = product.prices && product.prices.length > 0 ? product.prices[0] : null;
+            const priceText = firstPrice ? `S/ ${firstPrice.price}` : 'Sin precio';
+            
+            html += `
+                <div class="product-result p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 transition" 
+                     data-product-id="${product.id}"
+                     data-product-description="${product.description.replace(/"/g, '&quot;')}"
+                     data-product-prices='${JSON.stringify(product.prices || [])}'
+                     data-product-stock="${stockQuantity}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm text-gray-900">${product.description}</div>
+                            <div class="text-xs text-gray-500 mt-1">Código: ${product.code_sku}</div>
+                            <div class="text-xs ${stockColor} font-semibold mt-1">Stock: ${stockQuantity}</div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="text-sm font-semibold text-blue-600">${priceText}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+        resultsDiv.classList.remove('hidden');
+        
+        // Agregar event listeners a los resultados
+        resultsDiv.querySelectorAll('.product-result').forEach(item => {
+            item.addEventListener('click', function() {
+                const productId = parseInt(this.dataset.productId);
+                const description = this.dataset.productDescription;
+                const prices = JSON.parse(this.dataset.productPrices);
+                const stock = parseInt(this.dataset.productStock);
+                selectProduct(productId, description, prices, stock);
+            });
+        });
+    }
+    
+    // Función para ocultar resultados
+    function hideProductResults() {
+        const resultsDiv = document.getElementById('searchProductResults');
+        if (resultsDiv) {
+            resultsDiv.classList.add('hidden');
+        }
+    }
+    
+    // Función para seleccionar un producto
+    function selectProduct(productId, description, prices, stock) {
+        const hiddenInput = document.getElementById('selectedProduct');
+        if (hiddenInput) {
+            hiddenInput.value = JSON.stringify({
+                item_id: productId,
+                description: description,
+                prices: prices,
+                stock: stock
+            });
+        }
+        
+        // Actualizar el input con el nombre del producto
+        const searchInput = document.getElementById('searchProductInput');
+        if (searchInput) {
+            searchInput.value = description;
+        }
+        
+        hideProductResults();
+    }
+    
+    // Función para agregar el producto seleccionado
+    function addSelectedProduct() {
+        const hiddenInput = document.getElementById('selectedProduct');
+        
+        if (!hiddenInput || !hiddenInput.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Seleccione un producto',
+                text: 'Debe buscar y seleccionar un producto de la lista',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        try {
+            const productData = JSON.parse(hiddenInput.value);
+            const stockQuantity = productData.stock || 0;
+            
+            // Verificar stock
+            if (stockQuantity <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin stock',
+                    text: 'Este producto no tiene stock disponible',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+            
+            // Verificar si ya existe en la lista
+            const existingProduct = quotationItems.find(item => item.item_id === productData.item_id);
+            if (existingProduct) {
+                if (existingProduct.quantity + 1 > stockQuantity) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stock insuficiente',
+                        text: `Solo hay ${stockQuantity} unidades disponibles`,
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+                existingProduct.quantity += 1;
+            } else {
+                // Agregar nuevo producto
+                const firstPrice = productData.prices && productData.prices.length > 0 ? productData.prices[0] : null;
+                
+                if (!firstPrice) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Sin precio',
+                        text: 'Este producto no tiene precios configurados',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+                
+                const product = {
+                    item_id: productData.item_id,
+                    description: productData.description,
+                    priceId: firstPrice.id,
+                    unit_price: parseFloat(firstPrice.price),
+                    prices: productData.prices,
+                    quantity: 1,
+                    maximum_stock: stockQuantity
+                };
+                
+                const productCopy = { ...product };
+                delete productCopy.prices;
+                quotationItems.push(productCopy);
+                
+                addProductTo(product);
+            }
+            
+            // Limpiar búsqueda
+            document.getElementById('searchProductInput').value = '';
+            document.getElementById('selectedProduct').value = '';
+            hideProductResults();
+            
+            updateInformationCalculos();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Producto agregado',
+                timer: 1000,
+                showConfirmButton: false
+            });
+            
+        } catch (error) {
+            console.error('Error al agregar producto:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al agregar el producto',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
 
     // Función para cargar datos del pedido
     async function cargarDatosPedido(id) {
@@ -455,36 +811,8 @@
             dueDateInput.value = "";
         }
     });
-    //agregando buscador 
-    document.getElementById('searchProductList').addEventListener('input', function() {
-        let searchProductList = document.getElementById('searchProductList').value;
-        let filteredItems = quotationItems.filter(item =>
-            item.description.toLowerCase().includes(searchProductList.toLowerCase())
-        );
-        console.log(searchProductList, "searchProductList")
-        console.log(filteredItems, "filteredItems")
-        console.log(quotationItems, "quotationItems")
-        mostrarProductos(filteredItems);
-    })
-
-    function mostrarProductos(items) {
-        let productListContainer = document.getElementById('orderTableBody');
-        productListContainer.innerHTML = ''; // Limpia la tabla
-
-        if (items.length === 0) {
-            productListContainer.innerHTML = `
-            <tr id="emptyRow">
-                <td colspan="7" class="text-center p-2">No hay productos disponibles</td>
-            </tr>
-        `;
-            return;
-        }
-
-        items.forEach(product => {
-            addProductTo(product); // Usa la misma función para crear filas
-        });
-    }
-    //metodo d epago 
+    
+    //metodo de pago 
     document.getElementById('togglePaymentFields').addEventListener('change', function() {
         const container = document.getElementById('paymentFieldsContainer');
         container.style.display = this.checked ? 'block' : 'none';
@@ -629,124 +957,7 @@
     }
 
 
-    function fetchProducts() {
-        const tiendaId = document.getElementById("tienda_id").value;
-        const search = searchInput.value;
-        // Realizar la solicitud a la API
-        fetch(`${baseUrl}/api/product?tienda_id=` + tiendaId + '&search=' + search)
-            .then(res => res.json())
-            .then(data => {
-                console.log('Datos recibidos de la API:', data);
-                if (data.length > 0) {
-                    console.log('Primer producto:', data[0]);
-                    console.log('Stock del primer producto:', data[0].stock);
-                }
-                let allProducts = data
-                    .filter(product => !quotationItems.some(item => item.item_id === product.id))
-                    .map(product => ({
-                        ...product,
-                        selectedQuantity: 1,
-                        selectedPrice: ""
-                    }));
-                products = [...allProducts];
-                console.log('Productos procesados:', products);
-                renderProducts(products);
-            })
-            .catch(error => console.error('Error:', error));
-    }
-    // productos
-    document.getElementById("buscarProductos").addEventListener("click", () => {
-        openModal("buscarProductosModal", () => {
-            fetchProducts();
-        });
-    });
-    // // Renderiza la lista de productos en el modal
-    function renderProducts(productList) {
-        productTable.innerHTML = "";
-        productList.forEach(product => {
-            const stockActual = product.stock?.quantity ?? 0;
-            const stockMinimo = product.stock?.minimum_stock ?? 0;
-            const sinStock = stockActual === 0;
-            const stockBajo = stockActual > 0 && stockActual <= stockMinimo;
-            
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                    <td class="px-2 py-1 border">${product.code_sku}</td>
-                    <td class="px-2 py-1 border">${product.description}</td>
-                    <td class="px-2 py-1 border">${product.location || '-'}</td>
-                    <td class="px-2 py-1 border ${sinStock ? 'bg-red-100 text-red-700 font-bold' : stockBajo ? 'bg-yellow-100 text-yellow-700' : ''}">${stockActual}</td>
-                    <td class="px-2 py-1 border">${stockMinimo}</td>
-                    <td class="px-2 py-1 border">
-                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id}" value="1" min="1" max="${stockActual}" data-product-id="${product.id}" ${sinStock ? 'disabled' : ''}>
-                    </td>
-                    <td class="px-2 py-1 border">
-                        <select class="p-2 border rounded data-price-id-${product.id}" data-product-id="${product.id}" ${sinStock ? 'disabled' : ''}>
-                            <option value="">Seleccionar precio</option>
-                            ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - ${price.price}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td class="px-2 py-1 border subtotal-cell" id="subtotal-${product.id}">0</td>
-                    <td class="px-2 py-1 border">
-                        <button class="bg-blue-500 text-white px-3 py-1 rounded ${sinStock ? 'opacity-50 cursor-not-allowed' : ''}" data-product-id="${product.id}" onclick="agregarProducto(${product.id})" ${sinStock ? 'disabled' : ''}>Agregar</button>
-                    </td>
-                `;
-            productTable.appendChild(row);
-            if (!sinStock) {
-                addSubtotalEvents(row, product.id);
-            }
-        });
-    }
-    // calcular subtotal de productos en el modal y tabla
-    function addSubtotalEvents(row, productId) {
-        const quantity = row.querySelector(`.data-quantity-id-${productId}`);
-        const priceSelect = row.querySelector(`.data-price-id-${productId}`);
 
-        quantity.addEventListener("input", () => updateModalSubtotal(productId, quantity, priceSelect));
-        priceSelect.addEventListener("change", () => updateModalSubtotal(productId, quantity, priceSelect));
-    }
-
-    function updateModalSubtotal(productId, quantityInput, priceSelect) {
-        const quantity = parseInt(quantityInput.value) || 0;
-        const price = parseFloat(priceSelect.value) || 0;
-        const subtotal = quantity * price;
-        const subtotalElement = document.getElementById(`subtotal-${productId}`);
-
-        if (subtotalElement) {
-            subtotalElement.textContent = subtotal.toFixed(2);
-        }
-    }
-
-    //agregar productos
-    function agregarProducto(productId) {
-        const quantity = document.querySelector(`.data-quantity-id-${productId}`).value;
-        const priceSelect = document.querySelector(`.data-price-id-${productId}`);
-        const selectOptionPriceId = priceSelect.options[priceSelect.selectedIndex];
-        const selectedPriceId = selectOptionPriceId.getAttribute("data-price-id");
-        const response = products.find(product => product.id == productId);
-        if (response) {
-            const product = {
-                item_id: productId,
-                description: response.description,
-                priceId: selectedPriceId,
-                unit_price: priceSelect.value,
-                prices: response.prices,
-                quantity: quantity,
-                maximum_stock: response.stock?.quantity || 0,
-            }
-            const productCopy = {
-                ...product
-            };
-            delete productCopy.prices;
-            quotationItems.push(productCopy);
-            addProductTo(product);
-            updateInformationCalculos();
-
-        }
-        products = products.filter(product => product.id != productId)
-        const row = priceSelect.closest("tr");
-        console.log(quotationItems);
-        row.style.display = "none";
-    }
 
     function addProductTo(product) {
         const emptyRow = document.getElementById("emptyRow");
@@ -808,9 +1019,7 @@
     }
 
 
-    document.getElementById("btnBuscarProduct").addEventListener("click", () => {
-        fetchProducts();
-    })
+
 
     function updatePriceAndTotal(productId) {
         const quantityInput = document.querySelector(`.data-quantity-value-${productId}`);
@@ -859,7 +1068,9 @@
             customer_dni: document.getElementById("dni_personal").value.trim(),
             customer_names_surnames: document.getElementById("nombres_apellidos").value.trim(),
             customer_address: document.getElementById("direccion").value.trim(),
-            districts_id: document.getElementById("districts_id").value,
+            motorcycle_model: document.getElementById("motorcycle_model").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
+            districts_id: document.getElementById("districts_id")?.value || 'todos',
             mechanics_id: document.getElementById("mechanics_id").value,
             payments_id: document.getElementById("paymentType").value,
             order_date: document.getElementById("orderDate").value,
@@ -875,6 +1086,78 @@
     function parseAmount(elementId) {
         return parseFloat(document.getElementById(elementId).textContent.replace("S/ ", "")) || 0;
     }
+    // Función para limpiar el formulario y preparar para nueva venta
+    function resetFormFields() {
+        // Limpiar modelo de moto y teléfono
+        document.getElementById('motorcycle_model').value = '';
+        document.getElementById('phone').value = '';
+        
+        // Limpiar datos del cliente
+        document.getElementById('dni_personal').value = '';
+        document.getElementById('nombres_apellidos').value = '';
+        document.getElementById('direccion').value = '';
+        
+        // Limpiar mecánico si existe
+        const mecanicoSelect = document.getElementById('mecanico_select');
+        const mechanicsId = document.getElementById('mechanics_id');
+        if (mecanicoSelect) mecanicoSelect.value = '';
+        if (mechanicsId) mechanicsId.value = '';
+        
+        // Limpiar servicio
+        const serviceInput = document.getElementById('service');
+        const servicePriceInput = document.getElementById('service_price');
+        if (serviceInput) serviceInput.value = 'TALLER';
+        if (servicePriceInput) servicePriceInput.value = '60';
+        
+        // Limpiar documento
+        document.getElementById('paymentType').value = '';
+        document.getElementById('paymentMethod1').value = '';
+        document.getElementById('documentType').value = '';
+        document.getElementById('orderDate').value = '{{ date('Y-m-d') }}';
+        
+        // Ocultar campos de crédito
+        document.getElementById('creditFields').classList.add('hidden');
+        document.getElementById('nro_dias').value = '';
+        document.getElementById('fecha_vencimiento').value = '';
+        
+        // Limpiar método de pago adicional
+        document.getElementById('togglePaymentFields').checked = false;
+        document.getElementById('paymentFieldsContainer').classList.add('hidden');
+        document.getElementById('paymentMethod2').value = '';
+        document.getElementById('paymentAmount2').value = '';
+        
+        // Limpiar productos y servicios
+        quotationItems = [];
+        services = [];
+        payments = [];
+        orderCount = 0;
+        
+        // Limpiar tabla de productos
+        const orderTableBody = document.getElementById('orderTableBody');
+        orderTableBody.innerHTML = '<tr id="emptyRow"><td class="border p-2 text-center" colspan="7">No hay productos agregados</td></tr>';
+        
+        // Limpiar tabla de servicios
+        document.getElementById('serviceList').innerHTML = '';
+        
+        // Limpiar buscador de productos
+        document.getElementById('searchProductInput').value = '';
+        document.getElementById('selectedProduct').value = '';
+        const searchResults = document.getElementById('searchProductResults');
+        if (searchResults) searchResults.classList.add('hidden');
+        
+        // Resetear totales
+        updateInformationCalculos();
+        
+        // Mostrar mensaje de confirmación
+        Swal.fire({
+            icon: 'info',
+            title: 'Listo para nueva venta',
+            text: 'El formulario ha sido limpiado',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+    
     // guardar cotizacion
     async function saveSales() {
         try {
@@ -981,12 +1264,19 @@
             Swal.fire({
                 icon: 'success',
                 title: '¡Venta guardada!',
-                text: pedidoId ? 'La venta se ha creado y el pedido ha sido convertido.' : 'La venta se ha guardado correctamente.',
+                text: pedidoId ? 'La venta se ha creado y el pedido ha sido convertido.' : 'Venta guardada exitosamente',
                 confirmButtonColor: '#10b981',
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = `${baseUrl}/sales`;
+                showCancelButton: true,
+                confirmButtonText: 'Ir al índice',
+                cancelButtonText: 'Nueva venta'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirigir al índice de ventas
+                    window.location.href = `${baseUrl}/sales`;
+                } else {
+                    // Limpiar los campos para nueva venta
+                    resetFormFields();
+                }
             });
         } catch (error) {
             console.error("Error al guardar la orden:", error);

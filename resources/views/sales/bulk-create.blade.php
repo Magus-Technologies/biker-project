@@ -100,11 +100,264 @@
     }
     </style>
 
+    <!-- Panel lateral para configurar documento -->
+    <div id="panelDocumento" class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
+        <div class="sticky top-0 bg-blue-600 text-white p-6 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-file-earmark-text text-2xl"></i>
+                <h2 class="text-xl font-bold">Documento de Venta</h2>
+            </div>
+            <button onclick="cerrarPanelDocumento()" class="text-white hover:bg-white/20 rounded-full p-2 transition">
+                <i class="bi bi-x-lg text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="p-6 space-y-4" id="panelDocumentoContent">
+            <!-- El contenido se cargará dinámicamente -->
+        </div>
+        
+        <div class="sticky bottom-0 bg-white border-t p-4 flex gap-3">
+            <button onclick="cerrarPanelDocumento()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                Cancelar
+            </button>
+            <button onclick="aplicarDocumento()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                <i class="bi bi-check-lg mr-2"></i>Aplicar
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay oscuro -->
+    <div id="overlayDocumento" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="cerrarPanelDocumento()"></div>
+
+    <!-- ✅ Template HTML para formulario de documento (mejor práctica) -->
+    <template id="documento-form-template">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-bold mb-4">Documento</h2>
+            
+            <div>
+                <label class="font-bold">Tipo pago <span class="text-red-500">*</span></label>
+                <select data-id="paymentType" class="w-full p-2 border rounded">
+                    <option value="">Seleccione</option>
+                    @foreach ($paymentsType as $payment)
+                        <option value="{{ $payment->id }}">{{ $payment->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div data-id="creditFields" class="mt-3 hidden">
+                <label>Número de días:</label>
+                <input type="number" data-id="nro_dias" class="w-full p-2 border rounded" min="1">
+                <label class="mt-2">Fecha de vencimiento:</label>
+                <input type="date" data-id="fecha_vencimiento" class="w-full p-2 border rounded">
+            </div>
+            
+            <div class="mt-3" data-id="paymentMethodContainer1">
+                <label class="font-bold">Método pago <span class="text-red-500">*</span></label>
+                <select data-id="paymentMethod1" class="w-full p-2 border rounded">
+                    <option value="">Seleccione</option>
+                    @foreach ($paymentsMethod as $payment)
+                        <option value="{{ $payment->id }}">{{ $payment->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="mt-2" data-id="paymentMethodContainer2">
+                <input type="checkbox" data-id="togglePaymentFields" class="mr-2">
+                <label>Agregar método de pago y monto</label>
+            </div>
+            
+            <div data-id="paymentFieldsContainer" class="mt-2 hidden">
+                <div>
+                    <label class="font-bold">Método de pago</label>
+                    <select data-id="paymentMethod2" class="w-full p-2 border rounded">
+                        <option value="">Seleccione</option>
+                        @foreach ($paymentsMethod as $payment)
+                            <option value="{{ $payment->id }}">{{ $payment->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mt-2">
+                    <label class="font-bold">Monto a pagar</label>
+                    <input type="number" data-id="paymentAmount2" class="w-full p-2 border rounded" placeholder="Ingrese el monto">
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <label class="font-bold">Tipo de documento <span class="text-red-500">*</span></label>
+                <select data-id="documentType" class="w-full p-2 border rounded">
+                    <option value="">Seleccione</option>
+                    @foreach ($documentTypes as $documentType)
+                        <option value="{{ $documentType->id }}">{{ $documentType->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <!-- Fecha comentada - ahora aparece arriba al lado de N. Vendedor -->
+            <!--
+            <div class="mt-3">
+                <label class="font-bold">Fecha</label>
+                <input type="date" data-id="orderDate" value="{{ date('Y-m-d') }}" class="w-full p-2 border rounded">
+            </div>
+            -->
+            
+            <div class="mt-3 mb-4">
+                <label class="font-bold">Moneda</label>
+                <input type="text" data-id="orderCurrency" value="SOLES" class="w-full p-2 border rounded" readonly>
+            </div>
+            
+            <!-- Totales comentados - ya aparecen debajo de la tabla de productos -->
+            <!--
+            <div class="space-y-2">
+                <div class="bg-gray-200 text-gray-800 p-2 rounded text-center text-sm font-bold">
+                    Subtotal: <span data-id="subtotalAmount">S/ 0.00</span>
+                </div>
+                <div class="bg-gray-200 text-gray-800 p-2 rounded text-center text-sm font-bold">
+                    IGV (18%): <span data-id="igvAmount">S/ 0.00</span>
+                </div>
+                <div class="bg-indigo-500 text-white p-2 rounded text-center text-sm font-bold" data-id="totalAmount">
+                    S/ 0.00
+                </div>
+            </div>
+            -->
+        </div>
+    </template>
+
     <script>
     // Variables globales
     let saleCounter = 0;
     let salesData = new Map(); // Almacena datos de cada venta por tabId
     const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InN5c3RlbWNyYWZ0LnBlQGdtYWlsLmNvbSJ9.yuNS5hRaC0hCwymX_PjXRoSZJWLNNBeOdlLRSUGlHGA';
+    
+    // Datos del servidor
+    const tiendasData = @json($tiendas);
+    const regionsData = @json($regions);
+    const userRole = '{{ auth()->user()->getRoleNames()->first() }}';
+    const userTienda = '{{ auth()->user()->tienda->nombre ?? "Sin tienda asignada" }}';
+
+    // Variables para el panel de documento
+    let currentTabIdDocumento = null;
+
+    // Abrir panel lateral de documento
+    function abrirPanelDocumento(tabId) {
+        currentTabIdDocumento = tabId;
+        const data = salesData.get(tabId);
+        
+        // Cargar el contenido del formulario en el panel
+        const template = document.getElementById('documento-form-template');
+        const clone = template.content.cloneNode(true);
+        
+        // Reemplazar todos los data-id con IDs únicos
+        clone.querySelectorAll('[data-id]').forEach(element => {
+            const fieldName = element.getAttribute('data-id');
+            element.id = `${fieldName}_${tabId}`;
+            element.removeAttribute('data-id');
+        });
+        
+        // Insertar en el panel
+        const panelContent = document.getElementById('panelDocumentoContent');
+        panelContent.innerHTML = '';
+        panelContent.appendChild(clone);
+        
+        // Cargar valores guardados si existen
+        if (data && data.documento) {
+            setTimeout(() => {
+                try {
+                    if (data.documento.paymentType) {
+                        const paymentTypeEl = document.getElementById(`paymentType_${tabId}`);
+                        if (paymentTypeEl) paymentTypeEl.value = data.documento.paymentType;
+                    }
+                    if (data.documento.paymentMethod1) {
+                        const paymentMethod1El = document.getElementById(`paymentMethod1_${tabId}`);
+                        if (paymentMethod1El) paymentMethod1El.value = data.documento.paymentMethod1;
+                    }
+                    if (data.documento.documentType) {
+                        const documentTypeEl = document.getElementById(`documentType_${tabId}`);
+                        if (documentTypeEl) documentTypeEl.value = data.documento.documentType;
+                    }
+                } catch (error) {
+                    console.error('Error cargando valores del documento:', error);
+                }
+            }, 100);
+        }
+        
+        // Mostrar panel y overlay
+        document.getElementById('panelDocumento').classList.remove('translate-x-full');
+        document.getElementById('overlayDocumento').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Cerrar panel lateral
+    function cerrarPanelDocumento() {
+        document.getElementById('panelDocumento').classList.add('translate-x-full');
+        document.getElementById('overlayDocumento').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Aplicar configuración de documento
+    function aplicarDocumento() {
+        if (!currentTabIdDocumento) return;
+        
+        const tabId = currentTabIdDocumento;
+        const data = salesData.get(tabId);
+        
+        // Obtener valores seleccionados
+        const tipoDocSelect = document.getElementById(`documentType_${tabId}`);
+        const tipoPagoSelect = document.getElementById(`paymentType_${tabId}`);
+        const metodoPagoSelect = document.getElementById(`paymentMethod1_${tabId}`);
+        
+        const tipoDoc = tipoDocSelect?.options[tipoDocSelect.selectedIndex]?.text || '-';
+        const tipoPago = tipoPagoSelect?.options[tipoPagoSelect.selectedIndex]?.text || '-';
+        const metodoPago = metodoPagoSelect?.options[metodoPagoSelect.selectedIndex]?.text || '-';
+        
+        // Validar campos obligatorios
+        if (!tipoDocSelect?.value || !tipoPagoSelect?.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos obligatorios',
+                text: 'Debes seleccionar el tipo de documento y tipo de pago',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        if (tipoPagoSelect.value === '1' && !metodoPagoSelect?.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo obligatorio',
+                text: 'Debes seleccionar un método de pago',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        // Guardar valores en salesData para mantenerlos
+        if (!data.documento) {
+            data.documento = {};
+        }
+        data.documento.paymentType = tipoPagoSelect?.value;
+        data.documento.paymentMethod1 = metodoPagoSelect?.value;
+        data.documento.documentType = tipoDocSelect?.value;
+        data.documento.tipoDocText = tipoDoc;
+        data.documento.tipoPagoText = tipoPago;
+        data.documento.metodoPagoText = metodoPago;
+        
+        // Actualizar resumen
+        document.getElementById(`resumenTipoDoc_${tabId}`).textContent = tipoDoc;
+        document.getElementById(`resumenTipoPago_${tabId}`).textContent = tipoPago;
+        document.getElementById(`resumenMetodoPago_${tabId}`).textContent = metodoPago;
+        document.getElementById(`documentoResumen_${tabId}`).classList.remove('hidden');
+        
+        // Cerrar panel
+        cerrarPanelDocumento();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Documento configurado',
+            text: 'La configuración se ha guardado correctamente',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
 
     // Inicializar con una venta
     document.addEventListener('DOMContentLoaded', function() {
@@ -170,45 +423,119 @@
     function createSaleFormHTML(tabId) {
         return `
         <div class="container mx-auto p-2 text-sm" id="sale-form-${tabId}">
-            <div class="grid grid-cols-3 gap-6">
-                <!-- Formulario de Cliente -->
-                <div class="col-span-2 bg-white p-6 rounded-lg shadow">
-                    <h2 class="text-lg font-bold mb-4">Cliente</h2>
+            <!-- Información de Tienda, Vendedor y Cliente en un solo card -->
+            <div class="bg-white p-4 rounded-lg shadow mb-4">
+                <!-- Fecha y Hora (arriba a la derecha) -->
+                <div class="flex justify-end mb-3">
+                    <input type="text" id="fechaHora_${tabId}" value="" 
+                        class="p-2 border border-gray-300 rounded-md shadow-sm text-sm bg-gray-50 text-right" 
+                        readonly style="width: 200px;">
+                </div>
+                
+                <!-- Primera fila: NOMBRE DE TIENDA y N. VENDEDOR -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <!-- NOMBRE DE TIENDA -->
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Nombre de Tienda</label>
+                        <select id="tienda_select_${tabId}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            <option value="todos">Todas las tiendas</option>
+                            ${tiendasData.map(tienda => `<option value="${tienda.id}">${tienda.nombre}</option>`).join('')}
+                        </select>
+                    </div>
                     
-                    <!-- Grid de 2 columnas para campos de cliente -->
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <input type="text" id="dni_personal_${tabId}" placeholder="Ingrese Documento"
-                                class="w-full p-2 border rounded text-sm">
-                        </div>
-                        <div>
-                            <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos_${tabId}"
-                                class="w-full p-2 border rounded text-sm">
-                        </div>
+                    <!-- N. VENDEDOR -->
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">N. Vendedor</label>
+                        <input type="text" id="vendedor_${tabId}" value="" 
+                            placeholder="Ingrese nombre del vendedor"
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
                     </div>
-
-                    <!-- Grid de 2 columnas para modelo de moto y teléfono -->
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label for="motorcycle_model_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Modelo de Moto</label>
-                            <input type="text" id="motorcycle_model_${tabId}" placeholder="Ej: Honda CBR 600"
-                                class="w-full p-2 border rounded text-sm">
-                        </div>
-                        <div>
-                            <label for="phone_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Número de Teléfono</label>
-                            <input type="tel" id="phone_${tabId}" placeholder="Ej: 999 999 999"
-                                class="w-full p-2 border rounded text-sm">
-                        </div>
+                </div>
+                
+                <!-- Segunda fila: NÚMERO DE TELÉFONO, DEPARTAMENTO, PROVINCIA, DISTRITO -->
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <!-- NÚMERO DE TELÉFONO -->
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Número de Teléfono</label>
+                        <input type="tel" id="phone_${tabId}" placeholder="Ej: 999 999 999"
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" maxlength="9">
                     </div>
+                    
+                    <!-- DEPARTAMENTO -->
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Departamento</label>
+                        <select id="departamento_${tabId}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            <option value="">Seleccione</option>
+                            ${regionsData.map(region => `<option value="${region.id}">${region.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <!-- PROVINCIA -->
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Provincia</label>
+                        <select id="provincia_${tabId}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" disabled>
+                            <option value="">Seleccione</option>
+                        </select>
+                    </div>
+                    
+                    <!-- DISTRITO -->
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Distrito</label>
+                        <select id="distrito_${tabId}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" disabled>
+                            <option value="">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
 
-                    {{-- Campos ocultos para mantener compatibilidad --}}
-                    <input type="hidden" id="direccion_${tabId}" value="">
-                    <input type="hidden" id="regions_id_${tabId}" value="todos">
-                    <input type="hidden" id="provinces_id_${tabId}" value="todos">
-                    <input type="hidden" id="districts_id_${tabId}" value="todos">
+                <!-- Tercera fila: DOCUMENTO y CLIENTE -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Documento</label>
+                        <input type="text" id="dni_personal_${tabId}" placeholder="Ingrese Documento"
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Cliente</label>
+                        <input type="text" placeholder="Nombre del cliente" id="nombres_apellidos_${tabId}"
+                            class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    </div>
+                </div>
+                
+                <!-- Cuarta fila: BUSCADOR DE PRODUCTOS -->
+                <div class="relative">
+                    <label class="text-xs text-gray-500 uppercase font-semibold block mb-1">Buscar Producto</label>
+                    <div class="flex gap-2">
+                        <div class="flex-1 relative">
+                            <input type="text" id="searchProductInput_${tabId}" 
+                                placeholder="Escriba para buscar productos..."
+                                autocomplete="off"
+                                class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500">
+                            <!-- Dropdown de resultados -->
+                            <div id="searchProductResults_${tabId}" 
+                                class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+                                <!-- Los resultados se cargarán aquí -->
+                            </div>
+                        </div>
+                        <button type="button" onclick="addSelectedProduct('${tabId}')" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition text-sm whitespace-nowrap">
+                            <i class="bi bi-plus-circle mr-1"></i>Agregar
+                        </button>
+                    </div>
+                    <!-- Campo oculto para guardar el producto seleccionado -->
+                    <input type="hidden" id="selectedProduct_${tabId}" value="">
+                </div>
+            </div>
 
-                    <!-- Grid de 2 columnas para servicio y precio -->
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+            {{-- Campos ocultos para mantener compatibilidad --}}
+            <input type="hidden" id="direccion_${tabId}" value="">
+            <input type="hidden" id="regions_id_${tabId}" value="todos">
+            <input type="hidden" id="provinces_id_${tabId}" value="todos">
+            <input type="hidden" id="districts_id_${tabId}" value="todos">
+
+            <div class="grid grid-cols-1 gap-6">
+
+                    <!-- Grid de 2 columnas para servicio y precio (comentado) -->
+                   <!-- <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="relative">
                             <label for="service_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Servicio</label>
                             <input type="text" id="service_${tabId}" name="service" value="TALLER"
@@ -223,20 +550,20 @@
                             <input type="number" id="service_price_${tabId}" name="service_price" value="60"
                                 class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
                         </div>
-                    </div>
+                    </div> -->
                     
                     <!-- Grid de 2 columnas para botones -->
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <!-- <div class="grid grid-cols-2 gap-4 mb-4">
                         <button class="bg-yellow-400 hover:bg-yellow-500 p-2 rounded transition font-medium text-sm" id="buscarProductos_${tabId}">
                             <i class="bi bi-search mr-1"></i>Consultar Productos
                         </button>
                         <button type="button" id="addService_${tabId}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
                             <i class="bi bi-plus-circle mr-1"></i>Agregar Servicio
                         </button>
-                    </div>
+                    </div> -->
 
                     <!-- Selector de Mecánico -->
-                    <div class="mt-4">
+                  <!--  <div class="mt-4">
                         <label for="mecanico_select_${tabId}" class="block text-sm font-medium text-gray-700 mb-1">Mecánico</label>
                         <div class="flex gap-2">
                             <select id="mecanico_select_${tabId}" class="flex-1 p-2 border border-gray-300 rounded-md shadow-sm text-sm">
@@ -249,7 +576,7 @@
                             </button>
                         </div>
                         <input name="mechanics_id" id="mechanics_id_${tabId}" type="hidden">
-                    </div>
+                    </div> -->
 
                     <!-- Modal Mecánicos -->
                     <div id="modalMecanicos_${tabId}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
@@ -278,9 +605,7 @@
                                     <select id="tienda_id_${tabId}" name="tienda_id"
                                         class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
                                         <option value="todos">Todas</option>
-                                        @foreach ($tiendas as $tienda)
-                                            <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
-                                        @endforeach
+                                        ${tiendasData.map(tienda => `<option value="${tienda.id}">${tienda.nombre}</option>`).join('')}
                                     </select>
                                 </div>
                             </div>
@@ -308,81 +633,11 @@
                     </div>
                 </div>
 
-                <!-- Detalle del Pedido -->
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h2 class="text-lg font-bold mb-4">Documento</h2>
-                    <div>
-                        <label class="font-bold">Tipo pago</label>
-                        <select id="paymentType_${tabId}" class="w-full p-2 border rounded">
-                            <option value="">Seleccione</option>
-                            @foreach ($paymentsType as $payment)
-                                <option value="{{ $payment->id }}">{{ $payment->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div id="creditFields_${tabId}" class="mt-3 hidden">
-                        <label for="nro_dias_${tabId}">Número de días:</label>
-                        <input type="number" id="nro_dias_${tabId}" class="w-full p-2 border rounded" min="1">
-                        <label for="fecha_vencimiento_${tabId}" class="mt-2">Fecha de vencimiento:</label>
-                        <input type="date" id="fecha_vencimiento_${tabId}" class="w-full p-2 border rounded">
-                    </div>
-                    <div class="mt-3" id="paymentMethodContainer1_${tabId}">
-                        <label class="font-bold">Metodo pago</label>
-                        <select id="paymentMethod1_${tabId}" class="w-full p-2 border rounded">
-                            <option value="">Seleccione</option>
-                            @foreach ($paymentsMethod as $payment)
-                                <option value="{{ $payment->id }}">{{ $payment->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mt-2" id="paymentMethodContainer2_${tabId}">
-                        <input type="checkbox" id="togglePaymentFields_${tabId}" class="mr-2">
-                        <label for="togglePaymentFields_${tabId}">Agregar método de pago y monto</label>
-                    </div>
-                    <div id="paymentFieldsContainer_${tabId}" class="mt-2 hidden">
-                        <div>
-                            <label class="font-bold">Método de pago</label>
-                            <select id="paymentMethod2_${tabId}" class="w-full p-2 border rounded">
-                                <option value="">Seleccione</option>
-                                @foreach ($paymentsMethod as $payment)
-                                    <option value="{{ $payment->id }}">{{ $payment->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mt-2">
-                            <label class="font-bold">Monto a pagar</label>
-                            <input type="number" id="paymentAmount2_${tabId}" class="w-full p-2 border rounded" placeholder="Ingrese el monto">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="font-bold">Tipo de documento</label>
-                        <select id="documentType_${tabId}" class="w-full p-2 border rounded">
-                            <option value="">Seleccione</option>
-                            @foreach ($documentTypes as $documentType)
-                                <option value="{{ $documentType->id }}">{{ $documentType->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <label>Fecha</label>
-                    <input type="date" id="orderDate_${tabId}" value="{{ date('Y-m-d') }}" class="w-full p-2 border rounded mb-4">
-                    <label>Moneda</label>
-                    <input type="text" id="orderCurrency_${tabId}" value="SOLES" class="w-full p-2 border rounded mb-4">
-                    <div class="bg-gray-200 text-gray-800 p-1 rounded text-center text-sm font-bold mb-2">
-                        Subtotal: <span id="subtotalAmount_${tabId}">S/ 0.00</span>
-                    </div>
-                    <div class="bg-gray-200 text-gray-800 p-1 rounded text-center text-sm font-bold mb-2">
-                        IGV (18%): <span id="igvAmount_${tabId}">S/ 0.00</span>
-                    </div>
-                    <div class="bg-indigo-500 text-white p-1 rounded text-center text-sm font-bold" id="totalAmount_${tabId}">
-                        S/ 0.00
-                    </div>
-                </div>
             </div>
 
             <!-- Tabla de Productos -->
             <div class="mt-6 bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-bold mb-4">Productos Agregados</h2>
-                <table class="w-full border-collapse border border-gray-300" id="orderTable_${tabId}">
+                <table class="w-full border-collapse border border-gray-300 no-search-button" id="orderTable_${tabId}">
                     <thead>
                         <tr class="bg-gray-200">
                             <th class="border p-2">Item</th>
@@ -399,7 +654,45 @@
                 </table>
             </div>
 
-            <!-- Tabla de Servicios -->
+            <!-- Botón Configurar Documento y Totales -->
+            <div class="mt-4 bg-white p-4 rounded-lg shadow">
+                <div class="flex flex-col items-end">
+                    <!-- Botón pequeño alineado a la derecha -->
+                    <button onclick="abrirPanelDocumento('${tabId}')" type="button" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition text-sm mb-3 w-auto">
+                        <i class="bi bi-file-earmark-text mr-1"></i>Configurar Documento de Venta
+                    </button>
+                    
+                    <!-- Resumen de documento seleccionado -->
+                    <div id="documentoResumen_${tabId}" class="mb-3 p-3 bg-gray-50 rounded-lg hidden w-auto">
+                        <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500"></i>
+                            Documento Configurado
+                        </h3>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <p><strong>Tipo:</strong> <span id="resumenTipoDoc_${tabId}">-</span></p>
+                            <p><strong>Pago:</strong> <span id="resumenTipoPago_${tabId}">-</span></p>
+                            <p><strong>Método:</strong> <span id="resumenMetodoPago_${tabId}">-</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Totales con el mismo ancho que el botón -->
+                    <div class="space-y-2 w-auto">
+                        <div class="bg-gray-200 text-gray-800 p-2 rounded text-center text-sm font-bold whitespace-nowrap">
+                            Subtotal: <span id="subtotalAmount_${tabId}">S/ 0.00</span>
+                        </div>
+                        <div class="bg-gray-200 text-gray-800 p-2 rounded text-center text-sm font-bold whitespace-nowrap">
+                            IGV (18%): <span id="igvAmount_${tabId}">S/ 0.00</span>
+                        </div>
+                        <div class="bg-indigo-500 text-white p-2 rounded text-center text-sm font-bold whitespace-nowrap" id="totalAmount_${tabId}">
+                            S/ 0.00
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Servicios (comentada) -->
+            <!--
             <div class="mt-5">
                 <table class="w-full border-collapse border border-gray-300">
                     <thead>
@@ -412,9 +705,13 @@
                     <tbody id="serviceList_${tabId}"></tbody>
                 </table>
             </div>
+            -->
 
-            <!-- Botón para guardar esta venta individual -->
+            <!-- Botones para guardar venta y registrar despacho -->
             <div class="mt-6 flex justify-center gap-3 pt-4 border-t">
+                <button onclick="registrarDespacho('${tabId}')" type="button" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md">
+                    <i class="bi bi-truck mr-2"></i>Registrar Despacho
+                </button>
                 <button onclick="saveSingleSale('${tabId}')" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md">
                     <i class="bi bi-save mr-2"></i>Guardar Esta Venta
                 </button>
@@ -431,24 +728,13 @@
         if ($.fn.DataTable) {
             data.dataTable = $(`#orderTable_${tabId}`).DataTable({
                 responsive: true,
-                pageLength: 10,
-                lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
+                paging: false, // ✅ Desactivar paginación
+                info: false, // ✅ Desactivar contador
                 language: {
-                    search: "Buscar:",
-                    lengthMenu: "Mostrar _MENU_ productos",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ productos",
-                    infoEmpty: "0 productos",
-                    infoFiltered: "(filtrado de _MAX_ totales)",
                     zeroRecords: "No se encontraron productos",
-                    emptyTable: "No hay productos agregados",
-                    paginate: {
-                        first: "Primero",
-                        last: "Último",
-                        next: "Siguiente",
-                        previous: "Anterior"
-                    }
+                    emptyTable: "No hay productos agregados"
                 },
-                dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                dom: 'rt', // ✅ Solo tabla (r=processing, t=table)
                 columnDefs: [
                     { targets: [6], orderable: false },
                     { targets: [0], className: 'text-center' },
@@ -501,16 +787,31 @@
             btnBuscar.addEventListener('click', () => fetchProducts(tabId));
         }
 
-        // UBICACIÓN - COMENTADO (campos ocultos)
-        // const regionSelect = document.getElementById(`regions_id_${tabId}`);
-        // if (regionSelect) {
-        //     regionSelect.addEventListener('change', () => fetchProvinces(tabId));
-        // }
+        // Eventos para selects de ubicación (Departamento, Provincia, Distrito)
+        const departamentoSelect = document.getElementById(`departamento_${tabId}`);
+        if (departamentoSelect) {
+            departamentoSelect.addEventListener('change', function() {
+                const regionId = this.value;
+                if (regionId !== '') {
+                    fetchProvincesForTab(tabId, regionId);
+                } else {
+                    clearSelectForTab(`provincia_${tabId}`);
+                    clearSelectForTab(`distrito_${tabId}`);
+                }
+            });
+        }
 
-        // const provinceSelect = document.getElementById(`provinces_id_${tabId}`);
-        // if (provinceSelect) {
-        //     provinceSelect.addEventListener('change', () => fetchDistricts(tabId));
-        // }
+        const provinciaSelect = document.getElementById(`provincia_${tabId}`);
+        if (provinciaSelect) {
+            provinciaSelect.addEventListener('change', function() {
+                const provinceId = this.value;
+                if (provinceId !== '') {
+                    fetchDistrictsForTab(tabId, provinceId);
+                } else {
+                    clearSelectForTab(`distrito_${tabId}`);
+                }
+            });
+        }
 
         // Evento para búsqueda de servicios
         const serviceInput = document.getElementById(`service_${tabId}`);
@@ -518,8 +819,444 @@
             serviceInput.addEventListener('input', () => searchServices(tabId));
         }
 
+        // Evento para buscador de productos con autocompletado
+        const searchProductInput = document.getElementById(`searchProductInput_${tabId}`);
+        if (searchProductInput) {
+            searchProductInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length >= 1) {
+                    searchProductsAutocomplete(tabId, searchTerm);
+                } else {
+                    hideProductResults(tabId);
+                }
+            });
+
+            // Cerrar dropdown al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                const resultsDiv = document.getElementById(`searchProductResults_${tabId}`);
+                const inputDiv = document.getElementById(`searchProductInput_${tabId}`);
+                if (resultsDiv && !resultsDiv.contains(e.target) && e.target !== inputDiv) {
+                    hideProductResults(tabId);
+                }
+            });
+        }
+
         // Cargar mecánicos en el select
         cargarMecanicosTab(tabId);
+        
+        // Establecer fecha y hora actual
+        setCurrentDateTime(tabId);
+    }
+    
+    // Función para establecer fecha y hora actual
+    function setCurrentDateTime(tabId) {
+        const fechaHoraInput = document.getElementById(`fechaHora_${tabId}`);
+        if (fechaHoraInput) {
+            const now = new Date();
+            const fecha = now.toLocaleDateString('es-PE', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+            const hora = now.toLocaleTimeString('es-PE', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            fechaHoraInput.value = `${fecha} ${hora}`;
+        }
+    }
+
+    // Función para buscar productos con autocompletado
+    function searchProductsAutocomplete(tabId, searchTerm) {
+        // Verificar que el tab aún existe
+        const searchInput = document.getElementById(`searchProductInput_${tabId}`);
+        if (!searchInput) {
+            console.warn('Tab cerrado, cancelando búsqueda');
+            return;
+        }
+        
+        const tiendaSelect = document.getElementById(`tienda_select_${tabId}`);
+        let tiendaId = 'todos';
+        
+        if (tiendaSelect) {
+            tiendaId = tiendaSelect.value || 'todos';
+        }
+
+        console.log('Buscando con tienda_id:', tiendaId, 'search:', searchTerm);
+        const url = `${baseUrl}/api/product?tienda_id=${tiendaId}&search=${searchTerm}`;
+        console.log('URL completa:', url);
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Respuesta de la API:', data);
+                // Verificar nuevamente que el tab existe antes de mostrar resultados
+                if (document.getElementById(`searchProductResults_${tabId}`)) {
+                    // La API devuelve un array directamente, no un objeto con products
+                    displayProductResults(tabId, Array.isArray(data) ? data : []);
+                }
+            })
+            .catch(error => {
+                console.error('Error buscando productos:', error);
+                hideProductResults(tabId);
+            });
+    }
+
+    // Función para mostrar resultados de búsqueda
+    function displayProductResults(tabId, products) {
+        const resultsDiv = document.getElementById(`searchProductResults_${tabId}`);
+        
+        if (!resultsDiv) {
+            console.error('No se encontró el div de resultados');
+            return;
+        }
+        
+        if (products.length === 0) {
+            resultsDiv.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No se encontraron productos</div>';
+            resultsDiv.classList.remove('hidden');
+            return;
+        }
+
+        let html = '<div class="divide-y divide-gray-200">';
+        
+        products.forEach(product => {
+            console.log('Producto completo:', product);
+            console.log('Stock del producto:', product.stock);
+            
+            const stock = product.stock || { quantity: 0, minimum_stock: 0 };
+            const stockQuantity = stock.quantity || 0;
+            const stockMin = stock.minimum_stock || 0;
+            
+            console.log('Stock quantity:', stockQuantity);
+            
+            const stockColor = stockQuantity <= 0 ? 'text-red-600' : 
+                              stockQuantity <= stockMin ? 'text-yellow-600' : 
+                              'text-green-600';
+            
+            // Obtener el precio de venta (sucursalA o el primero disponible)
+            let price = 0;
+            if (product.prices && product.prices.length > 0) {
+                const sucursalAPrice = product.prices.find(p => p.type === 'sucursalA');
+                const wholesalePrice = product.prices.find(p => p.type === 'wholesale');
+                price = sucursalAPrice ? parseFloat(sucursalAPrice.price) : 
+                       wholesalePrice ? parseFloat(wholesalePrice.price) : 
+                       parseFloat(product.prices[0].price);
+            }
+            
+            const storeName = product.tienda ? product.tienda.nombre : 'Todas';
+            
+            // Guardar el producto en base64 para evitar problemas con comillas
+            const productBase64 = btoa(encodeURIComponent(JSON.stringify(product)));
+            
+            html += `
+                <div class="p-3 hover:bg-gray-50 cursor-pointer transition" onclick="selectProductFromList('${tabId}', '${productBase64}')">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800">${product.description}</p>
+                            <p class="text-xs text-gray-500">Código: ${product.code_sku || product.code_bar || 'N/A'}</p>
+                            <p class="text-xs ${stockColor} font-medium">Stock: ${stockQuantity}</p>
+                        </div>
+                        <div class="text-right ml-3">
+                            <p class="text-sm font-bold text-blue-600">S/ ${price.toFixed(2)}</p>
+                            <p class="text-xs text-gray-500">${storeName}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        resultsDiv.innerHTML = html;
+        resultsDiv.classList.remove('hidden');
+    }
+
+    // Función para ocultar resultados
+    function hideProductResults(tabId) {
+        const resultsDiv = document.getElementById(`searchProductResults_${tabId}`);
+        if (resultsDiv) {
+            resultsDiv.classList.add('hidden');
+        }
+    }
+
+    // Función para seleccionar un producto de la lista (solo lo coloca en el input)
+    function selectProductFromList(tabId, productBase64) {
+        try {
+            const product = JSON.parse(decodeURIComponent(atob(productBase64)));
+            
+            // Colocar el nombre del producto en el input
+            const searchInput = document.getElementById(`searchProductInput_${tabId}`);
+            if (searchInput) {
+                searchInput.value = product.description;
+            }
+            
+            // Guardar el producto seleccionado en el campo oculto
+            const hiddenInput = document.getElementById(`selectedProduct_${tabId}`);
+            if (hiddenInput) {
+                hiddenInput.value = productBase64;
+            }
+            
+            // Ocultar resultados
+            hideProductResults(tabId);
+        } catch (error) {
+            console.error('Error al seleccionar producto:', error);
+        }
+    }
+
+    // Función para agregar el producto seleccionado (botón Agregar)
+    function addSelectedProduct(tabId) {
+        const hiddenInput = document.getElementById(`selectedProduct_${tabId}`);
+        const searchInput = document.getElementById(`searchProductInput_${tabId}`);
+        
+        if (!hiddenInput || !hiddenInput.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Seleccione un producto',
+                text: 'Debe seleccionar un producto de la lista',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        try {
+            const product = JSON.parse(decodeURIComponent(atob(hiddenInput.value)));
+            const stock = product.stock || { quantity: 0, minimum_stock: 0 };
+            const stockQuantity = stock.quantity || 0;
+            
+            // Verificar stock
+            if (stockQuantity <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin stock',
+                    text: 'Este producto no tiene stock disponible',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            // Agregar producto a la tabla
+            addProductToOrder(tabId, product);
+            
+            // Limpiar búsqueda
+            if (searchInput) searchInput.value = '';
+            hiddenInput.value = '';
+            hideProductResults(tabId);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Producto agregado',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            console.error('Error al agregar producto:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo agregar el producto',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
+
+    // Función para agregar producto a la orden
+    function addProductToOrder(tabId, product) {
+        const data = salesData.get(tabId);
+        
+        const stock = product.stock || { quantity: 0, minimum_stock: 0 };
+        const stockQuantity = stock.quantity || 0;
+        
+        // Obtener precios correctamente según el tipo
+        let price_buy = 0, price_wholesale = 0, price_sucursalA = 0, price_sucursalB = 0;
+        
+        if (product.prices && product.prices.length > 0) {
+            product.prices.forEach(p => {
+                const priceValue = parseFloat(p.price) || 0;
+                switch(p.type) {
+                    case 'buy':
+                        price_buy = priceValue;
+                        break;
+                    case 'wholesale':
+                        price_wholesale = priceValue;
+                        break;
+                    case 'sucursalA':
+                        price_sucursalA = priceValue;
+                        break;
+                    case 'sucursalB':
+                        price_sucursalB = priceValue;
+                        break;
+                }
+            });
+        }
+        
+        // Usar precio de sucursalA por defecto, o el primero disponible
+        const defaultPrice = price_sucursalA || price_wholesale || price_buy || 0;
+        
+        console.log('Producto:', product);
+        console.log('Precios:', { price_buy, price_wholesale, price_sucursalA, price_sucursalB, defaultPrice });
+        
+        // Verificar si el producto ya existe
+        const existingProduct = data.products.find(p => p.id === product.id);
+        if (existingProduct) {
+            if (existingProduct.quantity + 1 > stockQuantity) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Stock insuficiente',
+                    text: `Solo hay ${stockQuantity} unidades disponibles`,
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+            existingProduct.quantity++;
+            existingProduct.subtotal = existingProduct.quantity * existingProduct.price;
+        } else {
+            data.orderCount++;
+            data.products.push({
+                id: product.id,
+                item: data.orderCount,
+                code: product.code_sku || product.code_bar || 'N/A',
+                description: product.description,
+                quantity: 1,
+                price: defaultPrice,
+                price_buy: price_buy,
+                price_wholesale: price_wholesale,
+                price_sucursalA: price_sucursalA,
+                price_sucursalB: price_sucursalB,
+                type_price: 'sucursalA',
+                subtotal: defaultPrice,
+                stock: stockQuantity,
+                prices: product.prices || []
+            });
+        }
+
+        updateOrderTable(tabId);
+        updateCalculations(tabId);
+    }
+
+    // Función para actualizar la tabla de productos
+    function updateOrderTable(tabId) {
+        const data = salesData.get(tabId);
+        
+        if (data.dataTable) {
+            data.dataTable.clear();
+            
+            data.products.forEach(product => {
+                data.dataTable.row.add([
+                    product.item,
+                    product.description,
+                    `<input type="number" value="${product.quantity}" min="1" max="${product.stock}" 
+                        onchange="updateProductQuantity('${tabId}', ${product.id}, this.value)" 
+                        class="w-20 p-1 border rounded text-center text-sm">`,
+                    `S/ ${product.price.toFixed(2)}`,
+                    `<select onchange="updateProductPrice('${tabId}', ${product.id}, this.value)" 
+                        class="w-full p-1 border rounded text-sm">
+                        <option value="price_1" ${product.type_price === 'price_1' ? 'selected' : ''}>Precio 1</option>
+                        <option value="price_2" ${product.type_price === 'price_2' ? 'selected' : ''}>Precio 2</option>
+                        <option value="price_3" ${product.type_price === 'price_3' ? 'selected' : ''}>Precio 3</option>
+                    </select>`,
+                    `S/ ${product.subtotal.toFixed(2)}`,
+                    `<button onclick="removeProduct('${tabId}', ${product.id})" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">
+                        <i class="bi bi-trash"></i>
+                    </button>`
+                ]);
+            });
+            
+            data.dataTable.draw();
+        }
+    }
+
+    // Función para actualizar cantidad de producto
+    function updateProductQuantity(tabId, productId, newQuantity) {
+        const data = salesData.get(tabId);
+        const product = data.products.find(p => p.id === productId);
+        
+        if (product) {
+            const qty = parseInt(newQuantity);
+            if (qty > product.stock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Stock insuficiente',
+                    text: `Solo hay ${product.stock} unidades disponibles`,
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+            
+            product.quantity = qty;
+            product.subtotal = product.quantity * product.price;
+            updateOrderTable(tabId);
+            updateCalculations(tabId);
+        }
+    }
+
+    // Función para actualizar precio de producto
+    function updateProductPrice(tabId, productId, priceType) {
+        const data = salesData.get(tabId);
+        const product = data.products.find(p => p.id === productId);
+        
+        if (product) {
+            // Aquí deberías obtener el precio correcto del producto según el tipo
+            // Por ahora mantenemos el precio actual
+            product.type_price = priceType;
+            updateOrderTable(tabId);
+        }
+    }
+
+    // Función para eliminar producto
+    function removeProduct(tabId, productId) {
+        const data = salesData.get(tabId);
+        data.products = data.products.filter(p => p.id !== productId);
+        updateOrderTable(tabId);
+        updateCalculations(tabId);
+    }
+
+    // Funciones para manejar ubicación por tab
+    function fetchProvincesForTab(tabId, regionId) {
+        fetch(`${baseUrl}/api/provinces/${regionId}`)
+            .then(response => response.json())
+            .then(data => {
+                const provinceSelect = document.getElementById(`provincia_${tabId}`);
+                provinceSelect.removeAttribute('disabled');
+                clearSelectForTab(`distrito_${tabId}`);
+                updateSelectOptionsForTab(`provincia_${tabId}`, data.provinces);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function fetchDistrictsForTab(tabId, provinceId) {
+        fetch(`${baseUrl}/api/districts/${provinceId}`)
+            .then(response => response.json())
+            .then(data => {
+                const districtSelect = document.getElementById(`distrito_${tabId}`);
+                districtSelect.removeAttribute('disabled');
+                updateSelectOptionsForTab(`distrito_${tabId}`, data.districts);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function updateSelectOptionsForTab(selectId, options) {
+        const select = document.getElementById(selectId);
+        if (!select) {
+            console.warn(`Select ${selectId} no encontrado`);
+            return;
+        }
+        select.innerHTML = '<option value="">Seleccione</option>';
+        options.forEach(option => {
+            const opt = document.createElement('option');
+            opt.value = option.id;
+            opt.textContent = option.name;
+            select.appendChild(opt);
+        });
+    }
+
+    function clearSelectForTab(selectId) {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.innerHTML = '<option value="">Seleccione</option>';
+            select.setAttribute('disabled', 'disabled');
+        }
     }
 
     // Funciones de Tab Management
@@ -529,6 +1266,67 @@
 
         document.getElementById(`tab-${tabId}`)?.classList.add('active');
         document.getElementById(`content-${tabId}`)?.classList.add('active');
+    }
+
+    // Función para cerrar tab sin confirmación (usado después de guardar)
+    function forceCloseTab(tabId) {
+        const data = salesData.get(tabId);
+        if (data && data.dataTable) {
+            data.dataTable.destroy();
+        }
+
+        document.getElementById(`tab-${tabId}`)?.remove();
+        document.getElementById(`content-${tabId}`)?.remove();
+        salesData.delete(tabId);
+
+        const firstTab = document.querySelector('.tab-header');
+        if (firstTab) {
+            const firstTabId = firstTab.id.replace('tab-', '');
+            switchTab(firstTabId);
+        }
+
+        updateSalesCount();
+    }
+
+    // Función para limpiar campos del tab (para nueva venta)
+    function resetTabFields(tabId) {
+        const data = salesData.get(tabId);
+        
+        // Limpiar productos
+        data.products = [];
+        data.services = [];
+        data.documento = null;
+        
+        // Limpiar tabla
+        if (data.dataTable) {
+            data.dataTable.clear().draw();
+        }
+        
+        // Limpiar campos del formulario
+        const dniInput = document.getElementById(`dni_personal_${tabId}`);
+        const nombresInput = document.getElementById(`nombres_apellidos_${tabId}`);
+        const phoneInput = document.getElementById(`phone_${tabId}`);
+        const vendedorInput = document.getElementById(`vendedor_${tabId}`);
+        
+        if (dniInput) dniInput.value = '';
+        if (nombresInput) nombresInput.value = '';
+        if (phoneInput) phoneInput.value = '';
+        if (vendedorInput) vendedorInput.value = '';
+        
+        // Ocultar resumen de documento
+        const resumen = document.getElementById(`documentoResumen_${tabId}`);
+        if (resumen) resumen.classList.add('hidden');
+        
+        // Actualizar totales
+        updateCalculations(tabId);
+        
+        Swal.fire({
+            icon: 'info',
+            title: 'Listo para nueva venta',
+            text: 'Los campos han sido limpiados',
+            timer: 1500,
+            showConfirmButton: false
+        });
     }
 
     function closeTab(tabId, event) {
@@ -650,6 +1448,11 @@
             .then(response => response.json())
             .then(data => {
                 const select = document.getElementById(`mecanico_select_${tabId}`);
+                if (!select) {
+                    console.warn(`Select mecanico_select_${tabId} no encontrado`);
+                    return;
+                }
+                
                 select.innerHTML = '<option value="">Seleccionar mecánico</option>';
                 
                 data.forEach(mecanico => {
@@ -661,8 +1464,14 @@
 
                 // Evento cuando cambia el select
                 select.addEventListener('change', function() {
-                    document.getElementById(`mechanics_id_${tabId}`).value = this.value;
+                    const mechanicsInput = document.getElementById(`mechanics_id_${tabId}`);
+                    if (mechanicsInput) {
+                        mechanicsInput.value = this.value;
+                    }
                 });
+            })
+            .catch(error => {
+                console.error('Error cargando mecánicos:', error);
             });
     }
 
@@ -1020,20 +1829,37 @@
         const data = salesData.get(tabId);
         let totalAmount = 0;
 
-        data.quotationItems.forEach(item => {
-            totalAmount += item.quantity * item.unit_price;
-        });
+        // Sumar productos
+        if (data.products && data.products.length > 0) {
+            data.products.forEach(item => {
+                totalAmount += parseFloat(item.subtotal) || 0;
+            });
+        }
 
-        data.services.forEach(item => {
-            totalAmount += parseFloat(item.price);
-        });
+        // Sumar quotationItems (si existen)
+        if (data.quotationItems && data.quotationItems.length > 0) {
+            data.quotationItems.forEach(item => {
+                totalAmount += item.quantity * item.unit_price;
+            });
+        }
+
+        // Sumar servicios (si existen)
+        if (data.services && data.services.length > 0) {
+            data.services.forEach(item => {
+                totalAmount += parseFloat(item.price);
+            });
+        }
 
         const igvAmount = totalAmount * 0.18;
         const subtotalAmount = totalAmount - igvAmount;
 
-        document.getElementById(`subtotalAmount_${tabId}`).textContent = "S/ " + subtotalAmount.toFixed(2);
-        document.getElementById(`igvAmount_${tabId}`).textContent = "S/ " + igvAmount.toFixed(2);
-        document.getElementById(`totalAmount_${tabId}`).textContent = "S/ " + totalAmount.toFixed(2);
+        const subtotalEl = document.getElementById(`subtotalAmount_${tabId}`);
+        const igvEl = document.getElementById(`igvAmount_${tabId}`);
+        const totalEl = document.getElementById(`totalAmount_${tabId}`);
+        
+        if (subtotalEl) subtotalEl.textContent = "S/ " + subtotalAmount.toFixed(2);
+        if (igvEl) igvEl.textContent = "S/ " + igvAmount.toFixed(2);
+        if (totalEl) totalEl.textContent = "S/ " + totalAmount.toFixed(2);
     }
 
     // Función para obtener métodos de pago
@@ -1075,26 +1901,61 @@
     function buildOrderData(tabId) {
         const data = salesData.get(tabId);
 
-        return {
-            customer_dni: document.getElementById(`dni_personal_${tabId}`).value.trim(),
-            customer_names_surnames: document.getElementById(`nombres_apellidos_${tabId}`).value.trim(),
-            customer_address: document.getElementById(`direccion_${tabId}`).value.trim(),
-            motorcycle_model: document.getElementById(`motorcycle_model_${tabId}`).value.trim(),
-            phone: document.getElementById(`phone_${tabId}`).value.trim(),
-            districts_id: document.getElementById(`districts_id_${tabId}`).value,
-            mechanics_id: document.getElementById(`mechanics_id_${tabId}`).value,
-            payments_id: document.getElementById(`paymentType_${tabId}`).value,
-            order_date: document.getElementById(`orderDate_${tabId}`).value,
-            currency: document.getElementById(`orderCurrency_${tabId}`).value,
-            document_type_id: document.getElementById(`documentType_${tabId}`).value,
-            nro_dias: document.getElementById(`nro_dias_${tabId}`).value,
-            fecha_vencimiento: document.getElementById(`fecha_vencimiento_${tabId}`).value,
-            igv: parseFloat(document.getElementById(`igvAmount_${tabId}`).textContent.replace("S/ ", "")) || 0,
-            total: parseFloat(document.getElementById(`totalAmount_${tabId}`).textContent.replace("S/ ", "")) || 0,
-            products: data.quotationItems,
-            services: data.services,
-            payments: getSalePaymentMethods(tabId)
+        // Función auxiliar para obtener valor de forma segura
+        const getValue = (id, defaultValue = '') => {
+            const element = document.getElementById(id);
+            return element ? element.value.trim() : defaultValue;
         };
+
+        const getTextContent = (id, defaultValue = '0.00') => {
+            const element = document.getElementById(id);
+            return element ? element.textContent.replace("S/ ", "").trim() : defaultValue;
+        };
+
+        // Preparar productos en el formato esperado por el backend
+        const products = (data.products || []).map(product => ({
+            item_id: product.id,
+            quantity: product.quantity,
+            unit_price: product.price
+        }));
+
+        // Preparar pagos en el formato esperado por el backend
+        const payments = data.documento ? [{
+            payment_method_id: data.documento.paymentMethod1,
+            amount: parseFloat(getTextContent(`totalAmount_${tabId}`)) || 0,
+            order: 1
+        }] : [];
+
+        return {
+            customer_dni: getValue(`dni_personal_${tabId}`),
+            customer_names_surnames: getValue(`nombres_apellidos_${tabId}`),
+            customer_address: getValue(`direccion_${tabId}`),
+            phone: getValue(`phone_${tabId}`),
+            seller_name: getValue(`vendedor_${tabId}`),
+            tienda_id: getValue(`tienda_select_${tabId}`) === 'todos' ? null : getValue(`tienda_select_${tabId}`),
+            districts_id: getValue(`distrito_${tabId}`) || null,
+            payments_id: data.documento?.paymentType || null,
+            order_date: getValue(`fechaHora_${tabId}`) || new Date().toISOString().split('T')[0],
+            currency: 'SOLES',
+            document_type_id: data.documento?.documentType || null,
+            nro_dias: getValue(`nro_dias_${tabId}`) || null,
+            fecha_vencimiento: getValue(`fecha_vencimiento_${tabId}`) || null,
+            igv: parseFloat(getTextContent(`igvAmount_${tabId}`)) || 0,
+            total: parseFloat(getTextContent(`totalAmount_${tabId}`)) || 0,
+            products: products,
+            services: data.services || [],
+            payments: payments
+        };
+    }
+
+    // Función para registrar despacho (sin funcionalidad aún)
+    function registrarDespacho(tabId) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Registrar Despacho',
+            text: 'Esta funcionalidad estará disponible próximamente',
+            confirmButtonColor: '#3b82f6'
+        });
     }
 
     // Función para guardar una venta individual
@@ -1177,14 +2038,22 @@
                 icon: 'success',
                 title: '¡Venta guardada!',
                 text: `Venta #${saleData.saleNumber} guardada exitosamente`,
-                confirmButtonColor: '#10b981'
-            }).then(() => {
-                // Cerrar la pestaña guardada
-                closeTab(tabId);
-                
-                // Si no quedan más pestañas, redirigir al índice
-                if (salesData.size === 0) {
+                confirmButtonColor: '#10b981',
+                showCancelButton: true,
+                confirmButtonText: 'Ir al índice',
+                cancelButtonText: 'Nueva venta'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirigir al índice de ventas
                     window.location.href = '{{ route("sales.index") }}';
+                } else {
+                    // Si hay más de un tab, cerrar el actual
+                    if (salesData.size > 1) {
+                        forceCloseTab(tabId);
+                    } else {
+                        // Si es el único tab, limpiar los campos para nueva venta
+                        resetTabFields(tabId);
+                    }
                 }
             });
 

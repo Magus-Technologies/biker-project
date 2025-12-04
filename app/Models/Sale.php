@@ -21,6 +21,8 @@ class Sale extends Model
         'customer_address',
         'motorcycle_model',
         'phone',
+        'seller_name',
+        'tienda_id',
         'code',
         'igv',
         'quotation_id',
@@ -38,7 +40,6 @@ class Sale extends Model
         'delivered_at',
     ];
 
-
     protected static function booted()
     {
         static::creating(function ($model) {
@@ -48,10 +49,12 @@ class Sale extends Model
             $model->user_update = auth()->id();
         });
     }
+
     public function userRegister()
     {
         return $this->belongsTo(User::class, 'user_register');
     }
+
     public function saleItems()
     {
         return $this->hasMany(SalesItem::class, 'sale_id');
@@ -66,18 +69,22 @@ class Sale extends Model
     {
         return $this->belongsTo(Quotation::class);
     }
+
     public function payments()
     {
         return $this->belongsTo(Payment::class);
     }
+
     public function documentType()
     {
         return $this->belongsTo(DocumentType::class);
     }
+
     public function companies()
     {
         return $this->belongsTo(Company::class);
     }
+
     public function districts()
     {
         return $this->belongsTo(District::class);
@@ -87,8 +94,14 @@ class Sale extends Model
     {
         return $this->belongsTo(District::class, 'districts_id');
     }
+
     public function mechanic()
     {
         return $this->belongsTo(User::class, 'mechanics_id');
+    }
+
+    public function tienda()
+    {
+        return $this->belongsTo(Tienda::class, 'tienda_id');
     }
 }
