@@ -130,7 +130,10 @@ function addCustomSearch(tableId) {
 // Aplicar automáticamente a todas las tablas DataTables después de inicializarse
 $(document).on('init.dt', function(e, settings) {
     const tableId = settings.nTable.id;
-    if (tableId) {
+    const $table = $(settings.nTable);
+    
+    // No aplicar si la tabla tiene la clase 'no-search-button'
+    if (tableId && !$table.hasClass('no-search-button')) {
         // Timeout reducido para que aparezca más rápido
         setTimeout(() => {
             addCustomSearch(tableId);
@@ -143,7 +146,10 @@ $(document).ready(function() {
     setTimeout(() => {
         $('table.dataTable').each(function() {
             const tableId = $(this).attr('id');
-            if (tableId && $.fn.DataTable.isDataTable(`#${tableId}`)) {
+            const $table = $(this);
+            
+            // No aplicar si la tabla tiene la clase 'no-search-button'
+            if (tableId && $.fn.DataTable.isDataTable(`#${tableId}`) && !$table.hasClass('no-search-button')) {
                 addCustomSearch(tableId);
             }
         });
