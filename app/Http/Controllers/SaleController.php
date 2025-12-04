@@ -146,6 +146,9 @@ class SaleController extends Controller
             }
             
             // 1. Crear la Venta
+            // Si es despacho, no se genera serie/número aún (se generará al facturar)
+            $isDespacho = $request->is_despacho ?? false;
+            
             $sale = Sale::create([
                 'code' => $this->generateCode(),
                 'total_price' => $request->total,
@@ -155,8 +158,8 @@ class SaleController extends Controller
                 'motorcycle_model' => $request->motorcycle_model,
                 'phone' => $request->phone,
                 'igv' => $request->igv,
-                'serie' => $this->generateSerie($request->document_type_id),
-                'number' => $this->generateNumero($request->document_type_id),
+                'serie' => $isDespacho ? 'TEMP' : $this->generateSerie($request->document_type_id),
+                'number' => $isDespacho ? 0 : $this->generateNumero($request->document_type_id),
                 'document_type_id' => $request->document_type_id,
                 'companies_id' => $request->companies_id ?? 1, // Valor por defecto: 1
                 'payments_id' => $request->payments_id,
@@ -164,6 +167,8 @@ class SaleController extends Controller
                 'districts_id' => ($request->districts_id && $request->districts_id != 'todos') ? $request->districts_id : null,
                 'nro_dias' => $request->nro_dias,
                 'fecha_vencimiento' => $request->fecha_vencimiento,
+                'delivery_status' => $isDespacho ? 0 : 1, // Si es despacho, pendiente de entrega
+                'status_sunat' => $isDespacho ? 0 : 0, // Si es despacho, no facturado aún
             ]);
             if (!empty($request->payments)) {
                 foreach ($request->payments as $payment) {
@@ -443,7 +448,7 @@ class SaleController extends Controller
         $nextCodigo = intval($lastCodigo) + 1;
         return str_pad($nextCodigo, 7, '0', STR_PAD_LEFT);
     }
-    private function generateSerie($documentTypeId)
+    public function generateSerie($documentTypeId)
     {
         $documentTypeId = (int) $documentTypeId; // Convertir a entero
 
@@ -469,7 +474,7 @@ class SaleController extends Controller
         return $prefijos[$tipoDocumento->name] . $numeroSerie;
     }
 
-    private function generateNumero($documentTypeId)
+    public function generateNumero($documentTypeId)
     {
         $documentTypeId = (int) $documentTypeId;
         if ($documentTypeId <= 0) {

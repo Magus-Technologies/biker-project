@@ -1948,14 +1948,128 @@
         };
     }
 
-    // Función para registrar despacho (sin funcionalidad aún)
-    function registrarDespacho(tabId) {
-        Swal.fire({
-            icon: 'info',
-            title: 'Registrar Despacho',
-            text: 'Esta funcionalidad estará disponible próximamente',
-            confirmButtonColor: '#3b82f6'
+    // Función para registrar despacho (guardar sin facturar)
+    async function registrarDespacho(tabId) {
+        const saleData = salesData.get(tabId);
+        if (!saleData) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontraron datos de la venta',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: '¿Registrar en Despacho?',
+            html: `
+                <p>Venta #${saleData.saleNumber}</p>
+                <p class="text-sm text-gray-600 mt-2">La venta se guardará sin facturar. Podrás editarla y facturarla cuando se entregue.</p>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sí, registrar',
+            cancelButtonText: 'Cancelar'
         });
+
+        if (!result.isConfirmed) return;
+
+        Swal.fire({
+            title: 'Registrando despacho...',
+            html: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            const orderData = buildOrderData(tabId);
+            
+            // Validar tipo de documento
+            const documentTypeSelect = document.getElementById(`documentType_${tabId}`);
+            const isNotaDeVenta = documentTypeSelect && documentTypeSelect.options[documentTypeSelect.selectedIndex]?.text === 'NOTA DE VENTA';
+            
+            if (!isNotaDeVenta && (!orderData.customer_dni || !orderData.customer_names_surnames)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Datos incompletos',
+                    text: 'Complete los datos del cliente (DNI y Nombre)',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            if (orderData.products.length === 0 && orderData.services.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin productos',
+                    text: 'Agregue al menos un producto o servicio',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            // Validar documento configurado
+            if (!orderData.document_type_id || !orderData.payments_id) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Configure el documento',
+                    text: 'Debe configurar el tipo de documento y forma de pago',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            // Agregar flag para indicar que es despacho (no facturar aún)
+            orderData.is_despacho = true;
+
+            const response = await fetch('{{ route('sales.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al registrar el despacho');
+            }
+
+            const data = await response.json();
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Despacho registrado!',
+                text: `Venta #${saleData.saleNumber} registrada en despachos`,
+                confirmButtonColor: '#10b981',
+                showCancelButton: true,
+                confirmButtonText: 'Ir a Despachos',
+                cancelButtonText: 'Nueva venta'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route('despachos.index') }}';
+                } else {
+                    if (salesData.size > 1) {
+                        forceCloseTab(tabId);
+                    } else {
+                        resetTabFields(tabId);
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Error registrando despacho:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Error al registrar el despacho',
+                confirmButtonColor: '#ef4444'
+            });
+        }
     }
 
     // Función para guardar una venta individual

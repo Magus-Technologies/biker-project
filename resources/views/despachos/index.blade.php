@@ -62,7 +62,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right font-medium">S/ {{ number_format($venta->total_price, 2) }}</td>
-                                <td class="px-4 py-3">{{ $venta->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="px-4 py-3">{{ \Carbon\Carbon::parse($venta->fecha_registro)->format('d/m/Y H:i') }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-center gap-2">
                                         <!-- Ver/Editar detalles -->
