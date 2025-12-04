@@ -29,23 +29,31 @@ class DespachoController extends Controller
     }
 
     /**
-     * Marcar venta como entregada
+     * Marcar venta como entregada y generar factura
      */
     public function marcarEntregado(Request $request)
     {
         try {
             $sale = Sale::findOrFail($request->sale_id);
 
+            // Si la venta tiene serie TEMP, generar serie y número real
+            if ($sale->serie === 'TEMP' || $sale->number == 0) {
+                $saleController = new SaleController();
+                $sale->serie = $saleController->generateSerie($sale->document_type_id);
+                $sale->number = $saleController->generateNumero($sale->document_type_id);
+            }
+
             $sale->update([
                 'delivery_status' => 1,
-                'delivered_at' => now()
+                'delivered_at' => now(),
+                'serie' => $sale->serie,
+                'number' => $sale->number
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Venta marcada como entregada'
+                'message' => 'Venta marcada como entregada y facturada'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -71,7 +79,6 @@ class DespachoController extends Controller
                 'success' => true,
                 'message' => 'Venta marcada como pendiente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -113,7 +120,7 @@ class DespachoController extends Controller
             $venta = Sale::with(['saleItems.product', 'district.province.region'])
                 ->findOrFail($id);
 
-            $productos = $venta->saleItems->map(function($item) {
+            $productos = $venta->saleItems->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'item_id' => $item->item_id,
@@ -148,7 +155,6 @@ class DespachoController extends Controller
                 ],
                 'productos' => $productos
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -164,10 +170,10 @@ class DespachoController extends Controller
     {
         try {
             $sale = Sale::findOrFail($request->sale_id);
-            
+
             // Eliminar items actuales
             $sale->saleItems()->delete();
-            
+
             // Agregar nuevos items
             $totalPrice = 0;
             foreach ($request->productos as $producto) {
@@ -176,10 +182,10 @@ class DespachoController extends Controller
                     'quantity' => $producto['quantity'],
                     'unit_price' => $producto['unit_price'],
                 ]);
-                
+
                 $totalPrice += $producto['quantity'] * $producto['unit_price'];
             }
-            
+
             // Actualizar total
             $igv = $totalPrice * 0.18;
             $sale->update([
@@ -191,7 +197,6 @@ class DespachoController extends Controller
                 'success' => true,
                 'message' => 'Despacho actualizado correctamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
