@@ -1629,6 +1629,9 @@
             setInterval(() => actualizarFechaHoraTab(tabId), 1000);
         }
         
+        // Cargar mecánicos para este tab
+        cargarMecanicosTab(tabId);
+        
         // Inicializar buscador de productos
         initProductSearchTab(tabId);
         
@@ -1858,6 +1861,39 @@
         // Configuración inicial del panel de documento para este tab
     }
 
+    // Función para cargar mecánicos en un tab específico
+    function cargarMecanicosTab(tabId) {
+        fetch("{{ route('mecanicosDisponibles') }}")
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById(`mecanico_select_${tabId}`);
+                if (!select) {
+                    console.error('Select de mecánico no encontrado para tab:', tabId);
+                    return;
+                }
+                
+                select.innerHTML = '<option value="">Seleccionar mecánico</option>';
+                
+                data.forEach(mecanico => {
+                    const option = document.createElement('option');
+                    option.value = mecanico.id;
+                    option.textContent = `${mecanico.name} ${mecanico.apellidos || ''}`.trim();
+                    select.appendChild(option);
+                });
+                
+                // Agregar evento change
+                select.addEventListener('change', function() {
+                    const mechanicsIdInput = document.getElementById(`mechanics_id_${tabId}`);
+                    if (mechanicsIdInput) {
+                        mechanicsIdInput.value = this.value;
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error cargando mecánicos:', error);
+            });
+    }
+
     // Función para abrir panel de documento del tab
     function abrirPanelDocumentoTab(tabId) {
         abrirPanelDocumento();
@@ -1877,7 +1913,44 @@
         const modal = document.getElementById(`modalMecanicos_${tabId}`);
         if (modal) {
             modal.classList.remove('hidden');
+            
+            // Cargar mecánicos en el modal
+            fetch("{{ route('mecanicosDisponibles') }}")
+                .then(response => response.json())
+                .then(data => {
+                    const contenedor = document.getElementById(`listaMecanicosModal_${tabId}`);
+                    if (!contenedor) return;
+                    
+                    contenedor.innerHTML = '';
+                    
+                    data.forEach(mecanico => {
+                        const div = document.createElement('div');
+                        div.className = 'p-2 hover:bg-gray-100 cursor-pointer rounded';
+                        div.textContent = `${mecanico.name} ${mecanico.apellidos || ''}`.trim();
+                        div.onclick = () => seleccionarMecanicoTab(tabId, mecanico.id, mecanico);
+                        contenedor.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error cargando mecánicos en modal:', error);
+                });
         }
+    }
+    
+    // Función para seleccionar mecánico del modal en un tab
+    function seleccionarMecanicoTab(tabId, mecanicoId, mecanicoData) {
+        const mechanicsIdInput = document.getElementById(`mechanics_id_${tabId}`);
+        const mecanicoSelect = document.getElementById(`mecanico_select_${tabId}`);
+        
+        if (mechanicsIdInput) {
+            mechanicsIdInput.value = mecanicoId;
+        }
+        
+        if (mecanicoSelect) {
+            mecanicoSelect.value = mecanicoId;
+        }
+        
+        closeModalTab(`modalMecanicos_${tabId}`);
     }
 
     // Función para cerrar modal del tab
