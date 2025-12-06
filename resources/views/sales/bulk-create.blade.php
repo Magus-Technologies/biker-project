@@ -375,7 +375,7 @@
         tabHeader.id = `tab-${tabId}`;
         tabHeader.innerHTML = `
             <i class="bi bi-cart"></i>
-            <span>Venta #${saleCounter}</span>
+            <span id="tab-name-${tabId}">Venta #${saleCounter}</span>
             ${saleCounter > 1 ? `<button onclick="closeTab('${tabId}', event)" class="close-tab" title="Cerrar"><i class="bi bi-x-lg"></i></button>` : ''}
         `;
         tabHeader.onclick = (e) => {
@@ -724,6 +724,14 @@
     function initializeSaleTab(tabId) {
         const data = salesData.get(tabId);
 
+        // Evento para cambiar nombre del tab cuando se selecciona tienda
+        const tiendaSelect = document.getElementById(`tienda_select_${tabId}`);
+        if (tiendaSelect) {
+            tiendaSelect.addEventListener('change', function() {
+                updateTabName(tabId, this.value);
+            });
+        }
+
         // Inicializar DataTable para la tabla de productos
         if ($.fn.DataTable) {
             data.dataTable = $(`#orderTable_${tabId}`).DataTable({
@@ -947,18 +955,37 @@
             
             const storeName = product.tienda ? product.tienda.nombre : 'Todas';
             
+            // Determinar el color de fondo del badge de stock
+            let stockBgColor = 'green';
+            if (stockQuantity <= 0) {
+                stockBgColor = 'red';
+            } else if (stockQuantity <= stockMin) {
+                stockBgColor = 'yellow';
+            }
+            
+            const productCode = product.code_sku || product.code_bar || 'N/A';
+            
             // Guardar el producto en base64 para evitar problemas con comillas
             const productBase64 = btoa(encodeURIComponent(JSON.stringify(product)));
             
             html += `
-                <div class="p-3 hover:bg-gray-50 cursor-pointer transition" onclick="selectProductFromList('${tabId}', '${productBase64}')">
-                    <div class="flex justify-between items-start">
+                <div class="p-3 hover:bg-gray-50 cursor-pointer transition border-b border-gray-100" onclick="selectProductFromList('${tabId}', '${productBase64}')">
+                    <div class="flex justify-between items-start gap-3">
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-gray-800">${product.description}</p>
-                            <p class="text-xs text-gray-500">Código: ${product.code_sku || product.code_bar || 'N/A'}</p>
-                            <p class="text-xs ${stockColor} font-medium">Stock: ${stockQuantity}</p>
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                <span class="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded inline-flex items-center">
+                                    <i class="bi bi-upc-scan mr-1"></i>Código: <strong class="ml-1">${productCode}</strong>
+                                </span>
+                                <span class="text-xs ${stockColor} bg-${stockBgColor}-50 px-2 py-0.5 rounded font-semibold inline-flex items-center">
+                                    <i class="bi bi-box-seam mr-1"></i>Stock: <strong class="ml-1">${stockQuantity}</strong>
+                                </span>
+                                <span class="text-xs text-gray-600 bg-blue-50 px-2 py-0.5 rounded inline-flex items-center">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>Mín: <strong class="ml-1">${stockMin}</strong>
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right ml-3">
+                        <div class="text-right">
                             <p class="text-sm font-bold text-blue-600">S/ ${price.toFixed(2)}</p>
                             <p class="text-xs text-gray-500">${storeName}</p>
                         </div>
@@ -1266,6 +1293,27 @@
 
         document.getElementById(`tab-${tabId}`)?.classList.add('active');
         document.getElementById(`content-${tabId}`)?.classList.add('active');
+    }
+
+    // Función para actualizar el nombre del tab según la tienda seleccionada
+    function updateTabName(tabId, tiendaId) {
+        const tabNameSpan = document.getElementById(`tab-name-${tabId}`);
+        if (!tabNameSpan) return;
+        
+        if (tiendaId === 'todos' || !tiendaId) {
+            // Si selecciona "Todas las tiendas", mostrar número de venta
+            const data = salesData.get(tabId);
+            tabNameSpan.textContent = `Venta #${data.saleNumber}`;
+        } else {
+            // Buscar el nombre de la tienda en los datos
+            const tienda = tiendasData.find(t => t.id == tiendaId);
+            if (tienda) {
+                // Mostrar el nombre de la tienda (puede ser largo o corto)
+                tabNameSpan.textContent = tienda.nombre;
+                // Opcional: agregar tooltip con el nombre completo
+                tabNameSpan.title = tienda.nombre;
+            }
+        }
     }
 
     // Función para cerrar tab sin confirmación (usado después de guardar)

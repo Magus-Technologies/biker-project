@@ -47,25 +47,73 @@
             icon="bi-box" 
             title="Productos"
             :routes="[
-                 ['route' => 'precios-productos.index', 'permission' => null, 'icon' => 'bi-currency-dollar', 'title' => 'Precios'],
+                ['route' => 'precios-productos.index', 'permission' => null, 'icon' => 'bi-currency-dollar', 'title' => 'Precios'],
                 ['route' => 'products.index', 'permission' => 'ver-productos', 'icon' => 'bi-box', 'title' => 'Inventario'],
-                ['route' => 'garantines.index', 'permission' => 'ver-garantias', 'icon' => 'bi-shield-check', 'title' => 'Garantías']
+                ['route' => 'stock-minimo.index', 'permission' => null, 'icon' => 'bi-exclamation-triangle-fill', 'title' => 'Stock Mínimo']
             ]" />
 
-        <!-- SECCIÓN COMPRAS -->
+        <!-- Garantías (individual) -->
+        <a href="{{ route('garantines.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+            <i class="bi bi-shield-check"></i>
+            <span>Garantías</span>
+        </a>
+
+        <!-- Compras (individual) -->
+        <a href="{{ route('buys.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+            <i class="bi bi-bag"></i>
+            <span>Compras</span>
+        </a>
+
+        <!-- SECCIÓN VENTAS -->
         <x-sidebar.mobile-menu-section 
-            key="compras" 
+            key="ventas" 
             icon="bi-cart" 
-            title="Compras"
+            title="Ventas"
             :routes="[
-                ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart', 'title' => 'Ventas'],
-                ['route' => 'quotations.index', 'permission' => null, 'icon' => 'bi-file-earmark-text', 'title' => 'Cotizaciones'],
-                ['route' => 'buys.index', 'permission' => null, 'icon' => 'bi-bag', 'title' => 'Compras'],
-                ['route' => 'services.index', 'permission' => 'ver-servicios', 'icon' => 'bi-tools', 'title' => 'Servicios'],
-                ['route' => 'mechanics.index', 'permission' => 'ver-mecanicos', 'icon' => 'bi-wrench', 'title' => 'Mecánicos'],
-                ['route' => 'cars.index', 'permission' => 'ver-vehiculos', 'icon' => 'bi-car-front-fill', 'title' => 'Vehículos'],
-                ['route' => 'workers.index', 'permission' => 'ver-trabajadores', 'icon' => 'bi-people', 'title' => 'Trabajadores']
+                ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart-check', 'title' => 'Ventas'],
+                ['route' => 'sales.bulk-create', 'permission' => null, 'icon' => 'bi-cart-plus', 'title' => 'Ventas Mayoristas'],
+                ['route' => 'pedidos.index', 'permission' => null, 'icon' => 'bi-list-check', 'title' => 'Pedidos'],
+                ['route' => 'despachos.index', 'permission' => null, 'icon' => 'bi-truck', 'title' => 'Despacho'],
+                ['route' => 'devoluciones.index', 'permission' => null, 'icon' => 'bi-arrow-return-left', 'title' => 'Devoluciones']
             ]" />
+
+        <!-- Cotizaciones (individual) -->
+        <a href="{{ route('quotations.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+            <i class="bi bi-file-earmark-text"></i>
+            <span>Cotizaciones</span>
+        </a>
+
+        <!-- Servicios (individual) -->
+        @can('ver-servicios')
+            <a href="{{ route('services.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+                <i class="bi bi-tools"></i>
+                <span>Servicios</span>
+            </a>
+        @endcan
+
+        <!-- Mecánicos (individual) -->
+        @can('ver-mecanicos')
+            <a href="{{ route('mechanics.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+                <i class="bi bi-wrench"></i>
+                <span>Mecánicos</span>
+            </a>
+        @endcan
+
+        <!-- Vehículos (individual) -->
+        @can('ver-vehiculos')
+            <a href="{{ route('cars.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+                <i class="bi bi-car-front-fill"></i>
+                <span>Vehículos</span>
+            </a>
+        @endcan
+
+        <!-- Trabajadores (individual) -->
+        @can('ver-trabajadores')
+            <a href="{{ route('workers.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
+                <i class="bi bi-people"></i>
+                <span>Trabajadores</span>
+            </a>
+        @endcan
 
         <!-- Separador -->
         <hr class="mobile-menu-separator">

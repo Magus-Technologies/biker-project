@@ -76,7 +76,7 @@
                     <div id="kilometraje-group" class="flex flex-wrap gap-2">
                         <button type="button"
                             class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
-                            data-value="0-5000">0-5000 km</button>
+                            data-value="0-5000">0-500 km</button>
                         <button type="button"
                             class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 bg-gray-200 text-gray-700 hover:bg-blue-400 hover:text-white transition flex-shrink-0"
                             data-value="5000-10000">500-2500 km</button>

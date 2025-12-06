@@ -83,7 +83,7 @@
                     <div class="w-full">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Kilometraje</label>
                         <div id="kilometraje-group" class="flex flex-wrap gap-2">
-                            @foreach(['0-5000', '500-2500', '2500-5000'] as $km)
+                            @foreach(['0-500', '500-2500', '2500-5000'] as $km)
                                 <button type="button"
                                     class="km-btn px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 {{ $garantine->kilometrajes == $km ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} hover:bg-blue-400 hover:text-white transition flex-shrink-0"
                                     data-value="{{ $km }}">
