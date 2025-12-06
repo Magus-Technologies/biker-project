@@ -1732,7 +1732,7 @@
                      data-product-stock="${stockQuantity}"
                      data-product-min-stock="${minimumStock}"
                      data-product-code="${productCode}"
-                     onclick="selectProductTab(${product.id}, '${product.description.replace(/'/g, "\\'")}', '${JSON.stringify(product.prices || []).replace(/'/g, "\\'")}', ${stockQuantity}, '${tabId}')">
+                     data-tab-id="${tabId}">
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex-1">
                             <div class="font-medium text-sm text-gray-900">${product.description}</div>
@@ -1758,6 +1758,18 @@
         
         resultsDiv.innerHTML = html;
         resultsDiv.classList.remove('hidden');
+        
+        // Agregar event listeners a los resultados
+        resultsDiv.querySelectorAll('.product-result').forEach(item => {
+            item.addEventListener('click', function() {
+                const productId = parseInt(this.dataset.productId);
+                const description = this.dataset.productDescription;
+                const prices = JSON.parse(this.dataset.productPrices);
+                const stock = parseInt(this.dataset.productStock);
+                const tabId = this.dataset.tabId;
+                selectProductTab(productId, description, prices, stock, tabId);
+            });
+        });
     }
 
     // Función para ocultar resultados del tab
@@ -1792,6 +1804,7 @@
     // Función para agregar el producto seleccionado del tab
     function addSelectedProductTab(tabId) {
         const hiddenInput = document.getElementById(`selectedProduct_${tabId}`);
+        const searchInput = document.getElementById(`searchProductInput_${tabId}`);
         
         if (!hiddenInput || !hiddenInput.value) {
             Swal.fire({
@@ -1803,14 +1816,144 @@
             return;
         }
         
-        // Aquí iría la lógica para agregar el producto a la tabla
-        // Por ahora solo mostramos un mensaje
-        Swal.fire({
-            icon: 'success',
-            title: 'Producto agregado',
-            timer: 1000,
-            showConfirmButton: false
-        });
+        try {
+            const productData = JSON.parse(hiddenInput.value);
+            const stockQuantity = productData.stock || 0;
+            
+            // Verificar stock
+            if (stockQuantity <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin stock',
+                    text: 'Este producto no tiene stock disponible',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+            
+            // Verificar si ya existe en quotationItems
+            const existingProduct = quotationItems.find(item => item.item_id === productData.item_id);
+            
+            if (existingProduct) {
+                if (existingProduct.quantity + 1 > stockQuantity) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stock insuficiente',
+                        text: `Solo hay ${stockQuantity} unidades disponibles`,
+                        confirmButtonColor: '#3b82f6'
+                    });
+                    return;
+                }
+                existingProduct.quantity += 1;
+            } else {
+                // Obtener el primer precio disponible
+                const firstPrice = productData.prices && productData.prices.length > 0 ? productData.prices[0] : null;
+                
+                if (!firstPrice) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Sin precio',
+                        text: 'Este producto no tiene precios configurados',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                    return;
+                }
+                
+                const product = {
+                    item_id: productData.item_id,
+                    description: productData.description,
+                    priceId: firstPrice.id,
+                    unit_price: parseFloat(firstPrice.price),
+                    prices: productData.prices,
+                    quantity: 1,
+                    maximum_stock: stockQuantity
+                };
+                
+                const productCopy = { ...product };
+                delete productCopy.prices;
+                quotationItems.push(productCopy);
+                
+                // Agregar a la tabla del tab
+                addProductToTab(tabId, product);
+            }
+            
+            // Actualizar cálculos
+            updateInformationCalculos();
+            
+            // Limpiar búsqueda
+            if (searchInput) searchInput.value = '';
+            hiddenInput.value = '';
+            hideProductResultsTab(tabId);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Producto agregado',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            console.error('Error al agregar producto:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo agregar el producto',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
+
+    // Función para agregar producto a la tabla del tab
+    function addProductToTab(tabId, product) {
+        const orderTableBody = document.getElementById(`orderTableBody_${tabId}`);
+        if (!orderTableBody) {
+            console.error('Tabla no encontrada para tab:', tabId);
+            console.log('Buscando:', `orderTableBody_${tabId}`);
+            return;
+        }
+        
+        // Remover fila vacía si existe (con o sin sufijo de tab)
+        const emptyRow = document.getElementById(`emptyRow_${tabId}`) || orderTableBody.querySelector('[id^="emptyRow"]');
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+        
+        orderCount++;
+        const orderRow = document.createElement("tr");
+        orderRow.setAttribute("data-product-id", product.item_id);
+        orderRow.innerHTML = `
+            <td class="border p-2 text-center">${orderCount}</td>
+            <td class="border p-2">${product.description}</td>
+            <td class="border p-2">
+                <input type="number" class="p-2 border rounded data-quantity-value-${product.item_id}" 
+                       onchange="updatePriceAndTotal(${product.item_id})"
+                       value="${product.quantity}" 
+                       max="${product.maximum_stock}"
+                       min="1"
+                       style="width: 60px;">
+            </td>
+            <td class="border p-2">
+                <select class="p-2 border rounded data-price-select-${product.item_id}" 
+                        style="width: 120px;" 
+                        onchange="updatePriceAndTotal(${product.item_id})">
+                    <option value="">Seleccionar precio</option>
+                    ${product.prices.map(precio => `
+                        <option value="${precio.price}" 
+                                data-price-id="${precio.id}" 
+                                ${precio.id == product.priceId ? 'selected' : ''}>
+                            ${precio.type} - ${precio.price}
+                        </option>`).join('')}
+                </select>
+            </td>
+            <td class="border p-2 data-price-value-${product.item_id}" style="text-align: right;">${product.unit_price}</td>
+            <td class="border p-2 data-total-value-${product.item_id}" style="text-align: right;">${(product.unit_price * product.quantity).toFixed(2)}</td>
+            <td class="border p-2 text-center">
+                <button class="bg-red-500 text-white px-2 py-1 rounded eliminar-btn" 
+                       onclick="deleteProduct(${product.item_id})">
+                    Eliminar
+                </button>
+            </td>
+        `;
+        orderTableBody.appendChild(orderRow);
     }
 
     // Función para inicializar eventos de servicios del tab
