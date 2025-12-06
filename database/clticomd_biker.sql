@@ -11,7 +11,7 @@
  Target Server Version : 80030 (8.0.30)
  File Encoding         : 65001
 
- Date: 16/11/2025 22:00:22
+ Date: 05/12/2025 19:44:02
 */
 
 SET NAMES utf8mb4;
@@ -2354,13 +2354,14 @@ CREATE TABLE `drives`  (
   INDEX `drives_nombres_index`(`nombres` ASC) USING BTREE,
   CONSTRAINT `drives_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `drives_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of drives
 -- ----------------------------
 INSERT INTO `drives` VALUES (1, '0000001', '77290401', 'DNI', 'MARCELO', 'VELARDE', 'HUALLPA', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, '2025-06-21 12:40:30', '2025-06-21 12:40:30', 1, '2025-06-21 17:40:30', '2025-06-21 17:40:30');
-INSERT INTO `drives` VALUES (2, '0000002', '77426200', 'DNI', 'BRENDY YOSELY', 'ZAPATA', 'Emer', NULL, NULL, NULL, '2006-01-02', '993321920', 'yarlequerodrigo9@gmail.com', NULL, '32432', '2134asd', '1234', 'Loreto', 'Mariscal Ramon Castilla', 'Pebas', 'Paita 2 de mayo', 'emer', '993321920', 'svdacc', 1, NULL, '2025-08-27 10:16:54', '2025-08-27 10:16:54', 1, '2025-08-27 15:16:54', '2025-08-27 15:16:54');
+INSERT INTO `drives` VALUES (2, '0000002', '77426200', 'DNI', 'BRENDY YOSELY', 'ZAPATA', 'Emer', NULL, NULL, NULL, '2006-01-02', '993321920', 'yarlequerodrigo9@gmail.com', NULL, '32432', '2134asd', '1234', 'Loreto', 'Mariscal Ramon Castilla', NULL, 'Paita 2 de mayo', 'emer', '993321920', 'svdacc', 1, 1, '2025-08-27 10:16:54', '2025-11-17 07:54:42', 1, '2025-08-27 15:16:54', '2025-11-17 12:54:42');
+INSERT INTO `drives` VALUES (3, '0000003', '77423200', 'DNI', 'RENINGER', 'AMASIFUEN', 'CACHIQUE', NULL, NULL, NULL, '2002-01-17', '993 321 920', 'kibutsuji26muzan@gmail.com', NULL, '324323232', '2134asd23', '123432', 'Madre De Dios', 'Tahuamanu', 'Tahuamanu', 'dwsscs', 'emer', '993321920', 'svdacc', 1, NULL, '2025-11-20 18:37:56', '2025-11-20 18:37:56', 1, '2025-11-20 23:37:56', '2025-11-20 23:37:56');
 
 -- ----------------------------
 -- Table structure for failed_jobs
@@ -2376,7 +2377,7 @@ CREATE TABLE `failed_jobs`  (
   `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `failed_jobs_uuid_unique`(`uuid` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of failed_jobs
@@ -2414,7 +2415,7 @@ CREATE TABLE `garantines`  (
   INDEX `garantines_user_update_foreign`(`user_update` ASC) USING BTREE,
   CONSTRAINT `garantines_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `garantines_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of garantines
@@ -2422,6 +2423,9 @@ CREATE TABLE `garantines`  (
 INSERT INTO `garantines` VALUES (11, '0000001', '72314107', 'YURI MARTIN MARROQUIN MEJIA', 'dni', 'Prueba', 'PRUADS', '2025', 'prueba', '10', '40', 1, NULL, 1, '2025-06-16 15:05:18', '2025-06-16 15:05:18', '213421', '2025-06-16 20:05:18', '2025-06-16 20:05:18', '500,2500', '[{\"original_name\":\"CV- Yuri Marroquin.pdf\",\"stored_path\":\"garantias\\/boleta_dua\\/boleta_dua_685078fe29da6.pdf\",\"url\":\"http:\\/\\/localhost\\/storage\\/garantias\\/boleta_dua\\/boleta_dua_685078fe29da6.pdf\"},{\"original_name\":\"Dni Yuri.pdf\",\"stored_path\":\"garantias\\/boleta_dua\\/boleta_dua_685078fe2a1d2.pdf\",\"url\":\"http:\\/\\/localhost\\/storage\\/garantias\\/boleta_dua\\/boleta_dua_685078fe2a1d2.pdf\"},{\"original_name\":\"Dni Alessandra.pdf\",\"stored_path\":\"garantias\\/boleta_dua\\/boleta_dua_685078fe2a426.pdf\",\"url\":\"http:\\/\\/localhost\\/storage\\/garantias\\/boleta_dua\\/boleta_dua_685078fe2a426.pdf\"}]');
 INSERT INTO `garantines` VALUES (12, '0000002', '77290401', 'MARCELO VELARDE HUALLPA', 'dni', 'BAJAJ', 'PULSAR 180', '2025', 'ROJO', 'dcevrv8889', '7777777777', 1, NULL, 1, '2025-07-08 15:16:05', '2025-07-08 15:16:05', '955251825', '2025-07-08 20:16:05', '2025-07-08 20:16:05', NULL, '[]');
 INSERT INTO `garantines` VALUES (13, '0000003', '77290401', 'MARCELO VELARDE HUALLPA', 'dni', 'BAJAJ', 'PULSAR 180', '2025', 'ROJO', 'SCSVS', '5y5756868', 1, NULL, 1, '2025-11-08 09:37:02', '2025-11-08 09:37:02', '955251825', '2025-11-08 15:37:02', '2025-11-08 15:37:02', NULL, '[]');
+INSERT INTO `garantines` VALUES (14, '0000004', '77425200', 'EMER RODRIGO YARLEQUE ZAPATA', 'dni', 'TAURO', 'TD-12N', '2025', '43d', '2134asd', '32432', 1, NULL, 1, '2025-11-28 10:00:13', '2025-11-28 10:00:13', '993321920', '2025-11-28 15:00:13', '2025-11-28 15:00:13', NULL, '[{\"original_name\":\"PRODUCTOS (1).pdf\",\"stored_path\":\"garantias\\/boleta_dua\\/boleta_dua_6929b8fbc6fbb.pdf\",\"url\":\"http:\\/\\/biker-project.test\\/storage\\/garantias\\/boleta_dua\\/boleta_dua_6929b8fbc6fbb.pdf\"}]');
+INSERT INTO `garantines` VALUES (15, '0000005', '77425200', 'EMER RODRIGO YARLEQUE ZAPATA', 'dni', 'fsdbbngdf', 'fgndgnfd', '2002', 'resd', '2134asddsf', '453543', 1, NULL, 1, '2025-11-28 10:07:20', '2025-11-28 10:07:20', '993321920', '2025-11-28 15:07:20', '2025-11-28 15:07:20', '0-5000', '[{\"original_name\":\"Constatacion_1_20251126 (8).pdf\",\"stored_path\":\"garantias\\/boleta_dua\\/boleta_dua_6929baa825a3e.pdf\",\"url\":\"http:\\/\\/biker-project.test\\/storage\\/garantias\\/boleta_dua\\/boleta_dua_6929baa825a3e.pdf\"}]');
+INSERT INTO `garantines` VALUES (16, '0000006', '77425200', 'EMER RODRIGO YARLEQUE ZAPATA', 'dni', 'sfdvcdsf', 'bfdsbfdg', 'fdgbdfgbgf', 'fgdbbfd', '6546545', 'dfgbbgfdbgf', 1, NULL, 1, '2025-12-03 11:23:27', '2025-12-03 11:23:27', '993321920', '2025-12-03 16:23:27', '2025-12-03 16:23:27', '0-5000', '[]');
 
 -- ----------------------------
 -- Table structure for migrations
@@ -2511,6 +2515,9 @@ CREATE TABLE `model_has_roles`  (
 INSERT INTO `model_has_roles` VALUES (1, 'App\\Models\\User', 1);
 INSERT INTO `model_has_roles` VALUES (3, 'App\\Models\\User', 2);
 INSERT INTO `model_has_roles` VALUES (2, 'App\\Models\\User', 3);
+INSERT INTO `model_has_roles` VALUES (2, 'App\\Models\\User', 4);
+INSERT INTO `model_has_roles` VALUES (1, 'App\\Models\\User', 5);
+INSERT INTO `model_has_roles` VALUES (2, 'App\\Models\\User', 5);
 
 -- ----------------------------
 -- Table structure for password_reset_tokens
@@ -2575,6 +2582,112 @@ CREATE TABLE `payments`  (
 -- ----------------------------
 INSERT INTO `payments` VALUES (1, 'contado', 1, '2025-05-05 16:22:29', '2025-05-05 16:22:29');
 INSERT INTO `payments` VALUES (2, 'credito', 1, '2025-05-05 16:22:29', '2025-05-05 16:22:29');
+
+-- ----------------------------
+-- Table structure for pedido_items
+-- ----------------------------
+DROP TABLE IF EXISTS `pedido_items`;
+CREATE TABLE `pedido_items`  (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `pedido_id` bigint UNSIGNED NOT NULL,
+  `product_id` bigint UNSIGNED NOT NULL,
+  `product_price_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'ID del precio seleccionado',
+  `quantity` int NOT NULL DEFAULT 1,
+  `unit_price` decimal(10, 2) NOT NULL,
+  `total` decimal(10, 2) NOT NULL,
+  `notes` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Notas del item',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `pedido_items_pedido_id_foreign`(`pedido_id` ASC) USING BTREE,
+  INDEX `pedido_items_product_id_foreign`(`product_id` ASC) USING BTREE,
+  INDEX `pedido_items_product_price_id_foreign`(`product_price_id` ASC) USING BTREE,
+  CONSTRAINT `pedido_items_pedido_id_foreign` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `pedido_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `pedido_items_product_price_id_foreign` FOREIGN KEY (`product_price_id`) REFERENCES `product_prices` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of pedido_items
+-- ----------------------------
+INSERT INTO `pedido_items` VALUES (1, 1, 1, 24787, 1, 30.00, 30.00, NULL, '2025-11-21 13:51:02', '2025-11-21 13:51:02');
+INSERT INTO `pedido_items` VALUES (2, 2, 1, 24788, 1, 70.00, 70.00, NULL, '2025-11-21 16:37:05', '2025-11-21 16:37:05');
+INSERT INTO `pedido_items` VALUES (3, 3, 1, 24787, 1, 30.00, 30.00, NULL, '2025-11-22 01:07:29', '2025-11-22 01:07:29');
+INSERT INTO `pedido_items` VALUES (5, 4, 1, 24787, 1, 30.00, 30.00, NULL, '2025-11-22 14:07:49', '2025-11-22 14:07:49');
+
+-- ----------------------------
+-- Table structure for pedido_services
+-- ----------------------------
+DROP TABLE IF EXISTS `pedido_services`;
+CREATE TABLE `pedido_services`  (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `pedido_id` bigint UNSIGNED NOT NULL,
+  `service_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `price` decimal(10, 2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `pedido_services_pedido_id_foreign`(`pedido_id` ASC) USING BTREE,
+  CONSTRAINT `pedido_services_pedido_id_foreign` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of pedido_services
+-- ----------------------------
+INSERT INTO `pedido_services` VALUES (1, 1, 'fdghngfh', 543.00, '2025-11-21 13:51:02', '2025-11-21 13:51:02');
+
+-- ----------------------------
+-- Table structure for pedidos
+-- ----------------------------
+DROP TABLE IF EXISTS `pedidos`;
+CREATE TABLE `pedidos`  (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Código único del pedido (PED-0001)',
+  `customer_dni` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'DNI/RUC del cliente',
+  `customer_names_surnames` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Nombre del cliente',
+  `customer_phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Teléfono del cliente',
+  `customer_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Dirección del cliente',
+  `districts_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'Distrito',
+  `mechanics_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'Mecánico asignado',
+  `user_register` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'Usuario que creó el pedido',
+  `user_update` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'Usuario que actualizó',
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendiente' COMMENT 'pendiente, confirmado, convertido, cancelado',
+  `priority` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal' COMMENT 'normal, urgente',
+  `observation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Observaciones del pedido',
+  `subtotal` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `igv` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `total` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `sale_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'ID de la venta cuando se convierte',
+  `converted_at` timestamp NULL DEFAULT NULL COMMENT 'Fecha de conversión a venta',
+  `expires_at` date NULL DEFAULT NULL COMMENT 'Fecha de expiración del pedido',
+  `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_actualizacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `pedidos_code_unique`(`code` ASC) USING BTREE,
+  INDEX `pedidos_customer_dni_index`(`customer_dni` ASC) USING BTREE,
+  INDEX `pedidos_status_index`(`status` ASC) USING BTREE,
+  INDEX `pedidos_districts_id_foreign`(`districts_id` ASC) USING BTREE,
+  INDEX `pedidos_mechanics_id_foreign`(`mechanics_id` ASC) USING BTREE,
+  INDEX `pedidos_user_register_foreign`(`user_register` ASC) USING BTREE,
+  INDEX `pedidos_user_update_foreign`(`user_update` ASC) USING BTREE,
+  INDEX `pedidos_sale_id_foreign`(`sale_id` ASC) USING BTREE,
+  INDEX `pedidos_status_fecha_index`(`status` ASC, `fecha_registro` ASC) USING BTREE,
+  CONSTRAINT `pedidos_districts_id_foreign` FOREIGN KEY (`districts_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `pedidos_mechanics_id_foreign` FOREIGN KEY (`mechanics_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `pedidos_sale_id_foreign` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `pedidos_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `pedidos_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of pedidos
+-- ----------------------------
+INSERT INTO `pedidos` VALUES (1, 'PED-000001', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', '993321920', 'fdgbngdfd', 1420, NULL, 1, 1, 'convertido', 'normal', 'fgdnbgfn', 469.86, 103.14, 573.00, 13, '2025-11-21 16:51:22', '2025-11-21', '2025-11-21 08:51:01', '2025-11-21 11:51:22', '2025-11-21 13:51:01', '2025-11-21 16:51:22');
+INSERT INTO `pedidos` VALUES (2, 'PED-000002', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', NULL, NULL, NULL, NULL, 1, 1, 'convertido', 'urgente', NULL, 57.40, 12.60, 70.00, 14, '2025-11-21 16:55:22', NULL, '2025-11-21 11:37:05', '2025-11-21 11:55:22', '2025-11-21 16:37:05', '2025-11-21 16:55:22');
+INSERT INTO `pedidos` VALUES (3, 'PED-000003', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', '993321920', NULL, NULL, NULL, 1, 1, 'confirmado', 'normal', NULL, 24.60, 5.40, 30.00, NULL, NULL, NULL, '2025-11-21 20:07:29', '2025-11-21 20:07:35', '2025-11-22 01:07:29', '2025-11-22 01:07:35');
+INSERT INTO `pedidos` VALUES (4, 'PED-000004', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', NULL, NULL, NULL, NULL, 1, 1, 'pendiente', 'normal', NULL, 24.60, 5.40, 30.00, NULL, NULL, NULL, '2025-11-22 09:04:16', '2025-11-22 09:04:16', '2025-11-22 14:04:16', '2025-11-22 14:04:16');
 
 -- ----------------------------
 -- Table structure for permissions
@@ -2655,7 +2768,7 @@ CREATE TABLE `personal_access_tokens`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `personal_access_tokens_token_unique`(`token` ASC) USING BTREE,
   INDEX `personal_access_tokens_tokenable_type_tokenable_id_index`(`tokenable_type` ASC, `tokenable_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of personal_access_tokens
@@ -2735,7 +2848,7 @@ CREATE TABLE `product_prices`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `product_prices_product_id_foreign`(`product_id` ASC) USING BTREE,
   CONSTRAINT `product_prices_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 24838 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 24844 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of product_prices
@@ -2807,14 +2920,18 @@ INSERT INTO `product_prices` VALUES (24826, 24786, 'buy', 50.00, '2025-11-07 15:
 INSERT INTO `product_prices` VALUES (24827, 24786, 'sucursalB', 90.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24828, 24787, 'buy', 50.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24829, 24787, 'sucursalB', 90.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
-INSERT INTO `product_prices` VALUES (24830, 24788, 'buy', 6.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
-INSERT INTO `product_prices` VALUES (24831, 24788, 'sucursalA', 15.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24832, 24789, 'buy', 6.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24833, 24789, 'sucursalA', 15.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24834, 24790, 'buy', 6.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24835, 24790, 'sucursalA', 15.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24836, 24791, 'buy', 6.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `product_prices` VALUES (24837, 24791, 'sucursalA', 15.00, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
+INSERT INTO `product_prices` VALUES (24838, 24792, 'buy', 100.00, '2025-11-21 13:11:16', '2025-11-21 13:11:16');
+INSERT INTO `product_prices` VALUES (24839, 24792, 'wholesale', 90.00, '2025-11-21 13:11:16', '2025-11-21 13:11:16');
+INSERT INTO `product_prices` VALUES (24840, 24792, 'sucursalA', 110.00, '2025-11-21 13:11:16', '2025-11-21 13:11:16');
+INSERT INTO `product_prices` VALUES (24841, 24792, 'sucursalB', 115.00, '2025-11-21 13:11:16', '2025-11-21 13:11:16');
+INSERT INTO `product_prices` VALUES (24842, 24788, 'buy', 6.00, NULL, NULL);
+INSERT INTO `product_prices` VALUES (24843, 24788, 'sucursalA', 15.00, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for products
@@ -2852,7 +2969,7 @@ CREATE TABLE `products`  (
   CONSTRAINT `products_unit_id_foreign` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `products_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `products_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 24792 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 24793 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of products
@@ -2886,6 +3003,7 @@ INSERT INTO `products` VALUES (24788, '0000026', '1134\'007\'CV', '1134-007-CV',
 INSERT INTO `products` VALUES (24789, '0000027', '1134\'020\'cv', '1134-020-CV', 'PASTILLA FRENO', 'FZ6 600', 'H-4', 1, 'cantidad', 1, NULL, '2025-11-07 09:55:58', '2025-11-07 09:55:58', 7, 19, 1, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `products` VALUES (24790, '0000028', '1134\'023\'cv', '1134-023-CV', 'PASTILLA FRENO', 'DY 110', 'H-4', 1, 'cantidad', 1, NULL, '2025-11-07 09:55:58', '2025-11-07 09:55:58', 7, 19, 1, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `products` VALUES (24791, '0000029', '1134\'019\'CV', '1134-019-CV', 'PASTILLA FRENO', 'GS 150', 'H-4', 1, 'cantidad', 1, NULL, '2025-11-07 09:55:58', '2025-11-07 09:55:58', 7, 19, 1, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
+INSERT INTO `products` VALUES (24792, '0000030', '156001', 'P001', 'Shampoo Hidratante 500ml', 'XYZ-123', 'Pasillo 3, Estante 2', 1, 'cantidad', 1, NULL, '2025-11-21 08:11:16', '2025-11-21 08:11:16', 1, 1, 1, '2025-11-21 13:11:16', '2025-11-21 13:11:16');
 
 -- ----------------------------
 -- Table structure for provinces
@@ -3124,13 +3242,13 @@ CREATE TABLE `quotation_items`  (
   CONSTRAINT `quotation_items_mechanics_id_foreign` FOREIGN KEY (`mechanics_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `quotation_items_product_prices_id_foreign` FOREIGN KEY (`product_prices_id`) REFERENCES `product_prices` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `quotation_items_quotation_id_foreign` FOREIGN KEY (`quotation_id`) REFERENCES `quotations` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of quotation_items
 -- ----------------------------
-INSERT INTO `quotation_items` VALUES (1, 1, 'App\\Models\\Product', 24751, 1, 1300.00, 24709, NULL, '2025-08-27 15:12:40', '2025-08-27 15:12:40');
-INSERT INTO `quotation_items` VALUES (2, 1, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, NULL, '2025-08-27 15:12:40', '2025-08-27 15:12:40');
+INSERT INTO `quotation_items` VALUES (3, 3, 'App\\Models\\Product', 1, 1, 30.00, 24787, NULL, '2025-11-19 14:12:22', '2025-11-19 14:12:22');
+INSERT INTO `quotation_items` VALUES (4, 3, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, 3, '2025-11-19 14:12:22', '2025-11-19 14:12:22');
 
 -- ----------------------------
 -- Table structure for quotation_payment_method
@@ -3149,12 +3267,13 @@ CREATE TABLE `quotation_payment_method`  (
   INDEX `quotation_payment_method_payment_method_id_foreign`(`payment_method_id` ASC) USING BTREE,
   CONSTRAINT `quotation_payment_method_payment_method_id_foreign` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `quotation_payment_method_quotation_id_foreign` FOREIGN KEY (`quotation_id`) REFERENCES `quotations` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of quotation_payment_method
 -- ----------------------------
-INSERT INTO `quotation_payment_method` VALUES (1, 1, 1, 1360.00, 1, '2025-08-27 15:12:40', '2025-08-27 15:12:40');
+INSERT INTO `quotation_payment_method` VALUES (4, 3, 2, 212.00, 2, '2025-11-19 14:12:22', '2025-11-19 14:12:22');
+INSERT INTO `quotation_payment_method` VALUES (5, 3, 3, -122.00, 1, '2025-11-19 14:12:22', '2025-11-19 14:12:22');
 
 -- ----------------------------
 -- Table structure for quotations
@@ -3200,12 +3319,12 @@ CREATE TABLE `quotations`  (
   CONSTRAINT `quotations_payments_id_foreign` FOREIGN KEY (`payments_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `quotations_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `quotations_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of quotations
 -- ----------------------------
-INSERT INTO `quotations` VALUES (1, '0000001', '77290401', 'VELARDE HUALLPA MARCELO', 1360.00, 244.80, NULL, NULL, NULL, '1', '0', 1, 100, 1, 1, NULL, 1, NULL, '2025-08-27 10:12:40', NULL, '2025-08-27 10:12:40', '2025-08-27 15:12:40', '2025-08-27 15:12:40');
+INSERT INTO `quotations` VALUES (3, '0000002', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 90.00, 16.20, NULL, NULL, 'dwsscs', '0', '0', 1, 280, 1, 1, 3, 1, 1, '2025-11-19 09:48:44', NULL, '2025-11-19 09:48:44', '2025-11-19 14:12:22', '2025-11-19 14:48:44');
 
 -- ----------------------------
 -- Table structure for regions
@@ -3358,7 +3477,7 @@ CREATE TABLE `roles`  (
 -- ----------------------------
 -- Records of roles
 -- ----------------------------
-INSERT INTO `roles` VALUES (1, 'administrador', 'web', '2025-05-05 16:22:28', '2025-05-05 16:22:28');
+INSERT INTO `roles` VALUES (1, 'administrador', 'web', '2025-05-05 16:22:28', '2025-11-18 21:26:04');
 INSERT INTO `roles` VALUES (2, 'mecanico', 'web', '2025-05-05 16:22:28', '2025-05-05 16:22:28');
 INSERT INTO `roles` VALUES (3, 'ventas', 'web', '2025-05-05 16:22:28', '2025-05-05 16:22:28');
 
@@ -3381,22 +3500,37 @@ CREATE TABLE `sale_items`  (
   INDEX `sale_items_mechanics_id_foreign`(`mechanics_id` ASC) USING BTREE,
   CONSTRAINT `sale_items_mechanics_id_foreign` FOREIGN KEY (`mechanics_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sale_items_sale_id_foreign` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 40 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sale_items
 -- ----------------------------
-INSERT INTO `sale_items` VALUES (1, 1, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-05-12 15:30:22', '2025-05-12 15:30:22');
-INSERT INTO `sale_items` VALUES (2, 2, 'App\\Models\\Product', 24751, 1, 12000.00, NULL, '2025-08-20 22:46:04', '2025-08-20 22:46:04');
-INSERT INTO `sale_items` VALUES (3, 2, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-08-20 22:46:04', '2025-08-20 22:46:04');
 INSERT INTO `sale_items` VALUES (4, 3, 'App\\Models\\Product', 24751, 1, 12000.00, NULL, '2025-08-21 23:05:30', '2025-08-21 23:05:30');
 INSERT INTO `sale_items` VALUES (5, 3, 'App\\Models\\Product', 24760, 1, 720.00, NULL, '2025-08-21 23:05:30', '2025-08-21 23:05:30');
 INSERT INTO `sale_items` VALUES (6, 4, 'App\\Models\\Product', 24789, 1, 6.00, NULL, '2025-11-07 16:00:00', '2025-11-07 16:00:00');
-INSERT INTO `sale_items` VALUES (7, 5, 'App\\Models\\Product', 24788, 1, 6.00, NULL, '2025-11-08 13:52:51', '2025-11-08 13:52:51');
-INSERT INTO `sale_items` VALUES (8, 5, 'App\\Models\\Product', 24789, 1, 6.00, NULL, '2025-11-08 13:52:51', '2025-11-08 13:52:51');
-INSERT INTO `sale_items` VALUES (9, 5, 'App\\Models\\Product', 24790, 1, 6.00, NULL, '2025-11-08 13:52:51', '2025-11-08 13:52:51');
-INSERT INTO `sale_items` VALUES (10, 5, 'App\\Models\\Product', 24791, 1, 6.00, NULL, '2025-11-08 13:52:51', '2025-11-08 13:52:51');
-INSERT INTO `sale_items` VALUES (11, 5, 'App\\Models\\Product', 24782, 4, 6.00, NULL, '2025-11-08 13:52:51', '2025-11-08 13:52:51');
+INSERT INTO `sale_items` VALUES (17, 9, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-21 12:59:17', '2025-11-21 12:59:17');
+INSERT INTO `sale_items` VALUES (18, 9, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-11-21 12:59:17', '2025-11-21 12:59:17');
+INSERT INTO `sale_items` VALUES (19, 10, 'App\\Models\\Product', 24751, 1, 12000.00, NULL, '2025-11-21 12:59:18', '2025-11-21 12:59:18');
+INSERT INTO `sale_items` VALUES (20, 10, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-11-21 12:59:18', '2025-11-21 12:59:18');
+INSERT INTO `sale_items` VALUES (21, 11, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-21 14:10:01', '2025-11-21 14:10:01');
+INSERT INTO `sale_items` VALUES (22, 11, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-11-21 14:10:01', '2025-11-21 14:10:01');
+INSERT INTO `sale_items` VALUES (23, 12, 'App\\Models\\Product', 24756, 1, 12000.00, NULL, '2025-11-21 14:10:02', '2025-11-21 14:10:02');
+INSERT INTO `sale_items` VALUES (24, 12, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-11-21 14:10:02', '2025-11-21 14:10:02');
+INSERT INTO `sale_items` VALUES (25, 13, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-21 16:51:22', '2025-11-21 16:51:22');
+INSERT INTO `sale_items` VALUES (26, 13, 'App\\Models\\ServiceSale', 2, 1, 543.00, NULL, '2025-11-21 16:51:22', '2025-11-21 16:51:22');
+INSERT INTO `sale_items` VALUES (27, 14, 'App\\Models\\Product', 1, 1, 70.00, NULL, '2025-11-21 16:55:22', '2025-11-21 16:55:22');
+INSERT INTO `sale_items` VALUES (28, 15, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-22 01:06:24', '2025-11-22 01:06:24');
+INSERT INTO `sale_items` VALUES (29, 15, 'App\\Models\\ServiceSale', 1, 1, 60.00, NULL, '2025-11-22 01:06:24', '2025-11-22 01:06:24');
+INSERT INTO `sale_items` VALUES (30, 16, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-26 11:56:37', '2025-11-26 11:56:37');
+INSERT INTO `sale_items` VALUES (31, 17, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-26 12:04:27', '2025-11-26 12:04:27');
+INSERT INTO `sale_items` VALUES (32, 18, 'App\\Models\\Product', 1, 1, 30.00, NULL, '2025-11-26 12:10:31', '2025-11-26 12:10:31');
+INSERT INTO `sale_items` VALUES (33, 21, 'App\\Models\\Product', 24759, 1, 14000.00, NULL, '2025-12-04 15:25:33', '2025-12-04 15:25:33');
+INSERT INTO `sale_items` VALUES (34, 22, 'App\\Models\\Product', 24759, 1, 14000.00, NULL, '2025-12-04 15:34:12', '2025-12-04 15:34:12');
+INSERT INTO `sale_items` VALUES (35, 23, 'App\\Models\\Product', 24751, 1, 12000.00, NULL, '2025-12-04 17:19:36', '2025-12-04 17:19:36');
+INSERT INTO `sale_items` VALUES (36, 23, 'App\\Models\\ServiceSale', 1, 1, 60.00, 4, '2025-12-04 17:19:36', '2025-12-04 17:19:36');
+INSERT INTO `sale_items` VALUES (37, 24, 'App\\Models\\Product', 24766, 1, 20.00, NULL, '2025-12-04 17:24:34', '2025-12-04 17:24:34');
+INSERT INTO `sale_items` VALUES (38, 24, 'App\\Models\\ServiceSale', 1, 1, 60.00, 3, '2025-12-04 17:24:34', '2025-12-04 17:24:34');
+INSERT INTO `sale_items` VALUES (39, 25, 'App\\Models\\Product', 24782, 1, 15.00, NULL, '2025-12-04 17:44:38', '2025-12-04 17:44:38');
 
 -- ----------------------------
 -- Table structure for sale_payment_method
@@ -3415,16 +3549,28 @@ CREATE TABLE `sale_payment_method`  (
   INDEX `sale_payment_method_payment_method_id_foreign`(`payment_method_id` ASC) USING BTREE,
   CONSTRAINT `sale_payment_method_payment_method_id_foreign` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sale_payment_method_sale_id_foreign` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sale_payment_method
 -- ----------------------------
-INSERT INTO `sale_payment_method` VALUES (1, 1, 1, 60.00, 1, '2025-05-12 15:30:22', '2025-05-12 15:30:22');
-INSERT INTO `sale_payment_method` VALUES (2, 2, 2, 12060.00, 1, '2025-08-20 22:46:04', '2025-08-20 22:46:04');
 INSERT INTO `sale_payment_method` VALUES (3, 3, 1, 12720.00, 1, '2025-08-21 23:05:30', '2025-08-21 23:05:30');
 INSERT INTO `sale_payment_method` VALUES (4, 4, 1, 6.00, 1, '2025-11-07 16:00:00', '2025-11-07 16:00:00');
-INSERT INTO `sale_payment_method` VALUES (5, 5, 1, 48.00, 1, '2025-11-08 13:52:51', '2025-11-08 13:52:51');
+INSERT INTO `sale_payment_method` VALUES (10, 9, 4, 90.00, 1, '2025-11-21 12:59:17', '2025-11-21 12:59:17');
+INSERT INTO `sale_payment_method` VALUES (11, 10, 4, 12060.00, 1, '2025-11-21 12:59:18', '2025-11-21 12:59:18');
+INSERT INTO `sale_payment_method` VALUES (12, 11, 3, 90.00, 1, '2025-11-21 14:10:01', '2025-11-21 14:10:01');
+INSERT INTO `sale_payment_method` VALUES (13, 12, 4, 12060.00, 1, '2025-11-21 14:10:02', '2025-11-21 14:10:02');
+INSERT INTO `sale_payment_method` VALUES (14, 13, 2, 573.00, 1, '2025-11-21 16:51:22', '2025-11-21 16:51:22');
+INSERT INTO `sale_payment_method` VALUES (15, 14, 3, 70.00, 1, '2025-11-21 16:55:22', '2025-11-21 16:55:22');
+INSERT INTO `sale_payment_method` VALUES (16, 15, 2, 90.00, 1, '2025-11-22 01:06:24', '2025-11-22 01:06:24');
+INSERT INTO `sale_payment_method` VALUES (17, 16, 3, 30.00, 1, '2025-11-26 11:56:37', '2025-11-26 11:56:37');
+INSERT INTO `sale_payment_method` VALUES (18, 17, 1, 30.00, 1, '2025-11-26 12:04:27', '2025-11-26 12:04:27');
+INSERT INTO `sale_payment_method` VALUES (19, 18, 7, 30.00, 1, '2025-11-26 12:10:31', '2025-11-26 12:10:31');
+INSERT INTO `sale_payment_method` VALUES (20, 21, 5, 14000.00, 1, '2025-12-04 15:25:33', '2025-12-04 15:25:33');
+INSERT INTO `sale_payment_method` VALUES (21, 22, 5, 14000.00, 1, '2025-12-04 15:34:12', '2025-12-04 15:34:12');
+INSERT INTO `sale_payment_method` VALUES (22, 23, 3, 12060.00, 1, '2025-12-04 17:19:36', '2025-12-04 17:19:36');
+INSERT INTO `sale_payment_method` VALUES (23, 24, 3, 80.00, 1, '2025-12-04 17:24:34', '2025-12-04 17:24:34');
+INSERT INTO `sale_payment_method` VALUES (24, 25, 2, 15.00, 1, '2025-12-04 17:44:38', '2025-12-04 17:44:38');
 
 -- ----------------------------
 -- Table structure for sales
@@ -3442,8 +3588,12 @@ CREATE TABLE `sales`  (
   `nro_dias` int NULL DEFAULT NULL,
   `observation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `customer_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `motorcycle_model` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `seller_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Nombre del vendedor',
+  `tienda_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT 'ID de la tienda',
   `quotation_id` bigint UNSIGNED NULL DEFAULT NULL,
-  `districts_id` bigint UNSIGNED NOT NULL,
+  `districts_id` bigint UNSIGNED NULL DEFAULT NULL,
   `document_type_id` bigint UNSIGNED NULL DEFAULT NULL,
   `mechanics_id` bigint UNSIGNED NULL DEFAULT NULL,
   `payments_id` bigint UNSIGNED NOT NULL,
@@ -3457,6 +3607,8 @@ CREATE TABLE `sales`  (
   `status_sunat` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `delivery_status` tinyint(1) NULL DEFAULT 0 COMMENT '0=pendiente, 1=entregado',
+  `delivered_at` timestamp NULL DEFAULT NULL COMMENT 'Fecha y hora de entrega',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `sales_code_unique`(`code` ASC) USING BTREE,
   INDEX `sales_quotation_id_foreign`(`quotation_id` ASC) USING BTREE,
@@ -3467,24 +3619,41 @@ CREATE TABLE `sales`  (
   INDEX `sales_companies_id_foreign`(`companies_id` ASC) USING BTREE,
   INDEX `sales_user_register_foreign`(`user_register` ASC) USING BTREE,
   INDEX `sales_user_update_foreign`(`user_update` ASC) USING BTREE,
+  INDEX `idx_delivery_status`(`delivery_status` ASC) USING BTREE,
+  INDEX `tienda_id`(`tienda_id` ASC) USING BTREE,
   CONSTRAINT `sales_companies_id_foreign` FOREIGN KEY (`companies_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sales_districts_id_foreign` FOREIGN KEY (`districts_id`) REFERENCES `districts` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sales_document_type_id_foreign` FOREIGN KEY (`document_type_id`) REFERENCES `document_types` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`tienda_id`) REFERENCES `tiendas` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `sales_mechanics_id_foreign` FOREIGN KEY (`mechanics_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sales_payments_id_foreign` FOREIGN KEY (`payments_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sales_quotation_id_foreign` FOREIGN KEY (`quotation_id`) REFERENCES `quotations` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sales_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `sales_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sales
 -- ----------------------------
-INSERT INTO `sales` VALUES (1, '0000001', '72314107', 'MARROQUIN MEJIA YURI MARTIN', 60.00, 10.80, 'NV01', 1, NULL, NULL, 'Ricardo Treneman', NULL, 1337, 6, NULL, 1, 1, 1, NULL, '2025-05-12 11:30:22', NULL, '2025-05-12 11:30:22', '1', '0', '2025-05-12 15:30:22', '2025-05-12 15:30:22');
-INSERT INTO `sales` VALUES (2, '0000002', '77290401', 'VELARDE HUALLPA MARCELO', 12060.00, 2170.80, 'B001', 1, NULL, NULL, NULL, NULL, 23, 1, NULL, 1, 2, 1, NULL, '2025-08-20 17:46:04', NULL, '2025-08-20 17:46:04', '1', '0', '2025-08-20 22:46:04', '2025-08-20 22:46:04');
-INSERT INTO `sales` VALUES (3, '0000003', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 12720.00, 2289.60, 'B001', 2, NULL, NULL, NULL, NULL, 286, 1, NULL, 1, 1, 1, NULL, '2025-08-21 18:05:30', NULL, '2025-08-21 18:05:30', '1', '0', '2025-08-21 23:05:30', '2025-08-21 23:05:30');
-INSERT INTO `sales` VALUES (4, '0000004', '77290401', 'VELARDE HUALLPA MARCELO', 6.00, 1.08, 'NV01', 2, NULL, NULL, 'MAZUKO', NULL, 734, 6, NULL, 1, 1, 1, 1, '2025-11-07 10:00:20', NULL, '2025-11-07 10:00:20', '1', '1', '2025-11-07 16:00:00', '2025-11-07 16:00:20');
-INSERT INTO `sales` VALUES (5, '0000005', '77290401', 'VELARDE HUALLPA MARCELO', 48.00, 8.64, 'B001', 3, NULL, NULL, 'MAZUKO', NULL, 1474, 1, NULL, 1, 1, 1, NULL, '2025-11-08 07:52:51', NULL, '2025-11-08 07:52:51', '1', '0', '2025-11-08 13:52:51', '2025-11-08 13:52:51');
+INSERT INTO `sales` VALUES (3, '0000003', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 12720.00, 2289.60, 'B001', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 286, 1, NULL, 1, 1, 1, 1, '2025-11-18 17:15:38', NULL, '2025-11-18 17:15:38', '1', '1', '2025-08-21 23:05:30', '2025-11-18 22:15:38', 0, NULL);
+INSERT INTO `sales` VALUES (4, '0000004', '77290401', 'VELARDE HUALLPA MARCELO', 6.00, 1.08, 'NV01', 2, NULL, NULL, 'MAZUKO', NULL, NULL, NULL, NULL, NULL, 734, 6, NULL, 1, 1, 1, 1, '2025-11-07 10:00:20', NULL, '2025-11-07 10:00:20', '1', '1', '2025-11-07 16:00:00', '2025-11-07 16:00:20', 0, NULL);
+INSERT INTO `sales` VALUES (9, '0000005', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 90.00, 16.20, 'B001', 3, NULL, NULL, 'mi casa', NULL, NULL, NULL, NULL, NULL, 280, 1, NULL, 1, 1, 1, NULL, '2025-11-21 07:59:17', NULL, '2025-11-21 07:59:17', '1', '0', '2025-11-21 12:59:17', '2025-11-21 12:59:17', 0, NULL);
+INSERT INTO `sales` VALUES (10, '0000006', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 12060.00, 2170.80, 'B001', 4, NULL, NULL, 'nsadc', NULL, NULL, NULL, NULL, NULL, 1145, 1, NULL, 1, 1, 1, NULL, '2025-11-21 07:59:18', NULL, '2025-11-21 07:59:18', '1', '0', '2025-11-21 12:59:18', '2025-11-21 12:59:18', 0, NULL);
+INSERT INTO `sales` VALUES (11, '0000007', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 90.00, 16.20, 'B001', 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1470, 1, NULL, 1, 1, 1, NULL, '2025-11-21 09:10:01', NULL, '2025-11-21 09:10:01', '1', '0', '2025-11-21 14:10:01', '2025-11-21 14:10:01', 0, NULL);
+INSERT INTO `sales` VALUES (12, '0000008', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 12060.00, 2170.80, 'B001', 6, NULL, NULL, 'nsadc', NULL, NULL, NULL, NULL, NULL, 1254, 1, NULL, 1, 1, 1, NULL, '2025-11-21 09:10:02', NULL, '2025-11-21 09:10:02', '1', '0', '2025-11-21 14:10:02', '2025-11-21 14:10:02', 0, NULL);
+INSERT INTO `sales` VALUES (13, '0000009', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 573.00, 103.14, 'B001', 7, NULL, NULL, 'fdgbngdfd', NULL, NULL, NULL, NULL, NULL, 280, 1, NULL, 1, 1, 1, NULL, '2025-11-21 11:51:22', NULL, '2025-11-21 11:51:22', '1', '0', '2025-11-21 16:51:22', '2025-11-21 16:51:22', 0, NULL);
+INSERT INTO `sales` VALUES (14, '0000010', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 70.00, 12.60, 'B001', 8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 100, 1, NULL, 1, 2, 1, 1, '2025-11-21 12:17:13', NULL, '2025-11-21 12:17:13', '1', '0', '2025-11-21 16:55:22', '2025-11-21 17:17:13', 1, '2025-11-21 17:17:13');
+INSERT INTO `sales` VALUES (15, '0000011', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 90.00, 16.20, 'B001', 9, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, 1, 1, 1, NULL, '2025-11-21 20:06:24', NULL, '2025-11-21 20:06:24', '1', '0', '2025-11-22 01:06:24', '2025-11-22 01:06:24', 0, NULL);
+INSERT INTO `sales` VALUES (16, '0000012', NULL, NULL, 30.00, 5.40, 'NV01', 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 6, NULL, 1, 1, 1, NULL, '2025-11-26 06:56:36', NULL, '2025-11-26 06:56:36', '1', '0', '2025-11-26 11:56:36', '2025-11-26 11:56:36', 0, NULL);
+INSERT INTO `sales` VALUES (17, '0000013', NULL, '93HWRF8', 30.00, 5.40, 'NV01', 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 6, NULL, 1, 1, 1, NULL, '2025-11-26 07:04:27', NULL, '2025-11-26 07:04:27', '1', '0', '2025-11-26 12:04:27', '2025-11-26 12:04:27', 0, NULL);
+INSERT INTO `sales` VALUES (18, '0000014', NULL, '497ABTO', 30.00, 5.40, 'NV01', 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 6, NULL, 1, 1, 1, NULL, '2025-11-26 07:10:31', NULL, '2025-11-26 07:10:31', '1', '0', '2025-11-26 12:10:31', '2025-11-26 12:10:31', 0, NULL);
+INSERT INTO `sales` VALUES (19, '0000015', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 25.00, 4.50, 'B001', 10, NULL, NULL, NULL, NULL, '993321920', NULL, NULL, NULL, 1427, 1, NULL, 1, 1, 1, NULL, '2025-12-04 10:17:30', NULL, '2025-12-04 10:17:30', '1', '0', '2025-12-04 15:17:30', '2025-12-04 15:17:30', 0, NULL);
+INSERT INTO `sales` VALUES (20, '0000016', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 25.00, 4.50, 'B001', 11, NULL, NULL, NULL, NULL, '993321920', NULL, NULL, NULL, 1427, 1, NULL, 1, 1, 1, NULL, '2025-12-04 10:17:39', NULL, '2025-12-04 10:17:39', '1', '0', '2025-12-04 15:17:39', '2025-12-04 15:17:39', 0, NULL);
+INSERT INTO `sales` VALUES (21, '0000017', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 14000.00, 2520.00, 'B001', 12, NULL, NULL, NULL, NULL, '993321920', NULL, NULL, NULL, 1305, 1, NULL, 1, 1, 1, NULL, '2025-12-04 10:25:33', NULL, '2025-12-04 10:25:33', '1', '0', '2025-12-04 15:25:33', '2025-12-04 15:25:33', 0, NULL);
+INSERT INTO `sales` VALUES (22, '0000018', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 14000.00, 2520.00, 'F001', 1, NULL, NULL, NULL, NULL, '993321920', NULL, NULL, NULL, 463, 2, NULL, 1, 1, 1, NULL, '2025-12-04 10:34:12', NULL, '2025-12-04 10:34:12', '1', '0', '2025-12-04 15:34:12', '2025-12-04 15:34:12', 0, NULL);
+INSERT INTO `sales` VALUES (23, '0000019', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 12060.00, 2170.80, 'B001', 13, NULL, NULL, NULL, '435634654', '993329202', NULL, NULL, NULL, NULL, 1, 4, 1, 1, 1, NULL, '2025-12-04 12:19:36', NULL, '2025-12-04 12:19:36', '1', '0', '2025-12-04 17:19:36', '2025-12-04 17:19:36', 0, NULL);
+INSERT INTO `sales` VALUES (24, '0000020', '77425200', 'YARLEQUE ZAPATA EMER RODRIGO', 80.00, 14.40, 'B001', 14, NULL, NULL, NULL, 'dvcsdvsdfv', '993321920', NULL, NULL, NULL, NULL, 1, 3, 1, 1, 1, NULL, '2025-12-04 12:24:34', NULL, '2025-12-04 12:24:34', '1', '0', '2025-12-04 17:24:34', '2025-12-04 17:24:34', 0, NULL);
+INSERT INTO `sales` VALUES (25, '0000021', '77426200', 'ZAPATA TORRES BRENDY YOSELY', 15.00, 2.70, 'TEMP', 0, NULL, NULL, NULL, NULL, '993321920', NULL, NULL, NULL, 99, 2, NULL, 1, 1, 1, NULL, '2025-12-04 12:44:38', NULL, '2025-12-04 12:44:38', '1', '0', '2025-12-04 17:44:38', '2025-12-04 17:44:38', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sales_sunat
@@ -3501,12 +3670,15 @@ CREATE TABLE `sales_sunat`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `sales_sunat_sale_id_foreign`(`sale_id` ASC) USING BTREE,
   CONSTRAINT `sales_sunat_sale_id_foreign` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sales_sunat
 -- ----------------------------
 INSERT INTO `sales_sunat` VALUES (1, 4, '20123456789-01-NV01-2.xml', '20123456789|01|NV01-2|0.92|6.00|2025-11-07|1|77290401', 'Kv5bh8KBq4kgUWJZI05uHm85Miw=', '2025-11-07 16:00:20', '2025-11-07 16:00:20');
+INSERT INTO `sales_sunat` VALUES (2, 3, '20123456789-03-B001-2.xml', '20123456789|03|B001-2|1940.34|12720.00|2025-08-21|1|77426200', 'LN5oKNaMZv4DFmuSx7tLV4HAoKY=', '2025-11-18 22:15:38', '2025-11-18 22:15:38');
+INSERT INTO `sales_sunat` VALUES (3, 3, '20123456789-03-B001-2.xml', '20123456789|03|B001-2|1940.34|12720.00|2025-08-21|1|77426200', 'tdootn1Zl6iPwBoFcV9lUMNlWlM=', '2025-11-18 22:15:38', '2025-11-18 22:15:38');
+INSERT INTO `sales_sunat` VALUES (4, 3, '20123456789-03-B001-2.xml', '20123456789|03|B001-2|1940.34|12720.00|2025-08-21|1|77426200', 'LN5oKNaMZv4DFmuSx7tLV4HAoKY=', '2025-11-18 22:15:38', '2025-11-18 22:15:38');
 
 -- ----------------------------
 -- Table structure for scanned_codes
@@ -3600,12 +3772,13 @@ CREATE TABLE `services_sales`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `services_sales_code_sku_unique`(`code_sku` ASC) USING BTREE,
   UNIQUE INDEX `services_sales_name_unique`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of services_sales
 -- ----------------------------
 INSERT INTO `services_sales` VALUES (1, '0000001', 'Taller', 60.00, '2025-05-12 15:30:22', '2025-05-12 15:30:22');
+INSERT INTO `services_sales` VALUES (2, '0000002', 'Fdghngfh', 543.00, '2025-11-21 16:51:22', '2025-11-21 16:51:22');
 
 -- ----------------------------
 -- Table structure for sessions
@@ -3655,24 +3828,24 @@ CREATE TABLE `stocks`  (
   INDEX `tienda_id`(`tienda_id` ASC) USING BTREE,
   CONSTRAINT `stocks_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `stocks_tienda_id_foreign` FOREIGN KEY (`tienda_id`) REFERENCES `tiendas` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 51 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of stocks
 -- ----------------------------
-INSERT INTO `stocks` VALUES (1, 1, NULL, 30, 10, '2025-06-10 00:00:16', '2025-06-10 00:00:16');
-INSERT INTO `stocks` VALUES (8, 24751, NULL, 1, 1, '2025-07-30 03:23:15', '2025-08-21 23:08:44');
-INSERT INTO `stocks` VALUES (13, 24756, NULL, 3, 2, '2025-07-30 04:19:08', '2025-07-30 04:19:08');
+INSERT INTO `stocks` VALUES (1, 1, NULL, 22, 10, '2025-06-10 00:00:16', '2025-11-26 12:10:31');
+INSERT INTO `stocks` VALUES (8, 24751, NULL, 0, 1, '2025-07-30 03:23:15', '2025-12-04 17:19:36');
+INSERT INTO `stocks` VALUES (13, 24756, NULL, 2, 2, '2025-07-30 04:19:08', '2025-11-21 14:10:02');
 INSERT INTO `stocks` VALUES (14, 24758, 2, 4, 2, '2025-07-30 14:11:14', '2025-07-31 22:00:05');
-INSERT INTO `stocks` VALUES (15, 24759, 1, 11, 2, '2025-07-30 14:19:07', '2025-08-02 15:35:24');
+INSERT INTO `stocks` VALUES (15, 24759, 1, 9, 2, '2025-07-30 14:19:07', '2025-12-04 15:34:12');
 INSERT INTO `stocks` VALUES (16, 24760, NULL, 1, 3, '2025-07-30 14:43:23', '2025-08-21 23:05:30');
 INSERT INTO `stocks` VALUES (17, 24761, 1, 4, 4, '2025-07-31 18:43:24', '2025-08-02 21:53:47');
 INSERT INTO `stocks` VALUES (18, 24759, 2, 4, 0, '2025-07-31 20:23:12', '2025-08-02 21:37:43');
-INSERT INTO `stocks` VALUES (19, 24757, 1, 2, 0, '2025-08-01 15:15:32', '2025-08-02 21:53:47');
+INSERT INTO `stocks` VALUES (19, 24757, 1, 2, 0, '2025-08-01 15:15:32', '2025-11-21 12:56:57');
 INSERT INTO `stocks` VALUES (20, 24761, 2, 2, 0, '2025-08-01 23:36:15', '2025-08-02 21:37:43');
 INSERT INTO `stocks` VALUES (21, 24757, 2, 4, 0, '2025-08-01 23:36:15', '2025-08-01 23:36:15');
 INSERT INTO `stocks` VALUES (22, 24763, 2, 30, 30, '2025-08-08 19:54:18', '2025-08-08 19:54:18');
-INSERT INTO `stocks` VALUES (25, 24766, 2, 2, 1, '2025-08-09 13:43:42', '2025-08-09 13:43:42');
+INSERT INTO `stocks` VALUES (25, 24766, 2, 1, 1, '2025-08-09 13:43:42', '2025-12-04 17:24:34');
 INSERT INTO `stocks` VALUES (27, 24768, 3, 1, 1, '2025-10-10 00:12:26', '2025-10-10 00:12:26');
 INSERT INTO `stocks` VALUES (28, 24769, 3, 1, 1, '2025-10-10 00:12:26', '2025-10-10 00:12:26');
 INSERT INTO `stocks` VALUES (29, 24770, 3, 1, 1, '2025-10-10 00:12:26', '2025-10-10 00:12:26');
@@ -3681,16 +3854,17 @@ INSERT INTO `stocks` VALUES (31, 24772, 3, 3, 1, '2025-10-10 00:12:26', '2025-10
 INSERT INTO `stocks` VALUES (32, 24773, 3, 6, 1, '2025-10-10 00:12:27', '2025-10-10 00:12:27');
 INSERT INTO `stocks` VALUES (39, 24780, 6, 2, 1, '2025-11-07 15:51:33', '2025-11-07 15:51:33');
 INSERT INTO `stocks` VALUES (40, 24781, 6, 2, 1, '2025-11-07 15:51:33', '2025-11-07 15:51:33');
-INSERT INTO `stocks` VALUES (41, 24782, 7, 4, 1, '2025-11-07 15:51:33', '2025-11-08 13:52:51');
+INSERT INTO `stocks` VALUES (41, 24782, 7, 7, 1, '2025-11-07 15:51:33', '2025-12-04 17:44:38');
 INSERT INTO `stocks` VALUES (42, 24783, 7, 2, 1, '2025-11-07 15:51:33', '2025-11-07 15:51:33');
 INSERT INTO `stocks` VALUES (43, 24784, 7, 8, 1, '2025-11-07 15:51:33', '2025-11-07 15:51:33');
 INSERT INTO `stocks` VALUES (44, 24785, 7, 8, 1, '2025-11-07 15:51:33', '2025-11-07 15:51:33');
 INSERT INTO `stocks` VALUES (45, 24786, 6, 2, 1, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
 INSERT INTO `stocks` VALUES (46, 24787, 6, 2, 1, '2025-11-07 15:55:58', '2025-11-07 15:55:58');
-INSERT INTO `stocks` VALUES (47, 24788, 7, 7, 1, '2025-11-07 15:55:58', '2025-11-08 13:52:51');
-INSERT INTO `stocks` VALUES (48, 24789, 7, 0, 1, '2025-11-07 15:55:58', '2025-11-08 13:52:51');
-INSERT INTO `stocks` VALUES (49, 24790, 7, 7, 1, '2025-11-07 15:55:58', '2025-11-08 13:52:51');
-INSERT INTO `stocks` VALUES (50, 24791, 7, 7, 1, '2025-11-07 15:55:58', '2025-11-08 13:52:51');
+INSERT INTO `stocks` VALUES (47, 24788, 7, 8, 1, '2025-11-07 15:55:58', '2025-11-21 12:57:17');
+INSERT INTO `stocks` VALUES (48, 24789, 7, 1, 1, '2025-11-07 15:55:58', '2025-11-21 12:57:17');
+INSERT INTO `stocks` VALUES (49, 24790, 7, 8, 1, '2025-11-07 15:55:58', '2025-11-21 12:57:17');
+INSERT INTO `stocks` VALUES (50, 24791, 7, 8, 1, '2025-11-07 15:55:58', '2025-11-21 12:57:17');
+INSERT INTO `stocks` VALUES (51, 24792, 1, 50, 10, '2025-11-21 13:11:16', '2025-11-21 13:11:16');
 
 -- ----------------------------
 -- Table structure for tiendas
@@ -3804,14 +3978,16 @@ CREATE TABLE `users`  (
   CONSTRAINT `users_tienda_id_foreign` FOREIGN KEY (`tienda_id`) REFERENCES `tiendas` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `users_user_register_foreign` FOREIGN KEY (`user_register`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `users_user_update_foreign` FOREIGN KEY (`user_update`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (1, 'administrador', NULL, 'administrador@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, '$2y$12$ujdkyXYs/S92IdLd09455uqZfwiE01JdnN8LiLv81ymykCH966O4C', '1', '1', NULL, NULL, 1, '2025-05-05 12:22:28', '2025-11-08 09:41:37', 'JyX1BU4QSHDqwK4RIZzNusJofYdeFYGWt4dGm2noVlBDwMWWrQnTiuyzStbv', '2025-05-05 16:22:28', '2025-05-05 16:22:28');
+INSERT INTO `users` VALUES (1, 'administrador', NULL, 'administrador@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, '$2y$12$ujdkyXYs/S92IdLd09455uqZfwiE01JdnN8LiLv81ymykCH966O4C', '1', '1', NULL, NULL, 1, '2025-05-05 12:22:28', '2025-11-26 22:14:28', 'gJgYgKYp3Y383uDMAFKVtysfQA4ZqoJokPPInYKPgOcfOBdoa1jptIkXS8F1', '2025-05-05 16:22:28', '2025-05-05 16:22:28');
 INSERT INTO `users` VALUES (2, 'BRIGYTT VIVIANA', 'Emer', 'brigytt.emer@empresa.com', '77427200', '993321920', 'Paita 2 de mayo', NULL, 'correo@gmail.com', 3, '$2y$12$fXRSOg7WcZY4CNxYUV2ZsOO0m04NCDK5L9dnF9IOf9Igud0azqTFO', '1', '1', '0000001', 1, NULL, '2025-08-11 11:02:56', '2025-08-11 11:02:56', NULL, '2025-08-11 16:02:56', '2025-08-11 16:02:56');
 INSERT INTO `users` VALUES (3, 'VICTOR MANUEL', 'Emer', 'victor.emer@empresa.com', '77423400', '993321920', 'Paita 2 de mayo', NULL, 'rodrigoyarleque7@gmail.com', 3, '$2y$12$o2D.94cunqIaVBVVHS3f2u1IMhd69KPHdYoYxnIGYm3ukFQZTX4Se', '1', '1', '0000002', 1, NULL, '2025-08-27 10:18:16', '2025-08-27 10:18:16', NULL, '2025-08-27 15:18:16', '2025-08-27 15:18:16');
+INSERT INTO `users` VALUES (4, 'ANTONELLA', 'MALDONADO BALESTRA', 'kiyotakahitori@gmail.com', '77456022', '+51 993 321 920', 'sdacsdc', NULL, 'kibutsuji26muzan@gmail.com', 3, '$2y$12$DObcX5tBVtXWzCfi8eI4y.OqnRDEUL/XvK7jllY5BNvKA6Lweyq7m', '1', '1', '0000003', 1, NULL, '2025-11-28 17:38:21', '2025-11-28 17:38:21', NULL, '2025-11-28 22:38:21', '2025-11-28 22:38:21');
+INSERT INTO `users` VALUES (5, 'EMER RODRIGO', 'YARLEQUE ZAPATA', 'yarlequerodrigo9@gmail.com', '77425200', '+51 993 321 920', 'dwsscs', NULL, 'yarlequerodrigo9@gmail.com', NULL, '$2y$12$o5QjhcWRDzxk5t6d53tVWuT25nxJv1n3cTg5fghHiM871KLURBs7u', '1', '1', '0000004', 1, NULL, '2025-12-05 19:29:15', '2025-12-05 19:29:15', NULL, '2025-12-06 00:29:15', '2025-12-06 00:29:15');
 
 -- ----------------------------
 -- Table structure for warehouses
@@ -3879,7 +4055,7 @@ CREATE TABLE `wholesalers`  (
   `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1',
   `status_sale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `document_type_id` bigint UNSIGNED NULL DEFAULT NULL,
-  `districts_id` bigint UNSIGNED NOT NULL,
+  `districts_id` bigint UNSIGNED NULL DEFAULT NULL,
   `mechanics_id` bigint UNSIGNED NULL DEFAULT NULL,
   `user_register` bigint UNSIGNED NULL DEFAULT NULL,
   `user_update` bigint UNSIGNED NULL DEFAULT NULL,

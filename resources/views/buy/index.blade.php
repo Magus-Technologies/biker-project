@@ -535,7 +535,7 @@
     }
 
     function downloadPDF(buyId) {
-        window.open(`/buy/pdf/${buyId}`, '_blank');
+        window.open(`${baseUrl}/buy/pdf/${buyId}`, '_blank');
     }
 
     function receiveProducts(buyId) {
