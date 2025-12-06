@@ -563,7 +563,7 @@
 
         modal.show();
 
-        fetch(`/buy/modal-details/${buyId}`)
+        fetch(`${baseUrl}/buy/modal-details/${buyId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -850,7 +850,7 @@
             return;
         }
 
-        fetch(`/buy/installment/${installmentId}/mark-paid`, {
+        fetch(`${baseUrl}/buy/installment/${installmentId}/mark-paid`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -877,7 +877,7 @@
             return;
         }
 
-        fetch(`/buy/installment/${installmentId}/mark-pending`, {
+        fetch(`${baseUrl}/buy/installment/${installmentId}/mark-pending`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -935,7 +935,7 @@
     }
 
     function showReceptionModal(buyId) {
-        fetch(`/buy/${buyId}/reception-data`)
+        fetch(`${baseUrl}/buy/${buyId}/reception-data`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -1164,7 +1164,7 @@
         processButton.innerHTML = '<i class="bi bi-spinner fa-spin mr-1"></i>Procesando...';
         processButton.disabled = true;
 
-        fetch(`/buy/${currentReceptionData.id}/process-reception`, {
+        fetch(`${baseUrl}/buy/${currentReceptionData.id}/process-reception`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
