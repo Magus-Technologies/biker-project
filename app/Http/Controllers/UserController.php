@@ -48,6 +48,56 @@ class UserController extends Controller
             'dni' => 'required|string|unique:users,dni|size:8',
             'correo' => 'required|email|max:255|unique:users,correo',
             'tienda_id' => 'nullable|exists:tiendas,id'
+        ], [
+            // Mensajes personalizados para name
+            'name.required' => 'El campo nombres es obligatorio.',
+            'name.string' => 'El campo nombres debe ser texto.',
+            'name.max' => 'El campo nombres no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para email
+            'email.required' => 'El correo de usuario es obligatorio.',
+            'email.email' => 'El correo de usuario debe ser una dirección válida.',
+            'email.max' => 'El correo de usuario no puede tener más de 255 caracteres.',
+            'email.unique' => 'Este correo de usuario ya está registrado en el sistema.',
+            
+            // Mensajes personalizados para password
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.string' => 'La contraseña debe ser texto.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede tener más de 20 caracteres.',
+            
+            // Mensajes personalizados para roles
+            'roles.required' => 'Debe seleccionar al menos un perfil.',
+            
+            // Mensajes personalizados para apellidos
+            'apellidos.required' => 'El campo apellidos es obligatorio.',
+            'apellidos.string' => 'El campo apellidos debe ser texto.',
+            'apellidos.max' => 'El campo apellidos no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para telefono
+            'telefono.required' => 'El campo teléfono es obligatorio.',
+            'telefono.string' => 'El campo teléfono debe ser texto.',
+            'telefono.max' => 'El campo teléfono no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para direccion
+            'direccion.required' => 'El campo dirección es obligatorio.',
+            'direccion.string' => 'El campo dirección debe ser texto.',
+            'direccion.max' => 'El campo dirección no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para dni
+            'dni.required' => 'El DNI es obligatorio.',
+            'dni.string' => 'El DNI debe ser texto.',
+            'dni.unique' => 'Este DNI ya está registrado en el sistema. Por favor verifique.',
+            'dni.size' => 'El DNI debe tener exactamente 8 dígitos.',
+            
+            // Mensajes personalizados para correo
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El correo electrónico debe ser una dirección válida.',
+            'correo.max' => 'El correo electrónico no puede tener más de 255 caracteres.',
+            'correo.unique' => 'Este correo electrónico ya está registrado en el sistema.',
+            
+            // Mensajes personalizados para tienda_id
+            'tienda_id.exists' => 'La tienda seleccionada no existe.',
         ]);
 
         $user = User::create([
@@ -102,6 +152,49 @@ class UserController extends Controller
             'dni' => 'required|string|size:8|unique:users,dni,' . $user->id,
             'correo' => 'required|email|max:255|unique:users,correo,' . $user->id,
             'tienda_id' => 'nullable|exists:tiendas,id'
+        ], [
+            // Mensajes personalizados para name
+            'name.required' => 'El campo nombres es obligatorio.',
+            'name.string' => 'El campo nombres debe ser texto.',
+            'name.max' => 'El campo nombres no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para password
+            'password.string' => 'La contraseña debe ser texto.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede tener más de 20 caracteres.',
+            
+            // Mensajes personalizados para roles
+            'roles.required' => 'Debe seleccionar al menos un perfil.',
+            
+            // Mensajes personalizados para apellidos
+            'apellidos.required' => 'El campo apellidos es obligatorio.',
+            'apellidos.string' => 'El campo apellidos debe ser texto.',
+            'apellidos.max' => 'El campo apellidos no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para telefono
+            'telefono.required' => 'El campo teléfono es obligatorio.',
+            'telefono.string' => 'El campo teléfono debe ser texto.',
+            'telefono.max' => 'El campo teléfono no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para direccion
+            'direccion.required' => 'El campo dirección es obligatorio.',
+            'direccion.string' => 'El campo dirección debe ser texto.',
+            'direccion.max' => 'El campo dirección no puede tener más de 255 caracteres.',
+            
+            // Mensajes personalizados para dni
+            'dni.required' => 'El DNI es obligatorio.',
+            'dni.string' => 'El DNI debe ser texto.',
+            'dni.unique' => 'Este DNI ya está registrado en el sistema. Por favor verifique.',
+            'dni.size' => 'El DNI debe tener exactamente 8 dígitos.',
+            
+            // Mensajes personalizados para correo
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El correo electrónico debe ser una dirección válida.',
+            'correo.max' => 'El correo electrónico no puede tener más de 255 caracteres.',
+            'correo.unique' => 'Este correo electrónico ya está registrado en el sistema.',
+            
+            // Mensajes personalizados para tienda_id
+            'tienda_id.exists' => 'La tienda seleccionada no existe.',
         ]);
 
         $data = [

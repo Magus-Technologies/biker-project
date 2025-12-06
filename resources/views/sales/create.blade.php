@@ -1,11 +1,96 @@
 <x-app-layout>
     <x-breadcrumb title="Registrar venta" parent="ventas" parentUrl="{{route('sales.index')}}" subtitle="crear"/>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{-- Registro de Socios --}}
-        </h2>
-    </x-slot>
-    <div class="container mx-auto p-2 text-sm">
+    
+    <div class="px-3 py-4">
+        <!-- Header con botones de acción -->
+        <div class="bg-white rounded-lg px-4 py-3 mb-3 flex flex-wrap justify-between items-center gap-3">
+            <h2 class="text-lg font-semibold text-gray-700">
+                <i class="bi bi-cart-plus mr-2 text-blue-600"></i>
+                Registro de Ventas
+            </h2>
+            <div class="flex gap-2">
+                <button onclick="addNewSaleTab()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                    <i class="bi bi-plus-lg mr-1"></i>
+                    Nueva Venta
+                </button>
+                <a href="{{ route('sales.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                    <i class="bi bi-x-lg mr-1"></i>
+                    Cancelar
+                </a>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded mb-3 text-sm">
+            <p class="text-blue-800">
+                <i class="bi bi-info-circle mr-1"></i>
+                <strong>Instrucciones:</strong> Haz clic en "Nueva Venta" para agregar más ventas. Cada pestaña es una venta independiente.
+            </p>
+        </div>
+
+        <!-- Tabs de ventas -->
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <!-- Tab Headers -->
+            <div class="flex items-center gap-1 px-2 py-2 bg-gray-50 border-b border-gray-200 overflow-x-auto" id="tabHeaders" style="min-height: 50px;">
+                <!-- Los tabs se agregarán dinámicamente aquí -->
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="tabContents">
+                <!-- Los contenidos de los tabs se agregarán dinámicamente aquí -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .tab-header {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        font-size: 0.875rem;
+        font-weight: 500;
+        min-width: fit-content;
+    }
+    .tab-header:not(.active) {
+        background-color: white;
+        color: #6b7280;
+        border: 1px solid #e5e7eb;
+    }
+    .tab-header:not(.active):hover {
+        background-color: #f3f4f6;
+        border-color: #3b82f6;
+    }
+    .tab-header.active {
+        background-color: #3b82f6;
+        color: white;
+        border: 1px solid #3b82f6;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+    .tab-content {
+        display: none;
+        padding: 1rem;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .close-tab {
+        margin-left: 0.5rem;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+        font-size: 0.75rem;
+    }
+    .close-tab:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    </style>
+
+    <div class="container mx-auto p-2 text-sm" style="display: none;" id="originalFormTemplate">
         <div class="grid grid-cols-1 gap-6">
             <!-- Formulario de Cliente -->
             <div class="bg-white p-6 rounded-lg shadow">
@@ -481,25 +566,46 @@
         let html = '';
         products.forEach(product => {
             const stockQuantity = product.stock?.quantity || 0;
-            const stockColor = stockQuantity === 0 ? 'text-red-600' : (stockQuantity <= (product.stock?.minimum_stock || 0) ? 'text-yellow-600' : 'text-green-600');
+            const minimumStock = product.stock?.minimum_stock || 0;
+            const stockColor = stockQuantity === 0 ? 'text-red-600' : (stockQuantity <= minimumStock ? 'text-yellow-600' : 'text-green-600');
+            
+            // Determinar el color de fondo del badge de stock
+            let stockBgColor = 'green';
+            if (stockQuantity === 0) {
+                stockBgColor = 'red';
+            } else if (stockQuantity <= minimumStock) {
+                stockBgColor = 'yellow';
+            }
             
             // Obtener el primer precio disponible
             const firstPrice = product.prices && product.prices.length > 0 ? product.prices[0] : null;
-            const priceText = firstPrice ? `S/ ${firstPrice.price}` : 'Sin precio';
+            const priceText = firstPrice ? 'S/ ' + firstPrice.price : 'Sin precio';
+            const productCode = product.code_sku || product.code || 'N/A';
             
             html += `
                 <div class="product-result p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 transition" 
                      data-product-id="${product.id}"
                      data-product-description="${product.description.replace(/"/g, '&quot;')}"
                      data-product-prices='${JSON.stringify(product.prices || [])}'
-                     data-product-stock="${stockQuantity}">
-                    <div class="flex justify-between items-start">
+                     data-product-stock="${stockQuantity}"
+                     data-product-min-stock="${minimumStock}"
+                     data-product-code="${productCode}">
+                    <div class="flex justify-between items-start gap-3">
                         <div class="flex-1">
                             <div class="font-medium text-sm text-gray-900">${product.description}</div>
-                            <div class="text-xs text-gray-500 mt-1">Código: ${product.code_sku}</div>
-                            <div class="text-xs ${stockColor} font-semibold mt-1">Stock: ${stockQuantity}</div>
+                            <div class="flex items-center gap-3 mt-1 flex-wrap">
+                                <span class="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                                    <i class="bi bi-upc-scan mr-1"></i>Código: <strong>${productCode}</strong>
+                                </span>
+                                <span class="text-xs ${stockColor} bg-${stockBgColor}-50 px-2 py-0.5 rounded font-semibold">
+                                    <i class="bi bi-box-seam mr-1"></i>Stock: <strong>${stockQuantity}</strong>
+                                </span>
+                                <span class="text-xs text-gray-600 bg-blue-50 px-2 py-0.5 rounded">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>Mín: <strong>${minimumStock}</strong>
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right ml-3">
+                        <div class="text-right">
                             <div class="text-sm font-semibold text-blue-600">${priceText}</div>
                         </div>
                     </div>
@@ -1390,4 +1496,453 @@
     inputDni.addEventListener('input', () => {
         buscarDNI(inputDni.value);
     });
+
+    // ============================================
+    // SISTEMA DE TABS PARA MÚLTIPLES VENTAS
+    // ============================================
+    
+    let saleCounter = 0;
+    let salesData = new Map(); // Almacena datos de cada venta por tabId
+    let currentActiveTab = null;
+
+    // Inicializar con una venta al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mover el formulario original al template
+        const originalForm = document.querySelector('.container.mx-auto.p-2.text-sm');
+        if (originalForm && originalForm.id !== 'originalFormTemplate') {
+            const template = document.getElementById('originalFormTemplate');
+            if (template) {
+                // Copiar todo el contenido del formulario original al template
+                while (originalForm.firstChild) {
+                    template.appendChild(originalForm.firstChild);
+                }
+            }
+        }
+        
+        // Crear la primera venta
+        addNewSaleTab();
+    });
+
+    // Función para agregar nueva pestaña de venta
+    function addNewSaleTab() {
+        saleCounter++;
+        const tabId = `sale-${saleCounter}`;
+
+        // Crear tab header
+        const tabHeader = document.createElement('div');
+        tabHeader.className = 'tab-header';
+        tabHeader.id = `tab-${tabId}`;
+        tabHeader.innerHTML = `
+            <i class="bi bi-cart"></i>
+            <span>Venta #${saleCounter}</span>
+            ${saleCounter > 1 ? `<button onclick="closeTab('${tabId}', event)" class="close-tab" title="Cerrar"><i class="bi bi-x-lg"></i></button>` : ''}
+        `;
+        tabHeader.onclick = (e) => {
+            if (!e.target.closest('.close-tab')) {
+                switchTab(tabId);
+            }
+        };
+
+        document.getElementById('tabHeaders').appendChild(tabHeader);
+
+        // Crear tab content
+        const tabContent = document.createElement('div');
+        tabContent.className = 'tab-content';
+        tabContent.id = `content-${tabId}`;
+
+        // Clonar el formulario original del template
+        const template = document.getElementById('originalFormTemplate');
+        if (template) {
+            const clonedForm = template.cloneNode(true);
+            clonedForm.id = `sale-form-${tabId}`;
+            clonedForm.style.display = 'block';
+            
+            // Actualizar todos los IDs en el formulario clonado
+            updateFormIds(clonedForm, tabId);
+            
+            tabContent.appendChild(clonedForm);
+        }
+
+        document.getElementById('tabContents').appendChild(tabContent);
+
+        // Inicializar datos de la venta
+        salesData.set(tabId, {
+            saleNumber: saleCounter,
+            services: [],
+            quotationItems: [],
+            products: [],
+            payments: [],
+            orderCount: 0,
+            documentoData: {}
+        });
+
+        // Activar el nuevo tab
+        switchTab(tabId);
+        
+        // Inicializar eventos para este tab
+        initializeTabEvents(tabId);
+    }
+
+    // Función para actualizar IDs en el formulario clonado
+    function updateFormIds(form, tabId) {
+        // Actualizar todos los elementos con ID
+        const elementsWithId = form.querySelectorAll('[id]');
+        elementsWithId.forEach(element => {
+            const originalId = element.id;
+            element.id = `${originalId}_${tabId}`;
+            
+            // Si es un label con 'for', también actualizarlo
+            const labels = form.querySelectorAll(`label[for="${originalId}"]`);
+            labels.forEach(label => {
+                label.setAttribute('for', `${originalId}_${tabId}`);
+            });
+        });
+        
+        // Actualizar referencias en onclick, onchange, etc.
+        const elementsWithOnclick = form.querySelectorAll('[onclick]');
+        elementsWithOnclick.forEach(element => {
+            let onclick = element.getAttribute('onclick');
+            // Agregar tabId como parámetro a las funciones
+            if (onclick.includes('saveSales()')) {
+                element.setAttribute('onclick', `saveSalesTab('${tabId}')`);
+            } else if (onclick.includes('abrirPanelDocumento()')) {
+                element.setAttribute('onclick', `abrirPanelDocumentoTab('${tabId}')`);
+            } else if (onclick.includes('addSelectedProduct()')) {
+                element.setAttribute('onclick', `addSelectedProductTab('${tabId}')`);
+            } else if (onclick.includes('mostrarModal()')) {
+                element.setAttribute('onclick', `mostrarModalTab('${tabId}')`);
+            } else if (onclick.includes('closeModal')) {
+                const match = onclick.match(/closeModal\('([^']+)'\)/);
+                if (match) {
+                    element.setAttribute('onclick', `closeModalTab('${match[1]}_${tabId}')`);
+                }
+            }
+        });
+    }
+
+    // Función para inicializar eventos específicos del tab
+    function initializeTabEvents(tabId) {
+        // Actualizar fecha y hora
+        const fechaHoraEl = document.getElementById(`fechaHora_${tabId}`);
+        if (fechaHoraEl) {
+            actualizarFechaHoraTab(tabId);
+            setInterval(() => actualizarFechaHoraTab(tabId), 1000);
+        }
+        
+        // Inicializar buscador de productos
+        initProductSearchTab(tabId);
+        
+        // Inicializar eventos de servicios
+        initServiceEventsTab(tabId);
+        
+        // Inicializar evento de DNI
+        initDniSearchTab(tabId);
+        
+        // Inicializar panel de documento
+        initDocumentPanelTab(tabId);
+    }
+
+    // Función para actualizar fecha y hora de un tab
+    function actualizarFechaHoraTab(tabId) {
+        const fechaHoraEl = document.getElementById(`fechaHora_${tabId}`);
+        if (fechaHoraEl) {
+            const ahora = new Date();
+            const opciones = { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false 
+            };
+            const fechaHoraFormateada = ahora.toLocaleString('es-PE', opciones).replace(',', '');
+            fechaHoraEl.value = fechaHoraFormateada;
+        }
+    }
+
+    // Función para inicializar buscador de productos del tab
+    function initProductSearchTab(tabId) {
+        const searchInput = document.getElementById(`searchProductInput_${tabId}`);
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length >= 1) {
+                    searchProductsAutocompleteTab(searchTerm, tabId);
+                } else {
+                    hideProductResultsTab(tabId);
+                }
+            });
+        }
+    }
+
+    // Función para buscar productos con autocompletado del tab
+    function searchProductsAutocompleteTab(searchTerm, tabId) {
+        const url = `${baseUrl}/api/product?tienda_id=todos&search=${searchTerm}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                displayProductResultsTab(Array.isArray(data) ? data : [], tabId);
+            })
+            .catch(error => {
+                console.error('Error buscando productos:', error);
+                hideProductResultsTab(tabId);
+            });
+    }
+
+    // Función para mostrar resultados de búsqueda del tab
+    function displayProductResultsTab(products, tabId) {
+        const resultsDiv = document.getElementById(`searchProductResults_${tabId}`);
+        
+        if (!resultsDiv) return;
+        
+        if (products.length === 0) {
+            resultsDiv.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No se encontraron productos</div>';
+            resultsDiv.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        products.forEach(product => {
+            const stockQuantity = product.stock?.quantity || 0;
+            const minimumStock = product.stock?.minimum_stock || 0;
+            const stockColor = stockQuantity === 0 ? 'text-red-600' : (stockQuantity <= minimumStock ? 'text-yellow-600' : 'text-green-600');
+            
+            // Determinar el color de fondo del badge de stock
+            let stockBgColor = 'green';
+            if (stockQuantity === 0) {
+                stockBgColor = 'red';
+            } else if (stockQuantity <= minimumStock) {
+                stockBgColor = 'yellow';
+            }
+            
+            const firstPrice = product.prices && product.prices.length > 0 ? product.prices[0] : null;
+            const priceText = firstPrice ? 'S/ ' + firstPrice.price : 'Sin precio';
+            const productCode = product.code_sku || product.code || 'N/A';
+            
+            html += `
+                <div class="product-result p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 transition" 
+                     data-product-id="${product.id}"
+                     data-product-description="${product.description.replace(/"/g, '&quot;')}"
+                     data-product-prices='${JSON.stringify(product.prices || [])}'
+                     data-product-stock="${stockQuantity}"
+                     data-product-min-stock="${minimumStock}"
+                     data-product-code="${productCode}"
+                     onclick="selectProductTab(${product.id}, '${product.description.replace(/'/g, "\\'")}', '${JSON.stringify(product.prices || []).replace(/'/g, "\\'")}', ${stockQuantity}, '${tabId}')">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm text-gray-900">${product.description}</div>
+                            <div class="flex items-center gap-3 mt-1 flex-wrap">
+                                <span class="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                                    <i class="bi bi-upc-scan mr-1"></i>Código: <strong>${productCode}</strong>
+                                </span>
+                                <span class="text-xs ${stockColor} bg-${stockBgColor}-50 px-2 py-0.5 rounded font-semibold">
+                                    <i class="bi bi-box-seam mr-1"></i>Stock: <strong>${stockQuantity}</strong>
+                                </span>
+                                <span class="text-xs text-gray-600 bg-blue-50 px-2 py-0.5 rounded">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>Mín: <strong>${minimumStock}</strong>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-semibold text-blue-600">${priceText}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+        resultsDiv.classList.remove('hidden');
+    }
+
+    // Función para ocultar resultados del tab
+    function hideProductResultsTab(tabId) {
+        const resultsDiv = document.getElementById(`searchProductResults_${tabId}`);
+        if (resultsDiv) {
+            resultsDiv.classList.add('hidden');
+        }
+    }
+
+    // Función para seleccionar un producto del tab
+    function selectProductTab(productId, description, pricesJson, stock, tabId) {
+        const hiddenInput = document.getElementById(`selectedProduct_${tabId}`);
+        if (hiddenInput) {
+            const prices = typeof pricesJson === 'string' ? JSON.parse(pricesJson) : pricesJson;
+            hiddenInput.value = JSON.stringify({
+                item_id: productId,
+                description: description,
+                prices: prices,
+                stock: stock
+            });
+        }
+        
+        const searchInput = document.getElementById(`searchProductInput_${tabId}`);
+        if (searchInput) {
+            searchInput.value = description;
+        }
+        
+        hideProductResultsTab(tabId);
+    }
+
+    // Función para agregar el producto seleccionado del tab
+    function addSelectedProductTab(tabId) {
+        const hiddenInput = document.getElementById(`selectedProduct_${tabId}`);
+        
+        if (!hiddenInput || !hiddenInput.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Seleccione un producto',
+                text: 'Debe buscar y seleccionar un producto de la lista',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+        
+        // Aquí iría la lógica para agregar el producto a la tabla
+        // Por ahora solo mostramos un mensaje
+        Swal.fire({
+            icon: 'success',
+            title: 'Producto agregado',
+            timer: 1000,
+            showConfirmButton: false
+        });
+    }
+
+    // Función para inicializar eventos de servicios del tab
+    function initServiceEventsTab(tabId) {
+        const addServiceBtn = document.getElementById(`addService_${tabId}`);
+        if (addServiceBtn) {
+            addServiceBtn.addEventListener('click', function() {
+                // Lógica para agregar servicio
+                console.log('Agregar servicio para tab:', tabId);
+            });
+        }
+    }
+
+    // Función para inicializar búsqueda de DNI del tab
+    function initDniSearchTab(tabId) {
+        const inputDni = document.getElementById(`dni_personal_${tabId}`);
+        if (inputDni) {
+            inputDni.addEventListener('input', () => {
+                buscarDNITab(inputDni.value, tabId);
+            });
+        }
+    }
+
+    // Función para buscar DNI del tab
+    function buscarDNITab(dni, tabId) {
+        if (dni.length === 8) {
+            fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}?token=${token}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const nombresEl = document.getElementById(`nombres_apellidos_${tabId}`);
+                    if (nombresEl) {
+                        nombresEl.value = data.apellidoPaterno + ' ' + data.apellidoMaterno + ' ' + data.nombres;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    }
+
+    // Función para inicializar panel de documento del tab
+    function initDocumentPanelTab(tabId) {
+        // Configuración inicial del panel de documento para este tab
+    }
+
+    // Función para abrir panel de documento del tab
+    function abrirPanelDocumentoTab(tabId) {
+        abrirPanelDocumento();
+        // Guardar el tabId actual para saber a qué tab aplicar los cambios
+        window.currentDocumentTabId = tabId;
+    }
+
+    // Función para guardar venta del tab
+    function saveSalesTab(tabId) {
+        console.log('Guardando venta del tab:', tabId);
+        // Aquí iría la lógica para guardar la venta específica del tab
+        saveSales();
+    }
+
+    // Función para mostrar modal del tab
+    function mostrarModalTab(tabId) {
+        const modal = document.getElementById(`modalMecanicos_${tabId}`);
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    // Función para cerrar modal del tab
+    function closeModalTab(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    // Función para cambiar de tab
+    function switchTab(tabId) {
+        // Desactivar todos los tabs
+        document.querySelectorAll('.tab-header').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Activar el tab seleccionado
+        const selectedTab = document.getElementById(`tab-${tabId}`);
+        const selectedContent = document.getElementById(`content-${tabId}`);
+        
+        if (selectedTab && selectedContent) {
+            selectedTab.classList.add('active');
+            selectedContent.classList.add('active');
+            currentActiveTab = tabId;
+        }
+    }
+
+    // Función para cerrar un tab
+    function closeTab(tabId, event) {
+        event.stopPropagation();
+        
+        Swal.fire({
+            title: '¿Cerrar esta venta?',
+            text: 'Se perderán los datos no guardados',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, cerrar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Eliminar el tab header y content
+                const tabHeader = document.getElementById(`tab-${tabId}`);
+                const tabContent = document.getElementById(`content-${tabId}`);
+                
+                if (tabHeader) tabHeader.remove();
+                if (tabContent) tabContent.remove();
+                
+                // Eliminar datos del Map
+                salesData.delete(tabId);
+                
+                // Si era el tab activo, activar otro
+                if (currentActiveTab === tabId) {
+                    const remainingTabs = document.querySelectorAll('.tab-header');
+                    if (remainingTabs.length > 0) {
+                        const firstTabId = remainingTabs[0].id.replace('tab-', '');
+                        switchTab(firstTabId);
+                    }
+                }
+            }
+        });
+    }
 </script>

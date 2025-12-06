@@ -5,12 +5,24 @@
             <div class="col-md-8">
                 <!-- Mensajes de error -->
                 @if ($errors->any())
-                    <div class="bg-yellow-100 text-yellow-700 p-4 rounded-md mb-6 shadow-md">
-                        <ul class="list-disc pl-5">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6 shadow-md">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h3 class="text-sm font-semibold mb-2">
+                                    Por favor corrija los siguientes errores:
+                                </h3>
+                                <ul class="list-disc list-inside space-y-1 text-sm">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 @endif
 
@@ -32,8 +44,8 @@
                                 <div class="mb-4">
                                     <label for="dni" class="block text-gray-700 font-medium">DNI <span class="text-red-500">*</span></label>
                                     <div class="flex mt-2">
-                                        <input type="text" name="dni" id="dni" maxlength="8"
-                                            class="w-full p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                        <input type="text" name="dni" id="dni" maxlength="8" value="{{ old('dni') }}"
+                                            class="w-full p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('dni') border-red-500 @enderror" />
                                         <button id="buscarDni" type="button" 
                                             class="ml-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-md transition-all">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,6 +53,9 @@
                                             </svg>
                                         </button>
                                     </div>
+                                    @error('dni')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                     <div id="dni-loading" class="hidden mt-2 text-blue-600 text-sm">
                                         <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-blue-600 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -52,64 +67,93 @@
 
                                 <div class="mb-4">
                                     <label for="name" class="block text-gray-700 font-medium">Nombres <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" id="name"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                    <input type="text" name="name" id="name" value="{{ old('name') }}"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('name') border-red-500 @enderror" />
+                                    @error('name')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="mb-4">
                                     <label for="apellidos" class="block text-gray-700 font-medium">Apellidos <span class="text-red-500">*</span></label>
-                                    <input type="text" name="apellidos" id="apellidos"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                    <input type="text" name="apellidos" id="apellidos" value="{{ old('apellidos') }}"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('apellidos') border-red-500 @enderror" />
+                                    @error('apellidos')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="mb-4">
                                     <label for="telefono" class="block text-gray-700 font-medium">Telefono <span class="text-red-500">*</span></label>
-                                    <input type="text" name="telefono" id="telefono"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                    <input type="text" name="telefono" id="telefono" value="{{ old('telefono') }}"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('telefono') border-red-500 @enderror" />
+                                    @error('telefono')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="mb-4">
                                     <label for="direccion" class="block text-gray-700 font-medium">Direccion <span class="text-red-500">*</span></label>
-                                    <input type="text" name="direccion" id="direccion"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                    <input type="text" name="direccion" id="direccion" value="{{ old('direccion') }}"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('direccion') border-red-500 @enderror" />
+                                    @error('direccion')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="mb-4">
                                     <label for="correo" class="block text-gray-700 font-medium">Correo electronico <span class="text-red-500">*</span></label>
-                                    <input type="email" name="correo" id="correo"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                    <input type="email" name="correo" id="correo" value="{{ old('correo') }}"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('correo') border-red-500 @enderror" />
+                                    @error('correo')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <!-- Select de tiendas -->
                                 <div class="mb-4">
                                     <label for="tienda_id" class="block text-gray-700 font-medium">Tienda</label>
                                     <select name="tienda_id" id="tienda_id"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none">
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('tienda_id') border-red-500 @enderror">
                                         <option value="">Seleccione una tienda</option>
                                     </select>
+                                    @error('tienda_id')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <!-- Campo Email -->
                                 <div class="mb-4">
                                     <label for="email" class="block text-gray-700 font-medium">Correo Usuario <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" id="email"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                    <input type="email" name="email" id="email" value="{{ old('email') }}"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('email') border-red-500 @enderror" />
+                                    @error('email')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <!-- Campo Contraseña -->
                                 <div class="mb-4">
                                     <label for="password" class="block text-gray-700 font-medium">Contraseña <span class="text-red-500">*</span></label>
                                     <input type="password" name="password" id="password"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none" />
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('password') border-red-500 @enderror" />
+                                    @error('password')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">Mínimo 8 caracteres, máximo 20 caracteres</p>
                                 </div>
 
                                 <!-- Campo Roles -->
                                 <div class="mb-4">
                                     <label for="roles" class="block text-gray-700 font-medium">Perfiles <span class="text-red-500">*</span></label>
                                     <select name="roles[]" id="roles"
-                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                                        class="w-full mt-2 p-3 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none @error('roles') border-red-500 @enderror"
                                         multiple>
                                         <option value="">Seleccione...</option>
                                         @foreach ($roles as $role)
-                                            <option value="{{ $role }}">{{ $role }}</option>
+                                            <option value="{{ $role }}" {{ in_array($role, old('roles', [])) ? 'selected' : '' }}>{{ $role }}</option>
                                         @endforeach
                                     </select>
+                                    @error('roles')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">Mantenga presionado Ctrl (Windows) o Cmd (Mac) para seleccionar múltiples perfiles</p>
                                 </div>
                             </div>
 
