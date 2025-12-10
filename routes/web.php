@@ -73,6 +73,7 @@ Route::group(
 
         // Route::get('product/import', [App\Http\Controllers\ProductController::class, 'import'])->name('products.import');
         Route::get('/plantilla-descargar', [ProductController::class, 'descargarPlantilla'])->name('plantilla.descargar');
+        Route::post('/product/preview', [ProductController::class, 'preview'])->name('products.preview');
         Route::post('/product/import', [ProductController::class, 'import'])->name('products.import');
 
         // PRECIOS DE PRODUCTOS

@@ -1534,7 +1534,7 @@
         tabHeader.id = `tab-${tabId}`;
         tabHeader.innerHTML = `
             <i class="bi bi-cart"></i>
-            <span>Venta #${saleCounter}</span>
+            <span id="tab-name-${tabId}">Venta #${saleCounter}</span>
             ${saleCounter > 1 ? `<button onclick="closeTab('${tabId}', event)" class="close-tab" title="Cerrar"><i class="bi bi-x-lg"></i></button>` : ''}
         `;
         tabHeader.onclick = (e) => {
@@ -1628,21 +1628,29 @@
             actualizarFechaHoraTab(tabId);
             setInterval(() => actualizarFechaHoraTab(tabId), 1000);
         }
-        
+
         // Cargar mecánicos para este tab
         cargarMecanicosTab(tabId);
-        
+
         // Inicializar buscador de productos
         initProductSearchTab(tabId);
-        
+
         // Inicializar eventos de servicios
         initServiceEventsTab(tabId);
-        
+
         // Inicializar evento de DNI
         initDniSearchTab(tabId);
-        
+
         // Inicializar panel de documento
         initDocumentPanelTab(tabId);
+
+        // Evento para cambiar nombre del tab cuando se escribe el modelo de moto
+        const motorcycleModelInput = document.getElementById(`motorcycle_model_${tabId}`);
+        if (motorcycleModelInput) {
+            motorcycleModelInput.addEventListener('input', function() {
+                updateTabNameByMotorcycle(tabId, this.value);
+            });
+        }
     }
 
     // Función para actualizar fecha y hora de un tab
@@ -2113,15 +2121,32 @@
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        
+
         // Activar el tab seleccionado
         const selectedTab = document.getElementById(`tab-${tabId}`);
         const selectedContent = document.getElementById(`content-${tabId}`);
-        
+
         if (selectedTab && selectedContent) {
             selectedTab.classList.add('active');
             selectedContent.classList.add('active');
             currentActiveTab = tabId;
+        }
+    }
+
+    // Función para actualizar el nombre del tab según el modelo de moto
+    function updateTabNameByMotorcycle(tabId, motorcycleModel) {
+        const tabNameSpan = document.getElementById(`tab-name-${tabId}`);
+        if (!tabNameSpan) return;
+
+        if (!motorcycleModel || motorcycleModel.trim() === '') {
+            // Si no hay modelo, mostrar número de venta
+            const data = salesData.get(tabId);
+            tabNameSpan.textContent = `Venta #${data.saleNumber}`;
+        } else {
+            // Mostrar el modelo de la moto
+            tabNameSpan.textContent = motorcycleModel.trim();
+            // Agregar tooltip con el modelo completo
+            tabNameSpan.title = motorcycleModel.trim();
         }
     }
 

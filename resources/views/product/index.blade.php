@@ -169,10 +169,10 @@
                                         <a href="{{ route('products.edit', $product->id) }}" class="text-purple-600 hover:text-purple-800 transition-colors" title="Editar">
                                             <i class="fas fa-edit text-base"></i>
                                         </a>
-                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display: inline;" class="form-delete-product">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" title="Eliminar">
+                                            <button type="button" onclick="confirmDelete(this)" class="text-red-600 hover:text-red-800 transition-colors" title="Eliminar">
                                                 <i class="fas fa-trash text-base"></i>
                                             </button>
                                         </form>
@@ -220,39 +220,132 @@
         </div>
     </div>
 
-    <!-- Modal de Importación -->
-    <div id="importModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
+    <!-- Modal de Importación (Paso 1: Seleccionar archivo) -->
+    <div id="importModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" style="z-index: 9998;">
         <div class="bg-white rounded-lg w-96 max-w-[90vw]">
-            <div class="flex justify-between items-center p-6 border-b">
-                <h2 class="text-lg font-semibold">Importar Productos</h2>
-                <button id="btnCloseImportModal" class="text-gray-500 hover:text-gray-700">
+            <div class="flex justify-between items-center p-6 border-b bg-indigo-600 text-white rounded-t-lg">
+                <h2 class="text-lg font-semibold">
+                    <i class="fas fa-file-excel mr-2"></i>Importar Productos con EXCEL
+                </h2>
+                <button id="btnCloseImportModal" class="text-white hover:text-gray-200">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
-            <div class="p-6">
-                <a href="{{ route('plantilla.descargar') }}" class="flex items-center text-blue-600 hover:text-blue-800 mb-4">
-                    <i class="fas fa-download mr-2"></i>
-                    Descargar Plantilla
-                </a>
 
-                <form id="importForm" enctype="multipart/form-data">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar archivo</label>
-                        <input type="file" id="importFile" name="file" required 
-                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <div class="p-6">
+                <!-- Instrucciones para descargar plantilla -->
+                <div class="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p class="text-sm text-gray-700 mb-2">
+                        Descargue el modelo en <span class="font-bold">EXCEL</span> para importar, no modifique los campos en el archivo.
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold">Click para descargar:</span>
+                        <a href="{{ route('plantilla.descargar') }}" class="inline-flex items-center px-3 py-1 bg-red-50 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 transition text-sm">
+                            <i class="fas fa-download mr-1"></i>plantilla.xlsx
+                        </a>
                     </div>
-                    
-                    <div class="flex space-x-3">
-                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
-                            <i class="fas fa-upload mr-2"></i>
-                            Importar
-                        </button>
-                        <button type="button" id="btnCancelImport" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
-                            Cancelar
+                </div>
+
+                <!-- Input para seleccionar archivo -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Importar Excel:</label>
+                    <div class="relative border-2 border-dashed border-indigo-400 rounded-lg p-6 text-center bg-indigo-50 hover:bg-indigo-100 transition">
+                        <input type="file" id="importFile" name="file" accept=".xlsx,.xls,.csv"
+                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <div class="pointer-events-none">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-indigo-600 mb-2"></i>
+                            <p class="text-sm text-gray-700 mb-1" id="file-name-display">Arrastre su archivo aquí o haga click para seleccionar</p>
+                            <p class="text-xs text-gray-500">Formatos aceptados: Excel (.xlsx, .xls), CSV</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" id="btnCancelImport" class="bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Vista Previa (Paso 2: Revisar antes de importar) -->
+    <div id="previewModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" style="z-index: 10001;">
+        <div class="bg-white rounded-lg w-[95vw] max-w-7xl max-h-[90vh] flex flex-col" style="position: relative; z-index: 10002;">
+            <div class="flex justify-between items-center p-6 border-b bg-blue-600 text-white rounded-t-lg">
+                <h2 class="text-lg font-semibold">
+                    <i class="fas fa-table mr-2"></i>Vista Previa - Productos a Importar
+                </h2>
+                <button id="btnClosePreviewModal" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 flex-1 overflow-auto">
+                <!-- Controles superiores -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-search mr-1"></i>Buscar Producto
+                        </label>
+                        <input type="text" id="searchPreview" placeholder="Buscar por código, descripción..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        <small class="text-gray-500">Total: <span id="totalProducts">0</span> productos</small>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-store mr-1"></i>Tienda de Destino
+                        </label>
+                        <select id="tiendaDestino" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                            <option value="">Seleccione una tienda</option>
+                            @foreach ($tiendas as $tienda)
+                                <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button id="btnToggleEdit" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-colors text-sm">
+                            <i class="fas fa-edit mr-2"></i>
+                            <span id="editModeText">Modo Edición</span>
                         </button>
                     </div>
-                </form>
+                </div>
+
+                <!-- Tabla de vista previa -->
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm" id="previewTable">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">CÓDIGO</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">CÓD. BARRAS</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">DESCRIPCIÓN</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">MODELO</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">LOCALIZACIÓN</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">MARCA</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">UNIDAD</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">P. COMPRA</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">P. MAYORISTA</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">P. SUCURSAL A</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">P. SUCURSAL B</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">STOCK</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">STOCK MÍN</th>
+                                <th class="px-2 py-2 text-center text-xs font-semibold text-gray-600">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody" class="bg-white divide-y divide-gray-100">
+                            <!-- Los productos se cargarán aquí dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-lg">
+                <button id="btnCancelPreview" class="bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-6 rounded-lg transition-colors font-medium">
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                </button>
+                <button id="btnConfirmImport" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg transition-colors font-medium">
+                    <i class="fas fa-check mr-2"></i>Importar Productos
+                </button>
             </div>
         </div>
     </div>
@@ -270,23 +363,45 @@
             appearance: none;
             background-image: none;
         }
-        
+
         #tienda_id::-ms-expand {
             display: none;
         }
-        
+
         /* Centrar headers y datos */
         #productsTable thead th {
             text-align: center !important;
         }
-        
+
         #productsTable tbody td {
             text-align: center !important;
         }
-        
+
         /* Línea del encabezado más visible */
         #productsTable thead th {
             border-bottom: 2px solid #6b7280 !important;
+        }
+
+        /* SweetAlert con z-index alto para que aparezca sobre los modales */
+        .swal-high-zindex {
+            z-index: 100000 !important;
+        }
+
+        .swal2-container.swal-high-zindex {
+            z-index: 100000 !important;
+        }
+
+        .swal-high-zindex-popup {
+            z-index: 100001 !important;
+        }
+
+        .swal2-popup.swal-high-zindex-popup {
+            z-index: 100001 !important;
+        }
+
+        /* Forzar z-index en todos los elementos de SweetAlert */
+        body > .swal2-container {
+            z-index: 100000 !important;
         }
     </style>
 
@@ -359,10 +474,16 @@
 
             document.getElementById('btnCloseImportModal').addEventListener('click', () => {
                 document.getElementById('importModal').classList.add('hidden');
+                // Limpiar el input file
+                document.getElementById('importFile').value = '';
+                document.getElementById('file-name-display').textContent = 'Arrastre su archivo aquí o haga click para seleccionar';
             });
 
             document.getElementById('btnCancelImport').addEventListener('click', () => {
                 document.getElementById('importModal').classList.add('hidden');
+                // Limpiar el input file
+                document.getElementById('importFile').value = '';
+                document.getElementById('file-name-display').textContent = 'Arrastre su archivo aquí o haga click para seleccionar';
             });
 
             // Exportación
@@ -372,8 +493,16 @@
                 window.location.href = `{{ route('products.export') }}?filter=${encodeURIComponent(filter)}`;
             });
 
-            // Formulario de importación
-            document.getElementById('importForm').addEventListener('submit', handleImport);
+            // Evento CHANGE del input file - se procesa automáticamente cuando seleccionas archivo
+            document.getElementById('importFile').addEventListener('change', handleImport);
+
+            // Mostrar nombre del archivo seleccionado
+            document.getElementById('importFile').addEventListener('change', function(e) {
+                const fileName = e.target.files[0]?.name;
+                if (fileName) {
+                    document.getElementById('file-name-display').textContent = fileName;
+                }
+            });
         }
 
         function switchView(view) {
@@ -601,34 +730,48 @@
             document.getElementById("imagesModal").classList.add("hidden");
         }
 
+        // Variables globales para la vista previa
+        let previewData = [];
+        let editMode = false;
+
         function handleImport(e) {
-            e.preventDefault();
-            
-            const formData = new FormData();
             const fileInput = document.getElementById('importFile');
-            
+
             if (!fileInput.files[0]) {
+                return; // No hacer nada si no hay archivo
+            }
+
+            // Validar tipo de archivo
+            const validExtensions = ['xlsx', 'xls', 'csv'];
+            const fileName = fileInput.files[0].name;
+            const fileExt = fileName.split('.').pop().toLowerCase();
+
+            if (!validExtensions.includes(fileExt)) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Advertencia',
-                    text: 'Por favor selecciona un archivo'
+                    title: 'Formato inválido',
+                    text: 'Formato de archivo no válido. Use Excel (.xlsx, .xls) o CSV'
                 });
+                fileInput.value = '';
+                document.getElementById('file-name-display').textContent = 'Arrastre su archivo aquí o haga click para seleccionar';
                 return;
             }
-            
-            formData.append('importFile', fileInput.files[0]);
-            
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
             // Mostrar loading
             Swal.fire({
-                title: 'Importando...',
-                text: 'Por favor espera mientras se procesan los datos',
+                title: 'Procesando Excel...',
+                text: 'Por favor espera mientras se lee el archivo',
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
             });
-            
-            fetch("{{ route('products.import') }}", {
+
+            // Llamar a la ruta de vista previa (sin importar aún)
+            fetch("{{ route('products.preview') }}", {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -638,13 +781,292 @@
             .then(response => response.json())
             .then(data => {
                 Swal.close();
-                
+
                 if (!data.success) {
                     const errorMessages = data.message;
-                    const htmlMessage = Array.isArray(errorMessages) 
-                        ? errorMessages.join('<br>') 
+                    const htmlMessage = Array.isArray(errorMessages)
+                        ? errorMessages.join('<br>')
                         : errorMessages;
-                    
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al procesar',
+                        html: htmlMessage,
+                        width: '800px'
+                    });
+                } else {
+                    // Guardar datos y mostrar vista previa
+                    previewData = data.data;
+                    showPreviewModal();
+
+                    // Cerrar modal de importación
+                    document.getElementById('importModal').classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al procesar el archivo'
+                });
+            });
+        }
+
+        function showPreviewModal() {
+            // Mostrar modal de vista previa
+            document.getElementById('previewModal').classList.remove('hidden');
+
+            // Actualizar contador
+            document.getElementById('totalProducts').textContent = previewData.length;
+
+            // Renderizar tabla
+            renderPreviewTable();
+        }
+
+        function renderPreviewTable(searchTerm = '') {
+            const tbody = document.getElementById('previewTableBody');
+
+            // Filtrar datos si hay búsqueda
+            const filteredData = searchTerm
+                ? previewData.filter(item => {
+                    return (item.code_sku && item.code_sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           (item.code_bar && item.code_bar.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           (item.model && item.model.toLowerCase().includes(searchTerm.toLowerCase()));
+                })
+                : previewData;
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="14" class="px-3 py-8 text-center text-gray-500">
+                            <i class="fas fa-search text-3xl mb-2"></i>
+                            <p>No se encontraron productos</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map((item, index) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.code_sku || ''}"
+                                     onchange="updatePreviewItem(${index}, 'code_sku', this.value)"
+                                     class="w-20 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.code_sku || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.code_bar || ''}"
+                                     onchange="updatePreviewItem(${index}, 'code_bar', this.value)"
+                                     class="w-24 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.code_bar || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.description || ''}"
+                                     onchange="updatePreviewItem(${index}, 'description', this.value)"
+                                     class="w-full px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.description || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.model || ''}"
+                                     onchange="updatePreviewItem(${index}, 'model', this.value)"
+                                     class="w-20 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.model || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.location || ''}"
+                                     onchange="updatePreviewItem(${index}, 'location', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs"
+                                     placeholder="E-29">`
+                            : (item.location || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.brand || ''}"
+                                     onchange="updatePreviewItem(${index}, 'brand', this.value)"
+                                     class="w-20 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.brand || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="text" value="${item.unit || ''}"
+                                     onchange="updatePreviewItem(${index}, 'unit', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.unit || '-')
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="number" step="0.01" value="${item.purchase_price || 0}"
+                                     onchange="updatePreviewItem(${index}, 'purchase_price', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : 'S/ ' + (parseFloat(item.purchase_price || 0).toFixed(2))
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="number" step="0.01" value="${item.wholesale_price || 0}"
+                                     onchange="updatePreviewItem(${index}, 'wholesale_price', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : 'S/ ' + (parseFloat(item.wholesale_price || 0).toFixed(2))
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="number" step="0.01" value="${item.sucursalA_price || 0}"
+                                     onchange="updatePreviewItem(${index}, 'sucursalA_price', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : 'S/ ' + (parseFloat(item.sucursalA_price || 0).toFixed(2))
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="number" step="0.01" value="${item.sucursalB_price || 0}"
+                                     onchange="updatePreviewItem(${index}, 'sucursalB_price', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : 'S/ ' + (parseFloat(item.sucursalB_price || 0).toFixed(2))
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="number" value="${item.stock || 0}"
+                                     onchange="updatePreviewItem(${index}, 'stock', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.stock || 0)
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center text-xs">
+                        ${editMode
+                            ? `<input type="number" value="${item.minimum_stock || 5}"
+                                     onchange="updatePreviewItem(${index}, 'minimum_stock', this.value)"
+                                     class="w-16 px-1 py-1 border border-gray-300 rounded text-xs">`
+                            : (item.minimum_stock || 5)
+                        }
+                    </td>
+                    <td class="px-2 py-2 text-center">
+                        <button onclick="removePreviewItem(${index})"
+                                class="text-red-600 hover:text-red-800 transition-colors text-xs"
+                                title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updatePreviewItem(index, field, value) {
+            previewData[index][field] = value;
+        }
+
+        function removePreviewItem(index) {
+            Swal.fire({
+                title: '¿Eliminar producto?',
+                text: 'Este producto no se importará',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    previewData.splice(index, 1);
+                    renderPreviewTable();
+                    document.getElementById('totalProducts').textContent = previewData.length;
+                }
+            });
+        }
+
+        function confirmImport() {
+            const tiendaId = document.getElementById('tiendaDestino').value;
+
+            if (!tiendaId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tienda requerida',
+                    text: 'Por favor selecciona una tienda de destino'
+                });
+                return;
+            }
+
+            if (previewData.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin productos',
+                    text: 'No hay productos para importar'
+                });
+                return;
+            }
+
+            // Mostrar confirmación
+            Swal.fire({
+                title: '¿Confirmar importación?',
+                text: `Se importarán ${previewData.length} productos a la tienda seleccionada`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, importar',
+                cancelButtonText: 'Cancelar',
+                heightAuto: false,
+                backdrop: false,
+                customClass: {
+                    popup: 'swal-high-zindex-popup',
+                    container: 'swal-high-zindex'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeImport(tiendaId);
+                }
+            });
+        }
+
+        function executeImport(tiendaId) {
+            // Mostrar loading
+            Swal.fire({
+                title: 'Importando productos...',
+                text: 'Por favor espera mientras se guardan los datos',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch("{{ route('products.import') }}", {
+                method: 'POST',
+                body: JSON.stringify({
+                    products: previewData,
+                    tienda_id: tiendaId
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+
+                if (!data.success) {
+                    const errorMessages = data.message;
+                    const htmlMessage = Array.isArray(errorMessages)
+                        ? errorMessages.join('<br>')
+                        : errorMessages;
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Importación Fallida',
@@ -657,8 +1079,8 @@
                         title: 'Importación Exitosa',
                         text: data.message,
                     });
-                    
-                    document.getElementById('importModal').classList.add('hidden');
+
+                    document.getElementById('previewModal').classList.add('hidden');
                     setTimeout(() => location.reload(), 2000);
                 }
             })
@@ -668,24 +1090,85 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Error al procesar la importación'
+                    text: 'Error al importar los productos'
                 });
             });
         }
+
+        // Event listeners para el modal de vista previa
+        document.getElementById('btnClosePreviewModal').addEventListener('click', () => {
+            document.getElementById('previewModal').classList.add('hidden');
+            previewData = [];
+            // Limpiar el input file
+            document.getElementById('importFile').value = '';
+            document.getElementById('file-name-display').textContent = 'Arrastre su archivo aquí o haga click para seleccionar';
+        });
+
+        document.getElementById('btnCancelPreview').addEventListener('click', () => {
+            document.getElementById('previewModal').classList.add('hidden');
+            previewData = [];
+            // Limpiar el input file
+            document.getElementById('importFile').value = '';
+            document.getElementById('file-name-display').textContent = 'Arrastre su archivo aquí o haga click para seleccionar';
+        });
+
+        document.getElementById('btnConfirmImport').addEventListener('click', confirmImport);
+
+        document.getElementById('btnToggleEdit').addEventListener('click', () => {
+            editMode = !editMode;
+            const editModeText = document.getElementById('editModeText');
+            const btnToggleEdit = document.getElementById('btnToggleEdit');
+
+            if (editMode) {
+                editModeText.textContent = 'Modo Vista';
+                btnToggleEdit.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+                btnToggleEdit.classList.add('bg-yellow-100', 'hover:bg-yellow-200', 'text-yellow-700');
+            } else {
+                editModeText.textContent = 'Modo Edición';
+                btnToggleEdit.classList.remove('bg-yellow-100', 'hover:bg-yellow-200', 'text-yellow-700');
+                btnToggleEdit.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+            }
+
+            renderPreviewTable();
+        });
+
+        document.getElementById('searchPreview').addEventListener('input', (e) => {
+            renderPreviewTable(e.target.value);
+        });
 
         // Cerrar modales al hacer clic fuera
         document.addEventListener('click', function(e) {
             const importModal = document.getElementById('importModal');
             const imagesModal = document.getElementById('imagesModal');
-            
+
             if (e.target === importModal) {
                 importModal.classList.add('hidden');
             }
-            
+
             if (e.target === imagesModal) {
                 closeModalImages();
             }
         });
+
+        // Función para confirmar eliminación con SweetAlert
+        function confirmDelete(button) {
+            Swal.fire({
+                title: '¿Eliminar producto?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Enviar el formulario
+                    button.closest('form').submit();
+                }
+            });
+        }
     </script>
 
 </x-app-layout>

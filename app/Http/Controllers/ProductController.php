@@ -217,58 +217,189 @@ class ProductController extends Controller
         return Excel::download(new ImportTemplateExport, 'Plantilla_Importacion.xlsx');
     }
 
-    public function import(Request $request)
+    /**
+     * Vista previa del Excel antes de importar
+     */
+    public function preview(Request $request)
     {
         $request->validate([
-            'importFile' => 'required|mimes:xlsx,csv',
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
-        DB::beginTransaction();  // Inicia la transacción
-
         try {
-            $import = new ProductsImport(auth()->id());
+            $file = $request->file('file');
+            $data = Excel::toArray([], $file);
 
-            // **PRIMERA IMPORTACIÓN (MODO PRUEBA)**
-            Excel::import($import, $request->file('importFile'));
-
-            $failures = $import->getFailures();
-
-            if (!empty($failures)) {
-                $errorMessages = [];
-
-                foreach ($failures as $failure) {
-                    $row = $failure['row'];
-                    if (!isset($errorMessages[$row])) {
-                        $errorMessages[$row] = [];
-                    }
-                    $errorMessages[$row] = array_merge($errorMessages[$row], $failure['errors']);
-                }
-
-                $finalMessages = [];
-                foreach ($errorMessages as $row => $errors) {
-                    $finalMessages[] = "Fila {$row}: " . implode(', ', array_unique($errors));
-                }
-
-                DB::rollBack();
-
+            if (empty($data) || empty($data[0])) {
                 return response()->json([
                     'success' => false,
-                    'message' => $finalMessages
+                    'message' => 'El archivo está vacío o no contiene datos válidos'
                 ], 422);
             }
 
-            // **SEGUNDA IMPORTACIÓN (REAL) SOLO SI NO HUBO ERRORES**
-            Excel::import(new ProductsImport(auth()->id()), $request->file('importFile'));
+            $rows = $data[0];
+            $products = [];
 
-            DB::commit();  // ✅ Confirmamos los cambios si no hay errores
+            // Saltar la primera fila (encabezados) y procesar el resto
+            for ($i = 1; $i < count($rows); $i++) {
+                $row = $rows[$i];
+
+                // Validar que la fila tenga datos mínimos (al menos descripción)
+                if (empty($row[2])) {
+                    continue; // Saltar filas sin descripción
+                }
+
+                $products[] = [
+                    'code_sku' => $row[0] ?? '',
+                    'code_bar' => $row[1] ?? '',
+                    'description' => $row[2] ?? '',
+                    'model' => $row[3] ?? '',
+                    'location' => $row[4] ?? '',
+                    'brand' => $row[5] ?? '',
+                    'unit' => $row[6] ?? '',
+                    'purchase_price' => $row[7] ?? 0,
+                    'wholesale_price' => $row[8] ?? 0,
+                    'sucursalA_price' => $row[9] ?? 0,
+                    'sucursalB_price' => $row[10] ?? 0,
+                    'stock' => $row[11] ?? 0,
+                    'minimum_stock' => $row[12] ?? 5,
+                ];
+            }
+
+            if (empty($products)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontraron productos válidos en el archivo'
+                ], 422);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Importación completada correctamente.'
+                'data' => $products,
+                'message' => 'Archivo procesado correctamente'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();  // Se revierte cualquier cambio si ocurre un error inesperado
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el archivo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
+    public function import(Request $request)
+    {
+        // Ahora recibe datos JSON en lugar de archivo
+        try {
+            $products = $request->input('products');
+            $tiendaId = $request->input('tienda_id');
+
+            if (empty($products)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay productos para importar'
+                ], 422);
+            }
+
+            if (!$tiendaId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debe seleccionar una tienda'
+                ], 422);
+            }
+
+            DB::beginTransaction();
+
+            $imported = 0;
+            $errors = [];
+
+            foreach ($products as $index => $productData) {
+                try {
+                    // Crear el producto
+                    $product = new Product();
+                    $product->code_sku = $productData['code_sku'] ?? null;
+                    $product->code_bar = $productData['code_bar'] ?? null;
+                    $product->description = $productData['description'];
+                    $product->model = $productData['model'] ?? null;
+                    $product->tienda_id = $tiendaId;
+                    $product->location = $productData['location'] ?? 'Almacén';
+                    // purchase_price no existe en la tabla products - se ignorará por ahora
+
+                    // Buscar o crear marca
+                    if (!empty($productData['brand'])) {
+                        $brand = Brand::firstOrCreate(['name' => $productData['brand']]);
+                        $product->brand_id = $brand->id;
+                    }
+
+                    // Buscar o crear unidad
+                    if (!empty($productData['unit'])) {
+                        $unit = Unit::firstOrCreate(['name' => $productData['unit']]);
+                        $product->unit_id = $unit->id;
+                    } else {
+                        $unit = Unit::first();
+                        $product->unit_id = $unit ? $unit->id : null;
+                    }
+
+                    $product->save();
+
+                    // Crear stock si hay cantidad
+                    $stockQuantity = $productData['stock'] ?? 0;
+                    $minimumStock = $productData['minimum_stock'] ?? 5;
+
+                    if ($stockQuantity > 0) {
+                        Stock::create([
+                            'product_id' => $product->id,
+                            'tienda_id' => $tiendaId,
+                            'quantity' => $stockQuantity,
+                            'minimum_stock' => $minimumStock
+                        ]);
+                    }
+
+                    // Crear precios
+                    $prices = [
+                        'mayorista' => $productData['wholesale_price'] ?? 0,
+                        'sucursalA' => $productData['sucursalA_price'] ?? 0,
+                        'sucursalB' => $productData['sucursalB_price'] ?? 0,
+                    ];
+
+                    foreach ($prices as $type => $price) {
+                        if ($price > 0) {
+                            ProductPrice::create([
+                                'product_id' => $product->id,
+                                'type' => $type,
+                                'price' => $price
+                            ]);
+                        }
+                    }
+
+                    $imported++;
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // Error de duplicado (código único)
+                    if ($e->errorInfo[1] == 1062) {
+                        $errors[] = "Fila " . ($index + 2) . ": El producto '{$productData['description']}' con código '{$productData['code_sku']}' ya existe en el sistema. No se puede importar productos duplicados.";
+                    } else {
+                        $errors[] = "Fila " . ($index + 2) . ": Error en la base de datos - " . $e->getMessage();
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Fila " . ($index + 2) . ": " . $e->getMessage();
+                }
+            }
+
+            if (!empty($errors)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => $errors
+                ], 422);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Se importaron {$imported} productos correctamente."
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error en la importación: ' . $e->getMessage()
