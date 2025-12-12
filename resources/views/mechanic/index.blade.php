@@ -31,6 +31,7 @@
                             <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Dirección</th>
                             <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Correo</th>
                             <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Estado</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -45,13 +46,27 @@
                                 <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $mechanic->direccion }}</td>
                                 <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $mechanic->correo }}</td>
                                 <td class="px-3 py-2 text-center">
-                                    <button type="button" 
-                                            id="btn-{{ $mechanic->id }}"
-                                            class="px-2 py-1 inline-flex text-xs font-medium rounded-full 
-                                                {{ $mechanic->status_mechanic == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}"
-                                            onclick="confirmDelete({{ $mechanic->id }}, '{{ $mechanic->status_mechanic == 0 ? '¿Está seguro de activar este mecánico?' : '¿Está seguro de desactivar este mecánico?' }}')">
+                                    <span id="status-badge-{{ $mechanic->id }}" class="px-2 py-1 inline-flex text-xs font-medium rounded-full
+                                        {{ $mechanic->status_mechanic == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                         {{ $mechanic->status_mechanic == 1 ? 'Disponible' : 'No disponible' }}
-                                    </button>
+                                    </span>
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
+                                                title="Cambiar estado"
+                                                onclick="confirmToggleStatusMechanic({{ $mechanic->id }}, {{ $mechanic->status_mechanic }})">
+                                            <i class="bi bi-arrow-repeat text-base"></i>
+                                        </button>
+                                        <form id="delete-form-mechanic-{{ $mechanic->id }}" action="{{ route('mechanics.destroy', $mechanic->id) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="text-red-600 hover:text-red-800 transition-colors"
+                                                    title="Eliminar" onclick="confirmDeleteMechanic({{ $mechanic->id }})">
+                                                <i class="bi bi-trash text-base"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -89,8 +104,8 @@
                     },
                     dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
                     columnDefs: [
-                        { targets: [6], orderable: false }, // Estado no ordenable
-                        { targets: [6], className: 'text-center' }
+                        { targets: [6, 7], orderable: false }, // Estado y Acciones no ordenables
+                        { targets: [6, 7], className: 'text-center' }
                     ],
                     order: [[0, 'asc']], // Ordenar por código
                     autoWidth: false,
@@ -99,8 +114,13 @@
             }
         });
 
-        // Función para confirmar cambio de estado (debes implementar el endpoint)
-        function confirmDelete(mechanicId, message) {
+        // Función para cambiar el estado del mecánico (toggle)
+        function confirmToggleStatusMechanic(mechanicId, currentStatus) {
+            const newStatus = currentStatus == 1 ? 0 : 1;
+            const message = currentStatus == 1
+                ? '¿Estás seguro de desactivar este mecánico?'
+                : '¿Estás seguro de activar este mecánico?';
+
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: message,
@@ -112,13 +132,60 @@
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Aquí debes implementar la lógica para cambiar el estado
-                    // Por ejemplo, hacer un fetch a una ruta específica
-                    Swal.fire(
-                        'Pendiente',
-                        'Debes implementar la ruta para cambiar el estado del mecánico',
-                        'info'
-                    );
+                    // Hacer petición AJAX para cambiar el estado
+                    fetch(`/mechanics/${mechanicId}/toggle-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Actualizar el badge visualmente
+                            const badge = document.getElementById(`status-badge-${mechanicId}`);
+                            if (newStatus == 1) {
+                                badge.className = 'px-2 py-1 inline-flex text-xs font-medium rounded-full bg-green-100 text-green-700';
+                                badge.textContent = 'Disponible';
+                            } else {
+                                badge.className = 'px-2 py-1 inline-flex text-xs font-medium rounded-full bg-red-100 text-red-700';
+                                badge.textContent = 'No disponible';
+                            }
+
+                            Swal.fire('¡Actualizado!', data.message, 'success');
+
+                            // Actualizar el estado en el botón para la próxima vez
+                            const toggleBtn = document.querySelector(`button[onclick*="confirmToggleStatusMechanic(${mechanicId}"]`);
+                            if (toggleBtn) {
+                                toggleBtn.setAttribute('onclick', `confirmToggleStatusMechanic(${mechanicId}, ${newStatus})`);
+                            }
+                        } else {
+                            Swal.fire('Error', data.message || 'No se pudo cambiar el estado', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Ocurrió un error al cambiar el estado', 'error');
+                    });
+                }
+            });
+        }
+
+        // Función para eliminar mecánico (desactivar permanentemente)
+        function confirmDeleteMechanic(id) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Este mecánico será desactivado permanentemente",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-mechanic-' + id).submit();
                 }
             });
         }

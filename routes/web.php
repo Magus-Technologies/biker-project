@@ -54,6 +54,7 @@ Route::group(
         Route::get('/drives/{id}/details', [CustomerController::class, 'getDetails'])->name('drives.details');
         // MECANICOS
         Route::resource('mechanics', App\Http\Controllers\MechanicController::class);
+        Route::post('mechanics/{id}/toggle-status', [App\Http\Controllers\MechanicController::class, 'toggleStatus'])->name('mechanics.toggleStatus');
         Route::get('mechanic/MecanicosDisponibles', [App\Http\Controllers\MechanicController::class, 'MecanicosDisponibles'])->name('obtener.MecanicosDisponibles');
         // VEHICULOS
         Route::resource('cars', App\Http\Controllers\CarController::class);

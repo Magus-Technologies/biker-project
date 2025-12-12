@@ -72,10 +72,59 @@ class MechanicController extends Controller
     }
 
     /**
+     * Toggle mechanic status (disponible/no disponible)
+     */
+    public function toggleStatus(Request $request, string $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            // Verificar que el usuario sea un mecánico
+            if (!$user->hasRole('mecanico')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El usuario no es un mecánico'
+                ], 400);
+            }
+
+            // Cambiar el estado
+            $user->status_mechanic = $request->status;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => $user->status_mechanic == 1
+                    ? 'Mecánico activado correctamente'
+                    : 'Mecánico desactivado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar el estado del mecánico'
+            ], 500);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+
+            // Verificar que el usuario sea un mecánico
+            if (!$user->hasRole('mecanico')) {
+                return redirect()->route('mechanics.index')->with('error', 'El usuario no es un mecánico');
+            }
+
+            // Desactivar permanentemente
+            $user->status_mechanic = 0;
+            $user->save();
+
+            return redirect()->route('mechanics.index')->with('success', 'Mecánico desactivado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('mechanics.index')->with('error', 'Error al desactivar el mecánico');
+        }
     }
 }
