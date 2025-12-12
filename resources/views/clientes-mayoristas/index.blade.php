@@ -95,10 +95,14 @@
                                            title="Editar">
                                             <i class="bi bi-pencil text-base"></i>
                                         </a>
-                                        <button class="text-red-600 hover:text-red-800 transition-colors" 
-                                                title="Eliminar">
-                                            <i class="bi bi-trash text-base"></i>
-                                        </button>
+                                        <form id="delete-form-cliente-{{ $cliente->id }}" action="{{ route('clientes-mayoristas.destroy', $cliente->id) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="text-red-600 hover:text-red-800 transition-colors"
+                                                    title="Eliminar" onclick="confirmDeleteCliente({{ $cliente->id }})">
+                                                <i class="bi bi-trash text-base"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -492,6 +496,24 @@ function cerrarModal() {
     if (modal) {
         modal.hide();
     }
+}
+
+// Función para confirmar eliminación de cliente mayorista con SweetAlert
+function confirmDeleteCliente(id) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Este cliente mayorista será desactivado",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-cliente-' + id).submit();
+        }
+    });
 }
 </script>
 

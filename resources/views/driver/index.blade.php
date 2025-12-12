@@ -97,10 +97,14 @@
                                                 <i class="bi bi-pencil text-base"></i>
                                             </a>
                                         @endcan
-                                        <button class="text-red-600 hover:text-red-800 transition-colors" 
-                                                title="Eliminar">
-                                            <i class="bi bi-trash text-base"></i>
-                                        </button>
+                                        <form id="delete-form-driver-{{ $drive->id }}" action="{{ route('drives.destroy', $drive->id) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="text-red-600 hover:text-red-800 transition-colors"
+                                                    title="Eliminar" onclick="confirmDeleteDriver({{ $drive->id }})">
+                                                <i class="bi bi-trash text-base"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -493,6 +497,24 @@ function closeModal() {
     if (modal) {
         modal.hide();
     }
+}
+
+// Función para confirmar eliminación de conductor con SweetAlert
+function confirmDeleteDriver(id) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Este conductor será desactivado",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-driver-' + id).submit();
+        }
+    });
 }
 </script>
 

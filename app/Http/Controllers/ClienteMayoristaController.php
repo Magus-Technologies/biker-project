@@ -255,6 +255,14 @@ class ClienteMayoristaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $cliente = ClienteMayorista::findOrFail($id);
+            $cliente->status = 0;
+            $cliente->save();
+
+            return redirect()->route('clientes-mayoristas.index')->with('success', 'Cliente mayorista desactivado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('clientes-mayoristas.index')->with('error', 'Error al desactivar el cliente mayorista');
+        }
     }
 }

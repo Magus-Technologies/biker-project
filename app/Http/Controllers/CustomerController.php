@@ -234,6 +234,14 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $driver = Drive::findOrFail($id);
+            $driver->status = 0;
+            $driver->save();
+
+            return redirect()->route('drives.index')->with('success', 'Conductor desactivado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('drives.index')->with('error', 'Error al desactivar el conductor');
+        }
     }
 }
