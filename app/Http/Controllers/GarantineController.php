@@ -196,6 +196,14 @@ class GarantineController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $garantine = Garantine::findOrFail($id);
+            $garantine->status = 0;
+            $garantine->save();
+
+            return redirect()->route('garantines.index')->with('success', 'Garantía desactivada correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('garantines.index')->with('error', 'Error al desactivar la garantía');
+        }
     }
 }

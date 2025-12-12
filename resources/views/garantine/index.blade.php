@@ -115,9 +115,16 @@
                                     </button>
                                 </td>
                                 <td class="px-3 py-2 text-center">
-                                    <a href="{{ route('garantines.edit', $garantia->id) }}" class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar">
+                                    <a href="{{ route('garantines.edit', $garantia->id) }}" class="text-blue-600 hover:text-blue-800 transition-colors mr-3" title="Editar">
                                         <i class="bi bi-pencil text-base"></i>
                                     </a>
+                                    <form id="delete-form-{{ $garantia->id }}" action="{{ route('garantines.destroy', $garantia->id) }}" method="POST" class="inline-block">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="text-red-600 hover:text-red-800 transition-colors" title="Eliminar" onclick="confirmDeleteGarantia({{ $garantia->id }})">
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -170,6 +177,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Función para confirmar eliminación con SweetAlert
+function confirmDeleteGarantia(id) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta garantía será eliminada permanentemente",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
 </script>
 
 </x-app-layout>
