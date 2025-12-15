@@ -168,6 +168,13 @@ class ServiceController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $service = Service::findOrFail($id);
+            $service->delete();
+
+            return redirect()->route('services.index')->with('success', 'Servicio eliminado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('services.index')->with('error', 'Error al eliminar el servicio');
+        }
     }
 }

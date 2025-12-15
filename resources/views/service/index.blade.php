@@ -116,11 +116,21 @@
                                     {{ \Carbon\Carbon::parse($servicio->fecha_registro)->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="px-3 py-2 text-center">
-                                    <button onclick="openModal({{ $servicio->id }})"
-                                            class="text-blue-600 hover:text-blue-800 transition-colors"
-                                            title="Ver/Agregar detalles">
-                                        <i class="bi bi-eye text-base"></i>
-                                    </button>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="openModal({{ $servicio->id }})"
+                                                class="text-blue-600 hover:text-blue-800 transition-colors"
+                                                title="Ver/Agregar detalles">
+                                            <i class="bi bi-eye text-base"></i>
+                                        </button>
+                                        <form id="delete-form-service-{{ $servicio->id }}" action="{{ route('services.destroy', $servicio->id) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="text-red-600 hover:text-red-800 transition-colors"
+                                                    title="Eliminar" onclick="confirmDeleteService({{ $servicio->id }})">
+                                                <i class="bi bi-trash text-base"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -361,6 +371,24 @@
             if (window.servicesTable) {
                 window.servicesTable.draw();
             }
+        }
+
+        // Función para confirmar eliminación de servicio con SweetAlert
+        function confirmDeleteService(id) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Este servicio será eliminado permanentemente",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-service-' + id).submit();
+                }
+            });
         }
     </script>
 
