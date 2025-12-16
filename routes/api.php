@@ -37,6 +37,7 @@ Route::get('/product', function (Request $request) {
     $query = $request->input('search', '');
 
     $productosQuery = Product::with('brand', 'unit', 'tienda', 'prices', 'stocks')
+        ->where('status', 1) // Solo productos activos
         ->where(function ($q) use ($query) {
             $q->where('code_sku', 'like', "%{$query}%")
                 ->orWhere('code_bar', 'like', "%{$query}%")

@@ -257,7 +257,7 @@
         brandInput.addEventListener('input', function() {
             const query = this.value;
             if (query.length > 0) {
-                fetch(`/api/brands/search?query=${encodeURIComponent(query)}`)
+                fetch(`${baseUrl}/api/brands/search?query=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
                         brandSuggestions.innerHTML = '';
@@ -290,7 +290,7 @@
         unitInput.addEventListener('input', function() {
             const query = this.value;
             if (query.length > 0) {
-                fetch(`/api/units/search?query=${encodeURIComponent(query)}`)
+                fetch(`${baseUrl}/api/units/search?query=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
                         unitSuggestions.innerHTML = '';
@@ -330,7 +330,7 @@
             const formData = new FormData(document.getElementById('formProducts'));
             formData.append('_method', 'PUT');
 
-            fetch(`/products/{{ $product->id }}`, {
+            fetch(`${baseUrl}/products/{{ $product->id }}`, {
                 method: 'POST',
                 body: formData,
                 headers: {

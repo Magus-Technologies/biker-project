@@ -1111,17 +1111,39 @@
         let totalAmount = 0;
         let igvAmount = 0;
         let subtotalAmount = 0;
+        
         quotationItems.forEach(item => {
             totalAmount += item.quantity * item.unit_price;
         })
+        
         services.forEach(item => {
             totalAmount += parseFloat(item.price);
         })
+        
         igvAmount = totalAmount * 0.18;
         subtotalAmount = totalAmount - igvAmount;
-        document.getElementById("subtotalAmount").textContent = "S/ " + subtotalAmount.toFixed(2);
-        document.getElementById("igvAmount").textContent = "S/ " + igvAmount.toFixed(2);
-        document.getElementById("totalAmount").textContent = "S/ " + totalAmount.toFixed(2);
+        
+        // Obtener el tab activo
+        const activeTab = document.querySelector('.tab-content.active');
+        if (activeTab) {
+            const tabId = activeTab.id.replace('content-', '');
+            const subtotalEl = document.getElementById(`subtotalAmount_${tabId}`);
+            const igvEl = document.getElementById(`igvAmount_${tabId}`);
+            const totalEl = document.getElementById(`totalAmount_${tabId}`);
+            
+            if (subtotalEl) subtotalEl.textContent = "S/ " + subtotalAmount.toFixed(2);
+            if (igvEl) igvEl.textContent = "S/ " + igvAmount.toFixed(2);
+            if (totalEl) totalEl.textContent = "S/ " + totalAmount.toFixed(2);
+        } else {
+            // Fallback para el formulario original (sin tabs)
+            const subtotalEl = document.getElementById("subtotalAmount");
+            const igvEl = document.getElementById("igvAmount");
+            const totalEl = document.getElementById("totalAmount");
+            
+            if (subtotalEl) subtotalEl.textContent = "S/ " + subtotalAmount.toFixed(2);
+            if (igvEl) igvEl.textContent = "S/ " + igvAmount.toFixed(2);
+            if (totalEl) totalEl.textContent = "S/ " + totalAmount.toFixed(2);
+        }
     }
 
 
@@ -1969,10 +1991,137 @@
         const addServiceBtn = document.getElementById(`addService_${tabId}`);
         if (addServiceBtn) {
             addServiceBtn.addEventListener('click', function() {
-                // Lógica para agregar servicio
-                console.log('Agregar servicio para tab:', tabId);
+                addServiceTab(tabId);
             });
         }
+        
+        // Inicializar búsqueda de servicios
+        const serviceInput = document.getElementById(`service_${tabId}`);
+        if (serviceInput) {
+            serviceInput.addEventListener('input', function() {
+                searchServicesTab(this.value.trim(), tabId);
+            });
+        }
+    }
+    
+    // Función para agregar servicio en un tab
+    function addServiceTab(tabId) {
+        const serviceName = document.getElementById(`service_${tabId}`).value.trim();
+        const servicePrice = document.getElementById(`service_price_${tabId}`).value.trim();
+
+        if (serviceName === "" || servicePrice === "") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor, complete todos los campos.',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+
+        const newService = {
+            id: Date.now(),
+            name: serviceName,
+            price: parseFloat(servicePrice)
+        };
+
+        services.push(newService);
+        updateTableTab(tabId);
+        updateInformationCalculos();
+
+        // Limpiar inputs
+        document.getElementById(`service_${tabId}`).value = "";
+        document.getElementById(`service_price_${tabId}`).value = "";
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Servicio agregado',
+            timer: 1000,
+            showConfirmButton: false
+        });
+    }
+    
+    // Función para actualizar la tabla de servicios en un tab
+    function updateTableTab(tabId) {
+        const tableBody = document.getElementById(`serviceList_${tabId}`);
+        if (!tableBody) {
+            console.error('Tabla de servicios no encontrada para tab:', tabId);
+            return;
+        }
+        
+        tableBody.innerHTML = "";
+
+        services.forEach(service => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="border border-gray-300 px-4 py-2">${service.name}</td>
+                <td class="border border-gray-300 px-4 py-2">S/ ${parseFloat(service.price).toFixed(2)}</td>
+                <td class="border border-gray-300 px-4 py-2">
+                    <button class="bg-red-500 text-white px-2 py-1 rounded-md" onclick="deleteServiceTab(${service.id}, '${tabId}')">Eliminar</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+    
+    // Función para eliminar un servicio en un tab
+    function deleteServiceTab(serviceId, tabId) {
+        services = services.filter(service => service.id !== serviceId);
+        updateTableTab(tabId);
+        updateInformationCalculos();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Servicio eliminado',
+            timer: 1000,
+            showConfirmButton: false
+        });
+    }
+    
+    // Función para buscar servicios en un tab
+    function searchServicesTab(inputValue, tabId) {
+        const suggestionsList = document.getElementById(`serviceSuggestions_${tabId}`);
+        const dropdown = document.getElementById(`serviceDropdown_${tabId}`);
+
+        if (!suggestionsList || !dropdown) {
+            console.error('Elementos de búsqueda de servicios no encontrados para tab:', tabId);
+            return;
+        }
+
+        if (inputValue === "") {
+            suggestionsList.innerHTML = "";
+            dropdown.classList.add("hidden");
+            return;
+        }
+
+        fetch(`${baseUrl}/api/services?query=${inputValue}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsList.innerHTML = "";
+
+                if (data.length > 0) {
+                    data.forEach(service => {
+                        const item = document.createElement("li");
+                        item.textContent = `${service.name} - S/. ${service.default_price}`;
+                        item.classList.add("cursor-pointer", "p-2", "hover:bg-gray-100");
+
+                        item.addEventListener("click", function() {
+                            document.getElementById(`service_${tabId}`).value = service.name;
+                            document.getElementById(`service_price_${tabId}`).value = service.default_price;
+                            dropdown.classList.add("hidden");
+                        });
+
+                        suggestionsList.appendChild(item);
+                    });
+
+                    dropdown.classList.remove("hidden");
+                } else {
+                    dropdown.classList.add("hidden");
+                }
+            })
+            .catch(error => {
+                console.error('Error buscando servicios:', error);
+            });
     }
 
     // Función para inicializar búsqueda de DNI del tab
