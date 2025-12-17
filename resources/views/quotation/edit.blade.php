@@ -1,9 +1,15 @@
 <x-app-layout>
-    <x-slot name="header">
+    <!-- <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             cotizacion EDTAR
         </h2>
-    </x-slot>
+    </x-slot> -->
+         <x-breadcrumb 
+        title="Actualizar Cotizacion" 
+        parent="Cotizacion" 
+        parentUrl="{{ route('quotations.index') }}" 
+        subtitle="Editar" 
+    />
     <div class="container mx-auto p-2 text-sm">
         <div class="grid grid-cols-3 gap-6">
             <!-- Formulario de Cliente -->

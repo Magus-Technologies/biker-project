@@ -1,151 +1,206 @@
 <!-- resources\views\product\create.blade.php -->
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Registro de Productos
-        </h2>
-    </x-slot>
+    <x-breadcrumb 
+        title="Registrar Producto" 
+        parent="Productos" 
+        parentUrl="{{ route('products.index') }}" 
+        subtitle="Crear" 
+    />
 
-    <div class="w-3/4 mx-auto py-8 my-6 shadow-lg p-5 rounded-lg border border-gray-300 text-xs">
-        <form id="formProducts" enctype="multipart/form-data">
-            @csrf
-            <h5 class="text-lg font-semibold mb-4">Datos del Producto</h5>
+    <div class="px-3 py-4">
+        <!-- Header con botones -->
+        <!-- <div class="bg-white rounded-lg px-4 py-3 mb-3 flex flex-wrap justify-between items-center gap-3">
+            <h2 class="text-lg font-semibold text-gray-700">
+                <i class="bi bi-box-seam mr-2 text-blue-600"></i>
+                Registro de Producto
+            </h2>
+            <a href="{{ route('products.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                <i class="bi bi-x-lg mr-1"></i>
+                Cancelar
+            </a>
+        </div> -->
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4  ">
-            
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 border border-gray-200">
+            <form id="formProducts" enctype="multipart/form-data">
+                @csrf
+                <h5 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
+                    <i class="bi bi-info-circle mr-2 text-blue-600"></i>
+                    Datos del Producto
+                </h5>
+
                 <!-- Control Type Switch -->
-                <div class="col-span-full mb-4">
-                    <label class="block font-medium text-gray-700 mb-3">Tipo de Control</label>
+                <div class="mb-6">
+                    <label class="block font-medium text-gray-700 mb-3 text-sm">Tipo de Control</label>
                     <div class="flex items-center justify-center">
                         <div class="bg-gray-200 p-1 rounded-full shadow-inner">
-                            <div class="flex relative">
+                            <div class="flex flex-col sm:flex-row relative gap-1 sm:gap-0">
                                 <input type="radio" name="control_type" value="cantidad" class="sr-only" id="radio_cantidad">
                                 <input type="radio" name="control_type" value="codigo_unico" class="sr-only" id="radio_codigo" checked>
                                 
-                                <label for="radio_cantidad" class="flex items-center px-6 py-3 rounded-full cursor-pointer transition-all duration-300 control-option" data-value="cantidad">
+                                <label for="radio_cantidad" class="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-full cursor-pointer transition-all duration-300 control-option" data-value="cantidad">
                                     <i class="fas fa-calculator mr-2 text-blue-500"></i>
-                                    <span class="text-sm font-medium">Control por Cantidad</span>
+                                    <span class="text-xs sm:text-sm font-medium whitespace-nowrap">Control por Cantidad</span>
                                 </label>
                                 
-                                <label for="radio_codigo" class="flex items-center px-6 py-3 rounded-full cursor-pointer transition-all duration-300 control-option" data-value="codigo_unico">
+                                <label for="radio_codigo" class="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-full cursor-pointer transition-all duration-300 control-option" data-value="codigo_unico">
                                     <i class="fas fa-qrcode mr-2 text-green-500"></i>
-                                    <span class="text-sm font-medium">Control por Código Único</span>
+                                    <span class="text-xs sm:text-sm font-medium whitespace-nowrap">Control por Código Único</span>
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
             
-                <div>
-                    <label for="code_sku" class="block  font-medium text-gray-700 ">Codigo</label>
-                    <input type="text" name="code_sku" id="code_sku"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
+                    <div>
+                        <label for="code_sku" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-upc-scan mr-1 text-gray-500"></i>Código SKU
+                        </label>
+                        <input type="text" name="code_sku" id="code_sku"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-card-text mr-1 text-gray-500"></i>Descripción
+                        </label>
+                        <input type="text" name="description" id="description"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="code_bar" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-upc mr-1 text-gray-500"></i>Código de Barras
+                        </label>
+                        <input type="text" name="code_bar" id="code_bar"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="model" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-tag mr-1 text-gray-500"></i>Modelo
+                        </label>
+                        <input type="text" name="model" id="model"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div class="relative">
+                        <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-award mr-1 text-gray-500"></i>Marca
+                        </label>
+                        <input type="text" id="brand" name="brand"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" autocomplete="off">
+                        <div id="brandDropdown"
+                            class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                            <ul id="brandSuggestions" class="max-h-40 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <label for="unit_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-rulers mr-1 text-gray-500"></i>Unidad de Medida
+                        </label>
+                        <input type="text" id="unit_name" name="unit_name"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" autocomplete="off">
+                        <div id="unitDropdown"
+                            class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                            <ul id="unitSuggestions" class="max-h-40 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-box-seam mr-1 text-gray-500"></i>Cantidad
+                        </label>
+                        <input type="number" name="quantity" id="quantity"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="minimum_stock" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-exclamation-triangle mr-1 text-gray-500"></i>Stock Mínimo
+                        </label>
+                        <input type="number" name="minimum_stock" id="minimum_stock"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-geo-alt mr-1 text-gray-500"></i>Ubicación
+                        </label>
+                        <input type="text" name="location" id="location"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="images" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-images mr-1 text-gray-500"></i>Imágenes del Producto
+                        </label>
+                        <input type="file" name="images[]" id="images" accept="image/*" multiple
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div id="previewImages" class="mt-2 flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div id="scanButton" class="hidden sm:col-span-2 lg:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Escanear Códigos</label>
+                        <button type="button" id="openScanModal" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center justify-center text-sm">
+                            <i class="fas fa-qrcode mr-2"></i>
+                            Escanear
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label for="description" class="block  font-medium text-gray-700">Descripción</label>
-                    <input type="text" name="description" id="description"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
+
+                <h5 class="text-lg font-semibold mb-4 mt-6 text-gray-800 border-b pb-2">
+                    <i class="bi bi-currency-dollar mr-2 text-green-600"></i>
+                    Precios
+                </h5>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label for="prices[buy]" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-cart mr-1 text-gray-500"></i>Precio de Compra
+                        </label>
+                        <input type="number" step="0.01" name="prices[buy]" id="prices_buy"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="prices[wholesale]" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-people mr-1 text-gray-500"></i>Precio Mayorista
+                        </label>
+                        <input type="number" step="0.01" name="prices[wholesale]" id="prices_wholesale"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="prices[sucursalA]" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-shop mr-1 text-gray-500"></i>Precio Sucursal A
+                        </label>
+                        <input type="number" step="0.01" name="prices[sucursalA]" id="prices_sucursal_a"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="prices[sucursalB]" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-shop-window mr-1 text-gray-500"></i>Precio Sucursal B
+                        </label>
+                        <input type="number" step="0.01" name="prices[sucursalB]" id="prices_sucursal_b"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
                 </div>
-                <div>
-                    <label for="code_bar" class="block  font-medium text-gray-700">Codigo de Barras</label>
-                    <input type="text" name="code_bar" id="code_bar"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="images" class="block  font-medium text-gray-700">Imágenes del Producto</label>
-                    <input type="file" name="images[]" id="images" accept="image/*" multiple
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                    <div id="previewImages" class="mt-2 flex flex-wrap gap-2"></div>
-                </div>
-                <div>
-                    <label for="model" class="block  font-medium text-gray-700">Modelo</label>
-                    <input type="text" name="model" id="model"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div id="scanButton" class="hidden">
-                    <label class="block font-medium text-gray-700 mb-2">Escanear Códigos</label>
-                    <button type="button" id="openScanModal" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center">
-                        <i class="fas fa-qrcode mr-2"></i>
-                        Escanear Productos
+
+                <div class="flex flex-col sm:flex-row justify-center gap-3 mt-6 pt-4 border-t">
+                    <a href="{{ route('products.index') }}" class="px-6 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition text-center text-sm">
+                        <i class="bi bi-x-lg mr-1"></i>
+                        Cancelar
+                    </a>
+                    <button id="registrar"
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition text-sm"
+                        type="submit">
+                        <i class="bi bi-save mr-1"></i>
+                        Registrar Producto
                     </button>
                 </div>
-
-                <div class="relative">
-                    <label for="unit_name" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
-                    <input type="text" id="unit_name" name="unit_name"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm " autocomplete="off">
-                    <div id="unitDropdown"
-                        class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                        <ul id="unitSuggestions" class="max-h-40 overflow-y-auto"></ul>
-                    </div>
-
-                </div>
-
-                <div>
-                    <label for="quantity" class="block font-medium text-gray-700">Cantidad</label>
-                    <input type="number" name="quantity" id="quantity"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="minimum_stock" class="block  font-medium text-gray-700">Stock Mínimo</label>
-                    <input type="number" name="minimum_stock" id="minimum_stock"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div class="relative">
-                    <label for="brand" class="block font-medium text-gray-700">Marca</label>
-                    <input type="text" id="brand" name="brand"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm" autocomplete="off">
-
-                    <!-- Dropdown de Sugerencias -->
-                    <div id="brandDropdown"
-                        class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                        <ul id="brandSuggestions" class="max-h-40 overflow-y-auto"></ul>
-                    </div>
-                </div>
-
-                <div>
-                    <label for="location" class="block  font-medium text-gray-700">Ubicación</label>
-                    <input type="text" name="location" id="location"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-            </div>
-
-            <h5 class="text-lg font-semibold mb-4">Precios</h5>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label for="prices[buy]" class="block  font-medium text-gray-700">Precio de Compra</label>
-                    <input type="decimal" name="prices[buy]" id="prices_buy"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="prices[wholesale]" class="block font-medium text-gray-700">Precio
-                        Mayorista</label>
-                    <input type="decimal" name="prices[wholesale]" id="prices_wholesale"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="prices[sucursalA]" class="block  font-medium text-gray-700">Precio Sucursal
-                        A</label>
-                    <input type="decimal" name="prices[sucursalA]" id="prices_sucursal_a"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="prices[sucursalB]" class="block  font-medium text-gray-700">Precio Sucursal
-                        B</label>
-                    <input type="decimal" name="prices[sucursalB]" id="prices_sucursal_b"
-                        class="block w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
-            </div>
-
-
-            <div class="flex justify-center space-x-4 mt-6">
-                <button id="registrar"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
-                    type="submit">
-                    Registrar
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </x-app-layout>
 

@@ -42,7 +42,19 @@ class SaleController extends Controller
     }
     public function detallesVenta($id)
     {
-        $sale = Sale::with('saleItems.item', 'userRegister', 'mechanic', 'devoluciones.items.saleItem.item', 'devoluciones.userRegister')->find($id);
+        $sale = Sale::with([
+            'saleItems.item' => function ($query) {
+                // Cargar productos incluso si están eliminados (status = 0)
+                $query->withoutGlobalScopes();
+            },
+            'userRegister',
+            'mechanic',
+            'devoluciones.items.saleItem.item' => function ($query) {
+                $query->withoutGlobalScopes();
+            },
+            'devoluciones.userRegister'
+        ])->find($id);
+        
         return response()->json(['sale' => $sale]);
     }
     public function generatePDF($id)

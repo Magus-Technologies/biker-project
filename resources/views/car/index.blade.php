@@ -1,14 +1,9 @@
 <!-- resources\views\car\index.blade.php -->
 <x-app-layout>
-    <x-breadcrumb title="Registro de Vehículos" subtitle="vehículos" />
+    <x-breadcrumb title="Motos" subtitle="Gestión de Motos" />
 
-    <!-- Bootstrap 5 para modales (CDN) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Contenedor principal -->
     <div class="px-3 py-4">
-        <!-- Mensajes de éxito o error -->
+        <!-- Mensajes -->
         @if (session('success'))
             <div class="bg-green-50 border-l-4 border-green-400 text-green-700 px-4 py-2 rounded mb-3 text-sm">
                 <i class="bi bi-check-circle mr-1"></i>{{ session('success') }}
@@ -21,144 +16,289 @@
             </div>
         @endif
 
-        <!-- Tabla con botón agregar -->
-        <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
-            <!-- Botón Agregar en la esquina superior derecha -->
-            <div class="px-4 py-3 flex justify-end border-b border-gray-200">
-                <a href="{{ route('cars.create') }}"
-                    class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors text-sm">
-                    <i class="bi bi-plus-lg mr-1"></i>Agregar
+        <!-- Vista de Iconos de Marcas -->
+        <div id="vistaIconos" class="bg-white rounded-lg border border-gray-200 p-6">
+            <!-- Header con botones de agregar -->
+            <div class="flex flex-wrap justify-end items-center gap-2 mb-6">
+                <button onclick="abrirModalMarca()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors text-sm">
+                    <i class="bi bi-plus-lg mr-1"></i>Agregar Marca
+                </button>
+                <a href="{{ route('cars.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors text-sm">
+                    <i class="bi bi-plus-lg mr-1"></i>Agregar Moto
                 </a>
             </div>
 
-            <!-- Tabla -->
-            <div class="overflow-x-auto">
-                <table id="carsTable" class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Código</th>
-                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Conductor</th>
-                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Placa</th>
-                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Nº Motor</th>
-                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Estado</th>
-                            <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                        @foreach($cars as $car)
-                            <tr class="hover:bg-blue-50 transition-colors">
-                                <td class="px-3 py-2 text-sm text-gray-700">{{ $car->codigo }}</td>
-                                <td class="px-3 py-2 text-sm font-medium text-gray-900">
-                                    {{ $car->driver->nombres ?? '' }} 
-                                    {{ $car->driver->apellido_paterno ?? '' }} 
-                                    {{ $car->driver->apellido_materno ?? '' }}
-                                </td>
-                                <td class="px-3 py-2 text-sm text-gray-600">{{ $car->placa ?? 'Sin placa' }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-600">{{ $car->driver->nro_motor ?? 'N/A' }}</td>
-                                <td class="px-3 py-2 text-center">
-                                    <button type="button" 
-                                            id="btn-{{ $car->id }}"
-                                            class="px-2 py-1 inline-flex text-xs font-medium rounded-full 
-                                                {{ $car->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}"
-                                            onclick="confirmStatusChange({{ $car->id }}, '{{ $car->status == 1 ? '¿Está seguro de desactivar este vehículo?' : '¿Está seguro de activar este vehículo?' }}')">
-                                        {{ $car->status == 1 ? 'Activo' : 'Inactivo' }}
-                                    </button>
-                                </td>
-                                <td class="px-3 py-2 text-center">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <!-- Editar -->
-                                        <a href="{{ route('cars.edit', $car->id) }}"
-                                           class="text-purple-600 hover:text-purple-800 transition-colors" 
-                                           title="Editar">
-                                            <i class="bi bi-pencil text-base"></i>
-                                        </a>
-                                        
-                                        <!-- Eliminar -->
-                                        <button onclick="confirmDelete({{ $car->id }})" 
-                                                class="text-red-600 hover:text-red-800 transition-colors" 
-                                                title="Eliminar">
-                                            <i class="bi bi-trash text-base"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <!-- Grid de Marcas de Motos (Dinámico desde BD) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                @foreach($brands as $brand)
+                    <div class="marca-card group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 h-32" 
+                         style="background: linear-gradient(135deg, {{ $brand->color_from }} 0%, {{ $brand->color_to }} 100%);">
+                        <!-- Botón de configuración -->
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onclick="abrirMenuMarca(event, {{ $brand->id }}, '{{ $brand->name }}', '{{ $brand->color_from }}', '{{ $brand->color_to }}')" 
+                                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full w-8 h-8 flex items-center justify-center transition">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Link a la marca -->
+                        <a href="{{ route('cars.marca.show', $brand->slug) }}" class="absolute inset-0">
+                            <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                            <div class="relative h-full flex items-center justify-center px-2">
+                                <span class="text-white font-bold text-xl sm:text-2xl tracking-wider drop-shadow-lg text-center">{{ $brand->name }}</span>
+                            </div>
+                        </a>
+                        
+                        <div class="absolute bottom-2 right-2 bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">
+                            <span class="count-marca" data-marca="{{ $brand->name }}">0</span> motos
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
+
+        <!-- Modal para agregar/editar marca -->
+        <div id="modalMarca" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="bi bi-plus-circle mr-2 text-blue-600"></i>
+                        <span id="modalTitle">Agregar Nueva Marca</span>
+                    </h3>
+                    <button onclick="cerrarModalMarca()" class="text-gray-500 hover:text-gray-700">
+                        <i class="bi bi-x-lg text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="formMarca" onsubmit="guardarMarca(event)">
+                    @csrf
+                    <input type="hidden" id="marca_id" name="marca_id">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Marca</label>
+                            <input type="text" id="marca_name" name="name" required
+                                class="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Color Inicial</label>
+                                <input type="color" id="marca_color_from" name="color_from" value="#3b82f6" required
+                                    class="w-full h-10 border border-gray-300 rounded-md cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Color Final</label>
+                                <input type="color" id="marca_color_to" name="color_to" value="#1e40af" required
+                                    class="w-full h-10 border border-gray-300 rounded-md cursor-pointer">
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end gap-2 mt-6">
+                            <button type="button" onclick="cerrarModalMarca()" 
+                                class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                                <i class="bi bi-save mr-1"></i>Guardar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Menú contextual de marca -->
+        <div id="menuMarca" class="hidden fixed bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50" style="min-width: 150px;">
+            <button onclick="editarMarca()" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2">
+                <i class="bi bi-pencil text-blue-600"></i>
+                Editar
+            </button>
+            <button onclick="desactivarMarca()" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2">
+                <i class="bi bi-toggle-off text-orange-600"></i>
+                Desactivar
+            </button>
+        </div>
+
+
     </div>
 
     <script>
-        // Inicializar DataTables
+        let allCars = @json($cars);
+
         document.addEventListener('DOMContentLoaded', function() {
-            if ($.fn.DataTable) {
-                $('#carsTable').DataTable({
-                    deferRender: true,
-                    processing: false,
-                    stateSave: false,
-                    responsive: true,
-                    pageLength: 10,
-                    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-                    language: {
-                        search: "Buscar:",
-                        lengthMenu: "Mostrar _MENU_ vehículos",
-                        info: "Mostrando _START_ a _END_ de _TOTAL_ vehículos",
-                        infoEmpty: "0 vehículos",
-                        infoFiltered: "(filtrado de _MAX_ totales)",
-                        zeroRecords: "No se encontraron vehículos",
-                        emptyTable: "No hay vehículos registrados",
-                        paginate: {
-                            first: "Primero",
-                            last: "Último",
-                            next: "Siguiente",
-                            previous: "Anterior"
-                        }
-                    },
-                    dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
-                    columnDefs: [
-                        { targets: [4, 5], orderable: false }, // Estado y Acciones no ordenables
-                        { targets: [4, 5], className: 'text-center' }
-                    ],
-                    order: [[0, 'asc']], // Ordenar por código
-                    autoWidth: false,
-                    scrollX: false
+            actualizarContadores();
+        });
+
+        let marcaSeleccionada = null;
+
+        function abrirModalMarca() {
+            document.getElementById('modalTitle').textContent = 'Agregar Nueva Marca';
+            document.getElementById('marca_id').value = '';
+            document.getElementById('formMarca').reset();
+            document.getElementById('modalMarca').classList.remove('hidden');
+        }
+
+        function cerrarModalMarca() {
+            document.getElementById('modalMarca').classList.add('hidden');
+            document.getElementById('formMarca').reset();
+            marcaSeleccionada = null;
+        }
+
+        function abrirMenuMarca(event, id, name, colorFrom, colorTo) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            marcaSeleccionada = { id, name, colorFrom, colorTo };
+            
+            const menu = document.getElementById('menuMarca');
+            menu.classList.remove('hidden');
+            
+            // Posicionar el menú cerca del botón
+            const rect = event.target.closest('button').getBoundingClientRect();
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.left = `${rect.left}px`;
+        }
+
+        function editarMarca() {
+            if (!marcaSeleccionada) return;
+            
+            document.getElementById('modalTitle').textContent = 'Editar Marca';
+            document.getElementById('marca_id').value = marcaSeleccionada.id;
+            document.getElementById('marca_name').value = marcaSeleccionada.name;
+            document.getElementById('marca_color_from').value = marcaSeleccionada.colorFrom;
+            document.getElementById('marca_color_to').value = marcaSeleccionada.colorTo;
+            
+            document.getElementById('menuMarca').classList.add('hidden');
+            document.getElementById('modalMarca').classList.remove('hidden');
+        }
+
+        async function desactivarMarca() {
+            if (!marcaSeleccionada) return;
+            
+            const result = await Swal.fire({
+                title: '¿Desactivar marca?',
+                text: `¿Estás seguro de desactivar la marca ${marcaSeleccionada.name}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, desactivar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) {
+                document.getElementById('menuMarca').classList.add('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`{{ route('cars.index') }}/toggle-brand/${marcaSeleccionada.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
                 });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Marca desactivada correctamente',
+                        confirmButtonColor: '#10b981'
+                    }).then(() => window.location.reload());
+                } else {
+                    throw new Error(data.message || 'Error al desactivar');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'No se pudo desactivar la marca',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+            
+            document.getElementById('menuMarca').classList.add('hidden');
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('menuMarca');
+            if (!menu.contains(e.target) && !e.target.closest('.marca-card button')) {
+                menu.classList.add('hidden');
             }
         });
 
-        // Función para confirmar cambio de estado
-        function confirmStatusChange(carId, message) {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: message,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, cambiar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Aquí debes implementar la ruta para cambiar el estado
-                    Swal.fire(
-                        'Pendiente',
-                        'Debes implementar la ruta para cambiar el estado del vehículo',
-                        'info'
-                    );
+        async function guardarMarca(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const marcaId = document.getElementById('marca_id').value;
+            
+            const url = marcaId 
+                ? `{{ route('cars.index') }}/update-brand/${marcaId}`
+                : '{{ route("cars.storeBrand") }}';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: marcaId ? 'Marca actualizada correctamente' : 'Marca agregada correctamente',
+                        confirmButtonColor: '#10b981'
+                    }).then(() => window.location.reload());
+                } else {
+                    throw new Error(data.message || 'Error al guardar');
                 }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'No se pudo guardar la marca',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        }
+
+        function actualizarContadores() {
+            const contadores = {};
+            
+            // Contar motos por marca
+            allCars.forEach(car => {
+                const marca = car.marca || '';
+                if (marca) {
+                    contadores[marca] = (contadores[marca] || 0) + 1;
+                }
+            });
+            
+            // Actualizar los contadores en el DOM
+            document.querySelectorAll('.count-marca').forEach(element => {
+                const marca = element.dataset.marca;
+                element.textContent = contadores[marca] || 0;
             });
         }
 
-        // Función para eliminar vehículo
         async function confirmDelete(carId) {
             const result = await Swal.fire({
                 title: '¿Estás seguro?',
-                text: "¿Deseas eliminar este vehículo?",
+                text: "¿Deseas eliminar esta moto?",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
             });
@@ -177,23 +317,19 @@
                 if (response.ok) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Vehículo Eliminado',
-                        text: 'El vehículo se ha eliminado correctamente',
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                    // Recargar la página
-                    setTimeout(() => window.location.reload(), 2000);
+                        title: 'Moto Eliminada',
+                        text: 'La moto se ha eliminado correctamente',
+                        confirmButtonColor: '#10b981'
+                    }).then(() => window.location.reload());
                 } else {
-                    throw new Error('Error al eliminar el vehículo');
+                    throw new Error('Error al eliminar');
                 }
             } catch (error) {
-                console.error("Error al eliminar:", error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'No se pudo eliminar el vehículo',
-                    showConfirmButton: true
+                    text: 'No se pudo eliminar la moto',
+                    confirmButtonColor: '#ef4444'
                 });
             }
         }

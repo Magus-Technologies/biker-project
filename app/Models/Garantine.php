@@ -27,9 +27,10 @@ class Garantine extends Model
         'nro_documento',
         'nombres_apellidos',
         'tipo_doc',
-	'celular',
-	'kilometrajes',
-	'boleta_dua_pdfs'
+        'celular',
+        'kilometrajes',
+        'boleta_dua_pdfs',
+        'lugar_destino_final'
     ];
     protected $casts = [
         'fecha_registro' => 'datetime',

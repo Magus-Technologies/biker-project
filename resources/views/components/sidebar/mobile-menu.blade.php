@@ -1,5 +1,18 @@
 <!-- resources\views\components\sidebar\mobile-menu.blade.php -->
-<!-- Mobile Menu Content SIN OVERLAY -->
+<!-- Overlay/Backdrop oscuro -->
+<div x-show="mobileMenuOpen"
+     @click="mobileMenuOpen = false"
+     x-cloak
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 bg-black bg-opacity-50 z-[1050]">
+</div>
+
+<!-- Mobile Menu Content -->
 <nav class="fixed top-0 left-0 w-280 h-screen bg-blue-800 text-white overflow-y-auto z-[1100]" 
      x-show="mobileMenuOpen"
      x-cloak
@@ -52,11 +65,15 @@
                 ['route' => 'stock-minimo.index', 'permission' => null, 'icon' => 'bi-exclamation-triangle-fill', 'title' => 'Stock Mínimo']
             ]" />
 
-        <!-- Garantías (individual) -->
-        <a href="{{ route('garantines.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
-            <i class="bi bi-shield-check"></i>
-            <span>Garantías</span>
-        </a>
+        <!-- SECCIÓN GARANTÍAS -->
+        <x-sidebar.mobile-menu-section 
+            key="garantias" 
+            icon="bi-shield-check" 
+            title="Garantías"
+            :routes="[
+                ['route' => 'cars.index', 'permission' => 'ver-vehiculos', 'icon' => 'bi-motorcycle', 'title' => 'Motos'],
+                ['route' => 'garantines.index', 'permission' => null, 'icon' => 'bi-shield-check', 'title' => 'Garantía']
+            ]" />
 
         <!-- Compras (individual) -->
         <a href="{{ route('buys.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
@@ -96,14 +113,6 @@
             <a href="{{ route('mechanics.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
                 <i class="bi bi-wrench"></i>
                 <span>Mecánicos</span>
-            </a>
-        @endcan
-
-        <!-- Vehículos (individual) -->
-        @can('ver-vehiculos')
-            <a href="{{ route('cars.index') }}" class="mobile-menu-item" @click="mobileMenuOpen = false">
-                <i class="bi bi-car-front-fill"></i>
-                <span>Vehículos</span>
             </a>
         @endcan
 

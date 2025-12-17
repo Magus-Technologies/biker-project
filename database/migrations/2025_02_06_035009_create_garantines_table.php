@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('anio')->nullable()->nullable();
             $table->string('color', 100)->nullable();
             $table->string('nro_chasis', 100)->nullable();
-            $table->string('nro_motor', 100)->unique()->nullable();
+            $table->string('nro_motor', 100)->nullable()->index();
             $table->unsignedBigInteger('user_register')->nullable();
             $table->foreign('user_register')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('user_update')->nullable();

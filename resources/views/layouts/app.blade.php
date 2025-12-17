@@ -43,6 +43,7 @@
           submenus: {
               clientes: false,
               productos: false,
+              garantias: false,
               ventas: false
           },
           toggleSubmenu(key) {
@@ -54,7 +55,7 @@
           toggleSidebar() {
               this.sidebarOpen = !this.sidebarOpen;
               if (!this.sidebarOpen) {
-                  this.submenus = { clientes: false, productos: false, ventas: false };
+                  this.submenus = { clientes: false, productos: false, garantias: false, ventas: false };
               }
           },
           init() {

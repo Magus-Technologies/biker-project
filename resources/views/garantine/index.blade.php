@@ -145,36 +145,42 @@
 // Inicializar DataTables
 document.addEventListener('DOMContentLoaded', function() {
     if ($.fn.DataTable) {
-        $('#garantiasTable').DataTable({
-            deferRender: true,
-            processing: false,
-            stateSave: false,
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            language: {
-                search: "Buscar:",
-                lengthMenu: "Mostrar _MENU_ garantías",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ garantías",
-                infoEmpty: "0 garantías",
-                infoFiltered: "(filtrado de _MAX_ totales)",
-                zeroRecords: "No se encontraron garantías",
-                emptyTable: "No hay garantías registradas",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                }
-            },
-            dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
-            columnDefs: [
-                { targets: [10, 11], orderable: false, className: 'text-center' }
-            ],
-            order: [[0, 'asc']],
-            autoWidth: false,
-            scrollX: false
-        });
+        // Solo inicializar DataTables si hay datos
+        const table = document.getElementById('garantiasTable');
+        const hasData = table.querySelector('tbody tr:not(:has(td[colspan]))');
+        
+        if (hasData) {
+            $('#garantiasTable').DataTable({
+                deferRender: true,
+                processing: false,
+                stateSave: false,
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                language: {
+                    search: "Buscar:",
+                    lengthMenu: "Mostrar _MENU_ garantías",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ garantías",
+                    infoEmpty: "0 garantías",
+                    infoFiltered: "(filtrado de _MAX_ totales)",
+                    zeroRecords: "No se encontraron garantías",
+                    emptyTable: "No hay garantías registradas",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                },
+                dom: '<"flex justify-between items-center px-3 py-2"lf>rt<"flex justify-between items-center px-3 py-2 border-t border-gray-200"ip>',
+                columnDefs: [
+                    { targets: [10, 11], orderable: false, className: 'text-center' }
+                ],
+                order: [[0, 'asc']],
+                autoWidth: false,
+                scrollX: false
+            });
+        }
     }
 });
 

@@ -24,6 +24,7 @@ class Car extends Model
         'fecha_soat',
         'fecha_seguro',
         'color',
+        'lugar_provisional',
         'user_register',
         'user_update',
         'fecha_registro',

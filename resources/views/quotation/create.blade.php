@@ -1,4 +1,10 @@
 <x-app-layout>
+      <x-breadcrumb 
+        title="Registrar Cotizacion" 
+        parent="Cotizacion" 
+        parentUrl="{{ route('quotations.index') }}" 
+        subtitle="Crear" 
+    />
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             cotizacion insertar
@@ -104,22 +110,22 @@
                         </div>
 
                         <!-- Tabla con los productos -->
-                        <div class="overflow-x-auto overflow-y-auto h-80">
+                        <div class="overflow-x-auto overflow-y-auto h-80 border border-gray-300 rounded-lg">
                             <table class="min-w-full table-auto text-xs">
-                                <thead class="bg-gray-200 sticky top-0">
+                                <thead class="bg-gradient-to-r from-blue-500 to-blue-600 text-white sticky top-0 shadow-md">
                                     <tr>
-                                        <th class="px-2 py-1 border">Código</th>
-                                        <th class="px-2 py-1 border">Descripción</th>
-                                        <th class="px-2 py-1 border">Ubicación</th>
-                                        <th class="px-2 py-1 border">Stock Actual</th>
-                                        <th class="px-2 py-1 border">Stock Mínimo</th>
-                                        <th class="px-2 py-1 border">Cantidad</th>
-                                        <th class="px-2 py-1 border">Seleccionar Precio</th>
-                                        <th class="px-2 py-1 border">Subtotal</th>
-                                        <th class="px-2 py-1 border">Agregar</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-left font-semibold">Código</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-left font-semibold">Descripción</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-center font-semibold">Ubicación</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-center font-semibold">Stock Actual</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-center font-semibold">Stock Mín.</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-center font-semibold">Cantidad</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-left font-semibold">Precio</th>
+                                        <th class="px-3 py-3 border-r border-blue-400 text-right font-semibold">Subtotal</th>
+                                        <th class="px-3 py-3 text-center font-semibold">Acción</th>
                                     </tr>
                                 </thead>
-                                <tbody id="productTable">
+                                <tbody id="productTable" class="bg-white divide-y divide-gray-200">
                                     <!-- Productos generados dinámicamente -->
                                 </tbody>
                             </table>
@@ -230,58 +236,136 @@
         </div>
 
         <!-- Tabla de Productos (Detalle del Pedido) -->
-        <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-lg font-bold mb-4">Producto</h2>
-            <div class="mb-4 flex items-center justify-end ">
+        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                    Productos
+                </h2>
                 <div class="w-5/12">
-                    <input type="text" placeholder="Buscar por nombre del producto..."
-                        class="w-full p-2 border rounded" id="searchProductList">
+                    <div class="relative">
+                        <input type="text" placeholder="Buscar producto..." 
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
+                            id="searchProductList">
+                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
                 </div>
-                {{-- <div>
-                    <button class="bg-blue-500 text-white px-4 py-2  rounded-md rounded-l-none mr-5"
-                        id="btnBuscarProductList">Buscar</button>
-                </div> --}}
             </div>
 
-            <table class="w-full border-collapse border border-gray-300" id="orderTable">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border p-2">Item</th>
-                        <th class="border p-2">Producto</th>
-                        <th class="border p-2">Cantidad</th>
-                        <th class="border p-2">P. Unit.</th>
-                        <th class="border p-2">T. Precio</th>
-                        <th class="border p-2">Parcial</th>
-                        <th class="border p-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="orderTableBody">
-                    <tr id="emptyRow">
-                        <td class="border p-2 text-center" colspan="7">No hay productos agregados</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="overflow-x-auto rounded-lg border border-gray-300">
+                <table class="w-full border-collapse" id="orderTable">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-gray-700 to-gray-800 text-white">
+                            <th class="border-r border-gray-600 px-4 py-3 text-center text-sm font-semibold">Item</th>
+                            <th class="border-r border-gray-600 px-4 py-3 text-left text-sm font-semibold">Producto</th>
+                            <th class="border-r border-gray-600 px-4 py-3 text-center text-sm font-semibold">Cantidad</th>
+                            <th class="border-r border-gray-600 px-4 py-3 text-center text-sm font-semibold">P. Unit.</th>
+                            <th class="border-r border-gray-600 px-4 py-3 text-center text-sm font-semibold">T. Precio</th>
+                            <th class="border-r border-gray-600 px-4 py-3 text-right text-sm font-semibold">Parcial</th>
+                            <th class="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr id="emptyRow">
+                            <td class="px-4 py-8 text-center text-gray-500" colspan="7">
+                                <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="text-sm font-medium">No hay productos agregados</p>
+                                <p class="text-xs text-gray-400 mt-1">Usa el botón "Consultar Productos" para agregar items</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <!-- Tabla para listar servicios -->
-        <div class="mt-5">
-            <table class="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 px-4 py-2">Servicio</th>
-                        <th class="border border-gray-300 px-4 py-2">Precio</th>
-                        <th class="border border-gray-300 px-4 py-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="serviceList">
-                    <!-- Aquí se agregarán los servicios -->
-                </tbody>
-            </table>
+        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Servicios
+            </h2>
+            <div class="overflow-x-auto rounded-lg border border-gray-300">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-green-600 to-green-700 text-white">
+                            <th class="border-r border-green-500 px-4 py-3 text-left text-sm font-semibold">Servicio</th>
+                            <th class="border-r border-green-500 px-4 py-3 text-right text-sm font-semibold">Precio</th>
+                            <th class="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serviceList" class="bg-white divide-y divide-gray-200">
+                        <!-- Aquí se agregarán los servicios -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
+
+    <style>
+        /* Estilos personalizados para las tablas */
+        #orderTable tbody tr:hover,
+        #productTable tr:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animación suave para inputs y selects */
+        input[type="number"]:focus,
+        select:focus {
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
+        /* Estilo para el scrollbar de la tabla del modal */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Efecto de pulso para botones */
+        @keyframes pulse-subtle {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.9;
+            }
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Mejorar la apariencia de las celdas de precio */
+        .data-price-value,
+        .data-total-value {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
 </x-app-layout>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     let services = [];
     let orderCount = 0; // para numerar los ítems
@@ -500,7 +584,12 @@
         let servicePrice = document.getElementById("service_price").value.trim();
 
         if (serviceName === "" || servicePrice === "") {
-            alert("Por favor, complete todos los campos.");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor, complete todos los campos.',
+                confirmButtonColor: '#3b82f6'
+            });
             return;
         }
 
@@ -524,13 +613,20 @@
         let tableBody = document.getElementById("serviceList");
         tableBody.innerHTML = ""; // Limpiar tabla antes de actualizar
 
-        services.forEach(service => {
+        services.forEach((service, index) => {
             let row = document.createElement("tr");
+            row.className = index % 2 === 0 ? 'bg-white hover:bg-green-50 transition-colors' : 'bg-gray-50 hover:bg-green-50 transition-colors';
             row.innerHTML = `
-                    <td class="border border-gray-300 px-4 py-2">${service.name}</td>
-                    <td class="border border-gray-300 px-4 py-2">${service.price}</td>
-                    <td class="border border-gray-300 px-4 py-2">
-                        <button class="bg-red-500 text-white px-2 py-1 rounded-md" onclick="deleteService(${service.id})">Eliminar</button>
+                    <td class="px-4 py-3 text-gray-800 font-medium">${service.name}</td>
+                    <td class="px-4 py-3 text-right font-bold text-green-700">S/ ${parseFloat(service.price).toFixed(2)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105" 
+                            onclick="deleteService(${service.id})">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Eliminar
+                        </button>
                     </td>
                 `;
             tableBody.appendChild(row);
@@ -632,26 +728,50 @@
     // // Renderiza la lista de productos en el modal
     function renderProducts(productList) {
         productTable.innerHTML = "";
-        productList.forEach(product => {
+        productList.forEach((product, index) => {
             const row = document.createElement("tr");
+            const stockQuantity = product.stock?.quantity ?? 0;
+            const minStock = product.stock?.minimum_stock ?? 0;
+            
+            // Determinar color del stock
+            let stockClass = 'text-green-700 bg-green-50';
+            if (stockQuantity === 0) {
+                stockClass = 'text-red-700 bg-red-50 font-bold';
+            } else if (stockQuantity <= minStock) {
+                stockClass = 'text-yellow-700 bg-yellow-50 font-semibold';
+            }
+            
+            row.className = index % 2 === 0 ? 'bg-white hover:bg-blue-50 transition-colors' : 'bg-gray-50 hover:bg-blue-50 transition-colors';
             row.innerHTML = `
-                    <td class="px-2 py-1 border">${product.code_sku}</td>
-                    <td class="px-2 py-1 border">${product.description}</td>
-                    <td class="px-2 py-1 border">${product.location}</td>
-                    <td class="px-2 py-1 border">${product.stock?.quantity ?? 'N/A'}</td>
-                    <td class="px-2 py-1 border">${product.stock?.minimum_stock ?? 'N/A'}</td>
-                    <td class="px-2 py-1 border">
-                        <input type="number" class="p-2 border rounded data-quantity-id-${product.id}" value="1" min="1" max="${product.stock?.quantity ?? 1}" data-product-id="${product.id}">
+                    <td class="px-3 py-2 border-r border-gray-200 text-gray-700 font-mono text-xs">${product.code_sku}</td>
+                    <td class="px-3 py-2 border-r border-gray-200 text-gray-800 font-medium">${product.description}</td>
+                    <td class="px-3 py-2 border-r border-gray-200 text-center text-gray-600">${product.location || '-'}</td>
+                    <td class="px-3 py-2 border-r border-gray-200 text-center">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${stockClass}">
+                            ${stockQuantity}
+                        </span>
                     </td>
-                    <td class="px-2 py-1 border">
-                        <select class="p-2 border rounded data-price-id-${product.id}" data-product-id="${product.id}">
+                    <td class="px-3 py-2 border-r border-gray-200 text-center text-gray-600">${minStock}</td>
+                    <td class="px-3 py-2 border-r border-gray-200 text-center">
+                        <input type="number" 
+                            class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center data-quantity-id-${product.id}" 
+                            value="1" min="1" max="${stockQuantity}" data-product-id="${product.id}">
+                    </td>
+                    <td class="px-3 py-2 border-r border-gray-200">
+                        <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs data-price-id-${product.id}" data-product-id="${product.id}">
                             <option value="">Seleccionar precio</option>
-                            ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - ${price.price}</option>`).join('')}
+                            ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - S/ ${price.price}</option>`).join('')}
                         </select>
                     </td>
-                    <td class="px-2 py-1 border subtotal-cell" id="subtotal-${product.id}">0</td>
-                    <td class="px-2 py-1 border">
-                        <button class="bg-blue-500 text-white px-3 py-1 rounded" data-product-id="${product.id}"  onclick="agregarProducto(${product.id})">Agregar</button>
+                    <td class="px-3 py-2 border-r border-gray-200 text-right font-semibold text-gray-800 subtotal-cell" id="subtotal-${product.id}">S/ 0.00</td>
+                    <td class="px-3 py-2 text-center">
+                        <button class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105" 
+                            data-product-id="${product.id}" onclick="agregarProducto(${product.id})">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Agregar
+                        </button>
                     </td>
                 `;
             productTable.appendChild(row);
@@ -676,7 +796,7 @@
         const subtotalElement = document.getElementById(`subtotal-${productId}`);
 
         if (subtotalElement) {
-            subtotalElement.textContent = subtotal.toFixed(2);
+            subtotalElement.textContent = 'S/ ' + subtotal.toFixed(2);
         }
     }
 
@@ -689,8 +809,8 @@
         const selectedOption = priceSelect.options[priceSelect.selectedIndex];
         const price = parseFloat(selectedOption.value) || 0;
         // precio y total en la tabla
-        priceValueCell.textContent = price.toFixed(2);
-        totalValueCell.textContent = (price * quantity).toFixed(2);
+        priceValueCell.textContent = 'S/ ' + price.toFixed(2);
+        totalValueCell.textContent = 'S/ ' + (price * quantity).toFixed(2);
 
         quotationItems.forEach(item => {
             if (item.item_id == productId) {
@@ -723,10 +843,22 @@
 
             if (!response.ok) throw new Error("Error en la petición");
             const data = await response.json();
-            alert("La cotización se ha guardado correctamente.");
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'La cotización se ha guardado correctamente.',
+                confirmButtonColor: '#10b981'
+            }).then(() => {
+                window.location.href = "{{ route('quotations.index') }}";
+            });
         } catch (error) {
             console.error("Error al guardar la orden:", error);
-            alert("Error al guardar la orden.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al guardar la orden.',
+                confirmButtonColor: '#ef4444'
+            });
         }
     }
 
@@ -808,33 +940,35 @@
         }
         orderCount++;
         const orderRow = document.createElement("tr");
+        orderRow.className = orderCount % 2 === 0 ? 'bg-white hover:bg-gray-50 transition-colors' : 'bg-gray-50 hover:bg-gray-100 transition-colors';
         orderRow.setAttribute("data-product-id", product.item_id);
         orderRow.innerHTML = `
-            <td class="border p-2 text-center">${orderCount}</td>
-            <td class="border p-2">${product.description}</td>
-            <td class="border p-2">
-                <input type="number" class="p-2 border rounded data-quantity-value-${product.item_id}" onchange="updatePriceAndTotal(${product.item_id})"
-                       value="${product.quantity}" 
-                       max="${product.maximum_stock}"
-                       min="1"
-                       style="width: 60px;">
+            <td class="px-4 py-3 text-center font-semibold text-gray-700">${orderCount}</td>
+            <td class="px-4 py-3 text-gray-800">${product.description}</td>
+            <td class="px-4 py-3 text-center">
+                <input type="number" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center data-quantity-value-${product.item_id}" 
+                    onchange="updatePriceAndTotal(${product.item_id})"
+                    value="${product.quantity}" 
+                    max="${product.maximum_stock}"
+                    min="1">
             </td>
-            <td class="border p-2">
-                <select class="p-2 border rounded data-price-select-${product.item_id}" 
-                        style="width: 120px;" onchange="updatePriceAndTotal(${product.item_id})">
+            <td class="px-4 py-3 text-center">
+                <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs data-price-select-${product.item_id}" 
+                        onchange="updatePriceAndTotal(${product.item_id})">
                     <option value="">Seleccionar precio</option>
                     ${product.prices.map(precio => `
                         <option value="${precio.price}" 
                                 data-price-id="${precio.id}" 
                                 ${precio.id == product.priceId ? 'selected' : ''}>
-                            ${precio.type} - ${precio.price}
+                            ${precio.type} - S/ ${precio.price}
                         </option>`).join('')}
                 </select>
             </td>
-            <td class="border p-2 data-price-value-${product.item_id}" style="text-align: right;">${product.unit_price}</td>
-            <td class="border p-2 data-total-value-${product.item_id}" style="text-align: right;">${product.unit_price * product.quantity}</td>
-            <td class="border p-2 text-center">
-                <button class="bg-red-500 text-white px-2 py-1 rounded eliminar-btn" 
+            <td class="px-4 py-3 text-center font-semibold text-blue-600 data-price-value-${product.item_id}">S/ ${product.unit_price}</td>
+            <td class="px-4 py-3 text-right font-bold text-gray-800 data-total-value-${product.item_id}">S/ ${(product.unit_price * product.quantity).toFixed(2)}</td>
+            <td class="px-4 py-3 text-center">
+                <button class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105 eliminar-btn" 
                        onclick="deleteProduct(${product.item_id})">
                     Eliminar
                 </button>
@@ -925,7 +1059,12 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('No se pudo encontrar el DNI');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo encontrar el DNI',
+                        confirmButtonColor: '#ef4444'
+                    });
                 });
         }
     }

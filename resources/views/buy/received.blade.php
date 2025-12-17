@@ -144,7 +144,7 @@
         // Cargar datos de la compra
         async function loadBuyData(buyId) {
             try {
-                const response = await fetch(`/buy/detalles/${buyId}`);
+                const response = await fetch(`${baseUrl}/buy/detalles/${buyId}`);
                 const data = await response.json();
                 
                 buyData = data.buy;
@@ -448,7 +448,7 @@
             }
 
             try {
-                const response = await fetch(`/buy/receive-products/${buyData.id}`, {
+                const response = await fetch(`${baseUrl}/buy/receive-products/${buyData.id}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

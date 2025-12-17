@@ -157,6 +157,8 @@ class QuotationController extends Controller
                 'mechanics_id' => $request->mechanics_id,
                 'nro_dias' => $request->nro_dias,
                 'fecha_vencimiento' => $request->fecha_vencimiento,
+                'fecha_registro' => now(),
+                'status' => '1',
             ]);
             if (!empty($request->payments)) {
                 foreach ($request->payments as $payment) {

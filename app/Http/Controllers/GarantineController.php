@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Garantine;
+use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException as ValidationValidationException;
 
@@ -31,20 +32,21 @@ class GarantineController extends Controller
     public function store(Request $request)
     {
         $messages = [
-            'n_documento.required' => 'El numero de documento es obligatorio.',
-            'datos_cliente.required' => 'Los datos del cliente son  obligatorio.',
-            'nro_motor.unique' => 'El numero de motor ya a sido registrado como vendido.',
-            'boleta_dua.*.mimes' => 'Solo se permiten archivos PDF.',
+            'n_documento.required' => 'El número de documento es obligatorio.',
+            'datos_cliente.required' => 'Los datos del cliente son obligatorios.',
+            'nro_motor.required' => 'El número de motor es obligatorio.',
+            'nro_motor.unique' => 'Esta moto ya tiene una garantía registrada. El número de motor ya fue vendido anteriormente.',
+            'boleta_dua.*.mimes' => 'Solo se permiten archivos PDF para la boleta y DUA.',
         ];
         try {
             $request->validate([
                 'n_documento' => 'required|string',
                 'datos_cliente' => 'required|string',
-                'nro_motor' => 'required|unique:garantines,nro_motor',
+                'nro_motor' => 'required|unique:garantines,nro_motor,NULL,id,status,1',
                 'boleta_dua.*' => 'nullable|mimes:pdf',
             ], $messages);
         } catch (ValidationValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 500);
+            return response()->json(['errors' => $e->errors()], 422);
         }
 
         // Manejo de PDFs
@@ -76,6 +78,7 @@ class GarantineController extends Controller
                 'celular' => $request->celular,
                 'kilometrajes' => $request->kilometrajes,
                 'boleta_dua_pdfs' => json_encode($pdfPaths),
+                'lugar_destino_final' => $request->lugar_destino_final,
             ]);
             if ($garantine) {
                 return response()->json([
@@ -112,6 +115,96 @@ class GarantineController extends Controller
     }
 
     /**
+     * Buscar moto por número de motor o chasis
+     */
+    public function buscarMoto(Request $request)
+    {
+        try {
+            $nro_motor = $request->query('nro_motor');
+            $nro_chasis = $request->query('nro_chasis');
+
+            if (!$nro_motor && !$nro_chasis) {
+                return response()->json([
+                    'error' => 'Debe proporcionar un número de motor o chasis para buscar'
+                ], 400);
+            }
+
+            $car = null;
+
+            if ($nro_motor) {
+                // Buscar por número de motor en la tabla drives y obtener el car relacionado
+                // No filtramos por status para permitir buscar motos inactivas
+                $car = Car::with('driver')
+                    ->whereHas('driver', function($query) use ($nro_motor) {
+                        $query->where('nro_motor', $nro_motor);
+                    })
+                    ->first();
+            } elseif ($nro_chasis) {
+                // Buscar por número de chasis en cars o en drives
+                $car = Car::with('driver')
+                    ->where('nro_chasis', $nro_chasis)
+                    ->first();
+                
+                if (!$car) {
+                    // Si no se encuentra en cars, buscar en drives
+                    $car = Car::with('driver')
+                        ->whereHas('driver', function($query) use ($nro_chasis) {
+                            $query->where('nro_chasis', $nro_chasis);
+                        })
+                        ->first();
+                }
+            }
+
+            if (!$car) {
+                $mensaje = $nro_motor 
+                    ? "No se encontró ninguna moto registrada con el N° de Motor: {$nro_motor}" 
+                    : "No se encontró ninguna moto registrada con el N° de Chasis: {$nro_chasis}";
+                
+                return response()->json([
+                    'error' => $mensaje
+                ], 404);
+            }
+
+        // Preparar datos completos incluyendo información del driver
+        $carData = [
+            'id' => $car->id,
+            'placa' => $car->placa,
+            'marca' => $car->marca,
+            'modelo' => $car->modelo,
+            'anio' => $car->anio,
+            'color' => $car->color,
+            'nro_chasis' => $car->nro_chasis ?? ($car->driver->nro_chasis ?? ''),
+            'nro_motor' => $car->driver->nro_motor ?? '',
+            'condicion' => $car->condicion,
+            'lugar_provisional' => $car->lugar_provisional,
+        ];
+
+        // Agregar datos del conductor/dueño actual
+        $driverData = null;
+        if ($car->driver) {
+            $driverData = [
+                'nro_documento' => $car->driver->nro_documento ?? '',
+                'nombres_completos' => trim(($car->driver->nombres ?? '') . ' ' . 
+                                           ($car->driver->apellido_paterno ?? '') . ' ' . 
+                                           ($car->driver->apellido_materno ?? '')),
+                'telefono' => $car->driver->telefono ?? '',
+            ];
+        }
+
+            return response()->json([
+                'success' => true,
+                'car' => $carData,
+                'driver' => $driverData
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error en buscarMoto: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Ocurrió un error al buscar la moto. Por favor, intente nuevamente.'
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
@@ -130,17 +223,18 @@ class GarantineController extends Controller
     public function update(Request $request, string $id)
     {
         $messages = [
-            'n_documento.required' => 'El numero de documento es obligatorio.',
-            'datos_cliente.required' => 'Los datos del cliente son obligatorio.',
-            'nro_motor.unique' => 'El numero de motor ya ha sido registrado.',
-            'boleta_dua.*.mimes' => 'Solo se permiten archivos PDF.',
+            'n_documento.required' => 'El número de documento es obligatorio.',
+            'datos_cliente.required' => 'Los datos del cliente son obligatorios.',
+            'nro_motor.required' => 'El número de motor es obligatorio.',
+            'nro_motor.unique' => 'Esta moto ya tiene una garantía registrada activa.',
+            'boleta_dua.*.mimes' => 'Solo se permiten archivos PDF para la boleta y DUA.',
         ];
 
         try {
             $request->validate([
                 'n_documento' => 'required|string',
                 'datos_cliente' => 'required|string',
-                'nro_motor' => 'required|unique:garantines,nro_motor,' . $id,
+                'nro_motor' => 'required|unique:garantines,nro_motor,' . $id . ',id,status,1',
                 'boleta_dua.*' => 'nullable|mimes:pdf',
             ], $messages);
         } catch (ValidationValidationException $e) {
@@ -177,6 +271,7 @@ class GarantineController extends Controller
                 'celular' => $request->celular,
                 'kilometrajes' => $request->kilometrajes,
                 'boleta_dua_pdfs' => json_encode($pdfPaths),
+                'lugar_destino_final' => $request->lugar_destino_final,
             ]);
 
             return response()->json([

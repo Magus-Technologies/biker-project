@@ -60,6 +60,14 @@ Route::group(
         Route::resource('cars', App\Http\Controllers\CarController::class);
         Route::get('car/buscarPorPlaca', [App\Http\Controllers\CarController::class, 'searchDriverPorPlaca'])->name('buscar.DriverPorPlaca');
         Route::get('car/buscarDrive', [App\Http\Controllers\CarController::class, 'searchBuscarDriver'])->name('buscar.Driver');
+        
+        // Gestión de marcas de motos
+        Route::post('cars/store-brand', [App\Http\Controllers\CarController::class, 'storeBrand'])->name('cars.storeBrand');
+        Route::post('cars/update-brand/{id}', [App\Http\Controllers\CarController::class, 'updateBrand'])->name('cars.updateBrand');
+        Route::post('cars/toggle-brand/{id}', [App\Http\Controllers\CarController::class, 'toggleBrand'])->name('cars.toggleBrand');
+        
+        // Rutas dinámicas por marca de moto (slug)
+        Route::get('cars/marca/{slug}', [App\Http\Controllers\CarController::class, 'showByMarcaSlug'])->name('cars.marca.show');
         Route::get('car/buscarPornroMotor', [App\Http\Controllers\CarController::class, 'searchBuscarVehiculo'])->name('buscar.Vehiculo');
         // PRODUCTOS
         Route::resource('products', ProductController::class);
@@ -107,6 +115,7 @@ Route::group(
 
         // GARANTIAS
         Route::resource('garantines', App\Http\Controllers\GarantineController::class);
+        Route::get('/buscar-moto-garantia', [App\Http\Controllers\GarantineController::class, 'buscarMoto'])->name('buscar.moto.garantia');
         // TRABAJADORES CON SUS ROLES
         Route::resource('workers', App\Http\Controllers\UserController::class);
         Route::middleware('auth')->group(function () {

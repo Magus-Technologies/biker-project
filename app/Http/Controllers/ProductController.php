@@ -655,9 +655,20 @@ class ProductController extends Controller
 
             if ($request->hasFile('new_images')) {
                 $newImages = $request->file('new_images');
+                
+                // Usar un array para evitar duplicados basados en el nombre del archivo
+                $processedFiles = [];
 
                 foreach ($newImages as $image) {
-                    $imageName = time() . '_' . $image->getClientOriginalName();
+                    $originalName = $image->getClientOriginalName();
+                    
+                    // Evitar procesar el mismo archivo dos veces
+                    if (in_array($originalName, $processedFiles)) {
+                        continue;
+                    }
+                    
+                    $processedFiles[] = $originalName;
+                    $imageName = time() . '_' . $originalName;
                     $image->move(public_path('images/products'), $imageName);
 
                     $product->images()->create([

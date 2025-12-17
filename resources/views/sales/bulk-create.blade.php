@@ -609,22 +609,22 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="overflow-x-auto overflow-y-auto h-80">
+                            <div class="overflow-x-auto overflow-y-auto h-80 border border-gray-300 rounded-lg">
                                 <table class="min-w-full table-auto text-xs">
-                                    <thead class="bg-gray-200 sticky top-0">
+                                    <thead class="bg-blue-600 text-white sticky top-0 shadow-md">
                                         <tr>
-                                            <th class="px-2 py-1 border">Código</th>
-                                            <th class="px-2 py-1 border">Descripción</th>
-                                            <th class="px-2 py-1 border">Ubicación</th>
-                                            <th class="px-2 py-1 border">Stock Actual</th>
-                                            <th class="px-2 py-1 border">Stock Mínimo</th>
-                                            <th class="px-2 py-1 border">Cantidad</th>
-                                            <th class="px-2 py-1 border">Seleccionar Precio</th>
-                                            <th class="px-2 py-1 border">Subtotal</th>
-                                            <th class="px-2 py-1 border">Agregar</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-left font-semibold">Código</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-left font-semibold">Descripción</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-center font-semibold">Ubicación</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-center font-semibold">Stock Actual</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-center font-semibold">Stock Mín.</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-center font-semibold">Cantidad</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-left font-semibold">Precio</th>
+                                            <th class="px-3 py-3 border-r border-blue-500 text-right font-semibold">Subtotal</th>
+                                            <th class="px-3 py-3 text-center font-semibold">Acción</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="productTable_${tabId}"></tbody>
+                                    <tbody id="productTable_${tabId}" class="bg-white divide-y divide-gray-200"></tbody>
                                 </table>
                             </div>
                             <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded"
@@ -636,22 +636,30 @@
             </div>
 
             <!-- Tabla de Productos -->
-            <div class="mt-6 bg-white p-6 rounded-lg shadow">
-                <table class="w-full border-collapse border border-gray-300 no-search-button" id="orderTable_${tabId}">
-                    <thead>
-                        <tr class="bg-gray-200">
-                            <th class="border p-2">Item</th>
-                            <th class="border p-2">Producto</th>
-                            <th class="border p-2">Cantidad</th>
-                            <th class="border p-2">P. Unit.</th>
-                            <th class="border p-2">T. Precio</th>
-                            <th class="border p-2">Parcial</th>
-                            <th class="border p-2">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderTableBody_${tabId}">
-                    </tbody>
-                </table>
+            <div class="mt-6 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                    Productos
+                </h2>
+                <div class="overflow-x-auto rounded-lg border border-gray-300">
+                    <table class="w-full border-collapse no-search-button" id="orderTable_${tabId}">
+                        <thead>
+                            <tr class="bg-blue-600 text-white">
+                                <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">Item</th>
+                                <th class="border-r border-blue-500 px-4 py-3 text-left text-sm font-semibold">Producto</th>
+                                <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">Cantidad</th>
+                                <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">P. Unit.</th>
+                                <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">T. Precio</th>
+                                <th class="border-r border-blue-500 px-4 py-3 text-right text-sm font-semibold">Parcial</th>
+                                <th class="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody_${tabId}" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Botón Configurar Documento y Totales -->
@@ -1725,32 +1733,59 @@
         const productTable = document.getElementById(`productTable_${tabId}`);
         productTable.innerHTML = "";
 
-        productList.forEach(product => {
+        productList.forEach((product, index) => {
             const stockActual = product.stock?.quantity ?? 0;
             const stockMinimo = product.stock?.minimum_stock ?? 0;
             const sinStock = stockActual === 0;
             const stockBajo = stockActual > 0 && stockActual <= stockMinimo;
             
+            // Determinar color del stock
+            let stockClass = 'text-green-700 bg-green-50';
+            if (sinStock) {
+                stockClass = 'text-red-700 bg-red-50 font-bold';
+            } else if (stockBajo) {
+                stockClass = 'text-yellow-700 bg-yellow-50 font-semibold';
+            }
+            
             const row = document.createElement("tr");
+            row.className = index % 2 === 0 ? 'bg-white hover:bg-blue-50 transition-colors' : 'bg-gray-50 hover:bg-blue-50 transition-colors';
             row.innerHTML = `
-                <td class="px-2 py-1 border">${product.code_sku}</td>
-                <td class="px-2 py-1 border">${product.description}</td>
-                <td class="px-2 py-1 border">${product.location || '-'}</td>
-                <td class="px-2 py-1 border ${sinStock ? 'bg-red-100 text-red-700 font-bold' : stockBajo ? 'bg-yellow-100 text-yellow-700' : ''}">${stockActual}</td>
-                <td class="px-2 py-1 border">${stockMinimo}</td>
-                <td class="px-2 py-1 border">
-                    <input type="number" class="p-2 border rounded" value="1" min="1" max="${stockActual}"
-                        id="qty_${tabId}_${product.id}" onchange="updateModalSubtotal('${tabId}', ${product.id})" ${sinStock ? 'disabled' : ''}>
+                <td class="px-3 py-2 border-r border-gray-200 text-gray-700 font-mono text-xs">${product.code_sku}</td>
+                <td class="px-3 py-2 border-r border-gray-200 text-gray-800 font-medium">${product.description}</td>
+                <td class="px-3 py-2 border-r border-gray-200 text-center text-gray-600">${product.location || '-'}</td>
+                <td class="px-3 py-2 border-r border-gray-200 text-center">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${stockClass}">
+                        ${stockActual}
+                    </span>
                 </td>
-                <td class="px-2 py-1 border">
-                    <select class="p-2 border rounded" id="price_${tabId}_${product.id}" onchange="updateModalSubtotal('${tabId}', ${product.id})" ${sinStock ? 'disabled' : ''}>
+                <td class="px-3 py-2 border-r border-gray-200 text-center text-gray-600">${stockMinimo}</td>
+                <td class="px-3 py-2 border-r border-gray-200 text-center">
+                    <input type="number" 
+                        class="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center" 
+                        value="1" min="1" max="${stockActual}"
+                        id="qty_${tabId}_${product.id}" 
+                        onchange="updateModalSubtotal('${tabId}', ${product.id})" 
+                        ${sinStock ? 'disabled' : ''}>
+                </td>
+                <td class="px-3 py-2 border-r border-gray-200">
+                    <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs" 
+                        id="price_${tabId}_${product.id}" 
+                        onchange="updateModalSubtotal('${tabId}', ${product.id})" 
+                        ${sinStock ? 'disabled' : ''}>
                         <option value="">Seleccionar precio</option>
-                        ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - ${price.price}</option>`).join('')}
+                        ${product.prices.map(price => `<option value="${price.price}" data-price-id="${price.id}">${price.type} - S/ ${price.price}</option>`).join('')}
                     </select>
                 </td>
-                <td class="px-2 py-1 border" id="subtotal_${tabId}_${product.id}">0</td>
-                <td class="px-2 py-1 border">
-                    <button class="bg-blue-500 text-white px-3 py-1 rounded ${sinStock ? 'opacity-50 cursor-not-allowed' : ''}" onclick="agregarProducto('${tabId}', ${product.id})" ${sinStock ? 'disabled' : ''}>Agregar</button>
+                <td class="px-3 py-2 border-r border-gray-200 text-right font-semibold text-gray-800" id="subtotal_${tabId}_${product.id}">S/ 0.00</td>
+                <td class="px-3 py-2 text-center">
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105 ${sinStock ? 'opacity-50 cursor-not-allowed' : ''}" 
+                        onclick="agregarProducto('${tabId}', ${product.id})" 
+                        ${sinStock ? 'disabled' : ''}>
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Agregar
+                    </button>
                 </td>
             `;
             productTable.appendChild(row);
@@ -1762,7 +1797,7 @@
         const priceSelect = document.getElementById(`price_${tabId}_${productId}`);
         const price = parseFloat(priceSelect.value) || 0;
         const subtotal = quantity * price;
-        document.getElementById(`subtotal_${tabId}_${productId}`).textContent = subtotal.toFixed(2);
+        document.getElementById(`subtotal_${tabId}_${productId}`).textContent = 'S/ ' + subtotal.toFixed(2);
     }
 
     function agregarProducto(tabId, productId) {
@@ -1804,15 +1839,15 @@
         // Crear la fila con DataTables API
         if (data.dataTable) {
             const rowNode = data.dataTable.row.add([
-                data.orderCount,
-                product.description,
-                `<input type="number" class="p-2 border rounded"
-                       value="${product.quantity}"
-                       max="${product.maximum_stock}"
-                       min="1"
-                       style="width: 60px;"
-                       onchange="updatePriceAndTotal('${tabId}', ${product.item_id})">`,
-                `<select class="p-2 border rounded" style="width: 120px;"
+                `<span class="font-semibold text-gray-700">${data.orderCount}</span>`,
+                `<span class="text-gray-800">${product.description}</span>`,
+                `<input type="number" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                    value="${product.quantity}"
+                    max="${product.maximum_stock}"
+                    min="1"
+                    onchange="updatePriceAndTotal('${tabId}', ${product.item_id})">`,
+                `<select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs"
                         onchange="updatePriceAndTotal('${tabId}', ${product.item_id})"
                         id="priceSelect_${tabId}_${product.item_id}">
                     <option value="">Seleccionar precio</option>
@@ -1820,12 +1855,18 @@
                         <option value="${precio.price}"
                                 data-price-id="${precio.id}"
                                 ${precio.id == product.priceId ? 'selected' : ''}>
-                            ${precio.type} - ${precio.price}
+                            ${precio.type} - S/ ${precio.price}
                         </option>`).join('')}
                 </select>`,
-                `<span id="priceValue_${tabId}_${product.item_id}">${product.unit_price}</span>`,
-                `<span id="totalValue_${tabId}_${product.item_id}">${product.unit_price * product.quantity}</span>`,
-                `<button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteProduct('${tabId}', ${product.item_id})">Eliminar</button>`
+                `<span class="font-semibold text-blue-600" id="priceValue_${tabId}_${product.item_id}">S/ ${product.unit_price}</span>`,
+                `<span class="font-bold text-gray-800" id="totalValue_${tabId}_${product.item_id}">S/ ${(product.unit_price * product.quantity).toFixed(2)}</span>`,
+                `<button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105" 
+                    onclick="deleteProduct('${tabId}', ${product.item_id})">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Eliminar
+                </button>`
             ]).draw(false).node();
 
             // Agregar atributo data-product-id a la fila
@@ -1843,8 +1884,8 @@
         const selectedOption = priceSelect.options[priceSelect.selectedIndex];
         const price = parseFloat(selectedOption.value) || 0;
 
-        document.getElementById(`priceValue_${tabId}_${productId}`).textContent = price.toFixed(2);
-        document.getElementById(`totalValue_${tabId}_${productId}`).textContent = (price * quantity).toFixed(2);
+        document.getElementById(`priceValue_${tabId}_${productId}`).textContent = 'S/ ' + price.toFixed(2);
+        document.getElementById(`totalValue_${tabId}_${productId}`).textContent = 'S/ ' + (price * quantity).toFixed(2);
 
         data.quotationItems.forEach(item => {
             if (item.item_id == productId) {
@@ -2331,4 +2372,59 @@
         });
     }
     </script>
+
+    <style>
+        /* Estilos personalizados para las tablas */
+        table tbody tr:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animación suave para inputs y selects */
+        input[type="number"]:focus,
+        select:focus {
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
+        /* Estilo para el scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Efecto de pulso para botones */
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Animación para filas */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        tbody tr {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
 </x-app-layout>

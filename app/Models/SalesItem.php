@@ -37,6 +37,10 @@ class SalesItem extends Model
 
     public function item()
     {
-        return $this->morphTo();
+        return $this->morphTo()->withDefault([
+            'description' => 'Producto no disponible',
+            'code_sku' => 'N/A',
+            'model' => 'N/A'
+        ]);
     }
 }

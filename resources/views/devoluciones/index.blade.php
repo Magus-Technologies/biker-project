@@ -218,7 +218,7 @@
             }
 
             try {
-                const response = await fetch('/devoluciones/exportar', {
+                const response = await fetch(`${baseUrl}/devoluciones/exportar`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -263,7 +263,7 @@
             }
             
             try {
-                const response = await fetch('/devoluciones/filtro-por-fecha', {
+                const response = await fetch(`${baseUrl}/devoluciones/filtro-por-fecha`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -308,7 +308,7 @@
 
         async function openDevolucionModal(saleId) {
             try {
-                const response = await fetch(`/devoluciones/sale/${saleId}`);
+                const response = await fetch(`${baseUrl}/devoluciones/sale/${saleId}`);
                 const sale = await response.json();
                 currentSale = sale;
                 
@@ -407,7 +407,7 @@
             const reason = document.getElementById('reason').value;
             
             try {
-                const response = await fetch('/devoluciones', {
+                const response = await fetch(`${baseUrl}/devoluciones`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -457,7 +457,7 @@
             }
 
             try {
-                const response = await fetch('/devoluciones/filtro-devoluciones', {
+                const response = await fetch(`${baseUrl}/devoluciones/filtro-devoluciones`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -511,7 +511,7 @@
 
         async function verDetalleDevolucion(devolucionId) {
             try {
-                const response = await fetch(`/devoluciones/${devolucionId}`);
+                const response = await fetch(`${baseUrl}/devoluciones/${devolucionId}`);
                 const devolucion = await response.json();
                 currentDevolucionId = devolucionId;
 
@@ -547,7 +547,7 @@
         async function eliminarDevolucion(devolucionId) {
             if (confirm('¿Estás seguro de que quieres eliminar esta devolución?')) {
                 try {
-                    const response = await fetch(`/devoluciones/${devolucionId}`, {
+                    const response = await fetch(`${baseUrl}/devoluciones/${devolucionId}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'

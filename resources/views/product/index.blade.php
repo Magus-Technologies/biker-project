@@ -567,14 +567,14 @@
                     : '0.00';
                 
                 const imageUrl = product.images && product.images.length > 0 
-                    ? product.images[0].image_path 
+                    ? `${baseUrl}/${product.images[0].image_path}` 
                     : null;
 
                 return `
                     <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
                         <div class="relative">
                             ${imageUrl 
-                                ? `<img src="${imageUrl}" alt="${product.description}" class="w-full h-48 object-cover">`
+                                ? `<img src="${imageUrl}" alt="${product.description}" class="w-full h-48 object-cover" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-48 bg-gray-100 flex items-center justify-center\\'><i class=\\'fas fa-image text-4xl text-gray-400\\'></i></div>'">`
                                 : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center">
                                      <i class="fas fa-image text-4xl text-gray-400"></i>
                                    </div>`

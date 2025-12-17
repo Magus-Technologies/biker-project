@@ -191,39 +191,58 @@
         </div>
 
         <!-- Tabla de Productos (Detalle del Pedido) -->
-        <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-lg font-bold mb-4">Productos</h2>
+        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                Productos
+            </h2>
 
-            <table class="w-full border-collapse border border-gray-300" id="orderTable">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border p-2">Item</th>
-                        <th class="border p-2">Producto</th>
-                        <th class="border p-2">Cantidad</th>
-                        <th class="border p-2">P. Unit.</th>
-                        <th class="border p-2">T. Precio</th>
-                        <th class="border p-2">Parcial</th>
-                        <th class="border p-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="orderTableBody">
-                    <tr id="emptyRow">
-                        <td class="border p-2 text-center" colspan="7">No hay productos agregados</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="overflow-x-auto rounded-lg border border-gray-300">
+                <table class="w-full border-collapse" id="orderTable">
+                    <thead>
+                        <tr class="bg-blue-600 text-white">
+                            <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">Item</th>
+                            <th class="border-r border-blue-500 px-4 py-3 text-left text-sm font-semibold">Producto</th>
+                            <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">Cantidad</th>
+                            <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">P. Unit.</th>
+                            <th class="border-r border-blue-500 px-4 py-3 text-center text-sm font-semibold">T. Precio</th>
+                            <th class="border-r border-blue-500 px-4 py-3 text-right text-sm font-semibold">Parcial</th>
+                            <th class="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr id="emptyRow">
+                            <td class="px-4 py-8 text-center text-gray-500" colspan="7">
+                                <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="text-sm font-medium">No hay productos agregados</p>
+                                <p class="text-xs text-gray-400 mt-1">Busca productos para agregar a la venta</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         
         <!-- Tabla para listar servicios -->
-        <div class="mt-5 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-lg font-bold mb-4">Servicios</h2>
+        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Servicios
+            </h2>
             
             <!-- Agregar Servicio (arriba de tabla de servicios) -->
             <div class="mb-4 grid grid-cols-12 gap-2 items-end">
                 <div class="col-span-5 relative">
                     <label for="service" class="block text-sm font-medium text-gray-700 mb-1">Servicio</label>
                     <input type="text" id="service" name="service" value="{{ old('service', 'TALLER') }}"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" autocomplete="off">
+                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent" autocomplete="off">
                     <div id="serviceDropdown"
                         class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
                         <ul id="serviceSuggestions" class="max-h-40 overflow-y-auto"></ul>
@@ -232,26 +251,28 @@
                 <div class="col-span-4">
                     <label for="service_price" class="block text-sm font-medium text-gray-700 mb-1">Precio del Servicio</label>
                     <input type="number" id="service_price" name="service_price" value="{{ old('service_price', 60) }}"
-                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                        class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 </div>
                 <div class="col-span-3">
-                    <button type="button" id="addService" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
+                    <button type="button" id="addService" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-all transform hover:scale-105 text-sm shadow-sm">
                         <i class="bi bi-plus-circle mr-1"></i>Agregar Servicio
                     </button>
                 </div>
             </div>
-            <table class="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 px-4 py-2">Servicio</th>
-                        <th class="border border-gray-300 px-4 py-2">Precio</th>
-                        <th class="border border-gray-300 px-4 py-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="serviceList">
-                    <!-- Aquí se agregarán los servicios -->
-                </tbody>
-            </table>
+            <div class="overflow-x-auto rounded-lg border border-gray-300">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-green-600 text-white">
+                            <th class="border-r border-green-500 px-4 py-3 text-left text-sm font-semibold">Servicio</th>
+                            <th class="border-r border-green-500 px-4 py-3 text-right text-sm font-semibold">Precio</th>
+                            <th class="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serviceList" class="bg-white divide-y divide-gray-200">
+                        <!-- Aquí se agregarán los servicios -->
+                    </tbody>
+                </table>
+            </div>
         </div>
         
         <!-- Configurar Documento, Totales y Botón Guardar (todo en un mismo card) -->
@@ -392,6 +413,68 @@
 
     <!-- Overlay oscuro -->
     <div id="overlayDocumento" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="cerrarPanelDocumento()"></div>
+
+    <style>
+        /* Estilos personalizados para las tablas */
+        #orderTable tbody tr:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animación suave para inputs y selects */
+        input[type="number"]:focus,
+        select:focus {
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
+        /* Estilo para el scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Efecto de pulso para botones */
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Mejorar la apariencia de las celdas de precio */
+        .data-price-value,
+        .data-total-value {
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Animación para filas */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #orderTableBody tr,
+        #serviceList tr {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
 </x-app-layout>
 
 <script>
@@ -1072,34 +1155,39 @@
         }
         orderCount++;
         const orderRow = document.createElement("tr");
+        orderRow.className = orderCount % 2 === 0 ? 'bg-white hover:bg-gray-50 transition-colors' : 'bg-gray-50 hover:bg-gray-100 transition-colors';
         orderRow.setAttribute("data-product-id", product.item_id);
         orderRow.innerHTML = `
-            <td class="border p-2 text-center">${orderCount}</td>
-            <td class="border p-2">${product.description}</td>
-            <td class="border p-2">
-                <input type="number" class="p-2 border rounded data-quantity-value-${product.item_id}" onchange="updatePriceAndTotal(${product.item_id})"
-                       value="${product.quantity}" 
-                       max="${product.maximum_stock}"
-                       min="1"
-                       style="width: 60px;">
+            <td class="px-4 py-3 text-center font-semibold text-gray-700">${orderCount}</td>
+            <td class="px-4 py-3 text-gray-800">${product.description}</td>
+            <td class="px-4 py-3 text-center">
+                <input type="number" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center data-quantity-value-${product.item_id}" 
+                    onchange="updatePriceAndTotal(${product.item_id})"
+                    value="${product.quantity}" 
+                    max="${product.maximum_stock}"
+                    min="1">
             </td>
-            <td class="border p-2">
-                <select class="p-2 border rounded data-price-select-${product.item_id}" 
-                        style="width: 120px;" onchange="updatePriceAndTotal(${product.item_id})">
+            <td class="px-4 py-3 text-center">
+                <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs data-price-select-${product.item_id}" 
+                        onchange="updatePriceAndTotal(${product.item_id})">
                     <option value="">Seleccionar precio</option>
                     ${product.prices.map(precio => `
                         <option value="${precio.price}" 
                                 data-price-id="${precio.id}" 
                                 ${precio.id == product.priceId ? 'selected' : ''}>
-                            ${precio.type} - ${precio.price}
+                            ${precio.type} - S/ ${precio.price}
                         </option>`).join('')}
                 </select>
             </td>
-            <td class="border p-2 data-price-value-${product.item_id}" style="text-align: right;">${product.unit_price}</td>
-            <td class="border p-2 data-total-value-${product.item_id}" style="text-align: right;">${product.unit_price * product.quantity}</td>
-            <td class="border p-2 text-center">
-                <button class="bg-red-500 text-white px-2 py-1 rounded eliminar-btn" 
+            <td class="px-4 py-3 text-center font-semibold text-blue-600 data-price-value-${product.item_id}">S/ ${product.unit_price}</td>
+            <td class="px-4 py-3 text-right font-bold text-gray-800 data-total-value-${product.item_id}">S/ ${(product.unit_price * product.quantity).toFixed(2)}</td>
+            <td class="px-4 py-3 text-center">
+                <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105 eliminar-btn" 
                        onclick="deleteProduct(${product.item_id})">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
                     Eliminar
                 </button>
             </td>
@@ -1158,8 +1246,8 @@
         const selectedOption = priceSelect.options[priceSelect.selectedIndex];
         const price = parseFloat(selectedOption.value) || 0;
         // precio y total en la tabla
-        priceValueCell.textContent = price.toFixed(2);
-        totalValueCell.textContent = (price * quantity).toFixed(2);
+        priceValueCell.textContent = 'S/ ' + price.toFixed(2);
+        totalValueCell.textContent = 'S/ ' + (price * quantity).toFixed(2);
 
         quotationItems.forEach(item => {
             if (item.item_id == productId) {
@@ -1425,13 +1513,20 @@
         let tableBody = document.getElementById("serviceList");
         tableBody.innerHTML = ""; // Limpiar tabla antes de actualizar
 
-        services.forEach(service => {
+        services.forEach((service, index) => {
             let row = document.createElement("tr");
+            row.className = index % 2 === 0 ? 'bg-white hover:bg-green-50 transition-colors' : 'bg-gray-50 hover:bg-green-50 transition-colors';
             row.innerHTML = `
-                    <td class="border border-gray-300 px-4 py-2">${service.name}</td>
-                    <td class="border border-gray-300 px-4 py-2">${service.price}</td>
-                    <td class="border border-gray-300 px-4 py-2">
-                        <button class="bg-red-500 text-white px-2 py-1 rounded-md" onclick="deleteService(${service.id})">Eliminar</button>
+                    <td class="px-4 py-3 text-gray-800 font-medium">${service.name}</td>
+                    <td class="px-4 py-3 text-right font-bold text-green-700">S/ ${parseFloat(service.price).toFixed(2)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105" 
+                            onclick="deleteService(${service.id})">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Eliminar
+                        </button>
                     </td>
                 `;
             tableBody.appendChild(row);
@@ -1949,36 +2044,39 @@
         
         orderCount++;
         const orderRow = document.createElement("tr");
+        orderRow.className = orderCount % 2 === 0 ? 'bg-white hover:bg-gray-50 transition-colors' : 'bg-gray-50 hover:bg-gray-100 transition-colors';
         orderRow.setAttribute("data-product-id", product.item_id);
         orderRow.innerHTML = `
-            <td class="border p-2 text-center">${orderCount}</td>
-            <td class="border p-2">${product.description}</td>
-            <td class="border p-2">
-                <input type="number" class="p-2 border rounded data-quantity-value-${product.item_id}" 
-                       onchange="updatePriceAndTotal(${product.item_id})"
-                       value="${product.quantity}" 
-                       max="${product.maximum_stock}"
-                       min="1"
-                       style="width: 60px;">
+            <td class="px-4 py-3 text-center font-semibold text-gray-700">${orderCount}</td>
+            <td class="px-4 py-3 text-gray-800">${product.description}</td>
+            <td class="px-4 py-3 text-center">
+                <input type="number" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center data-quantity-value-${product.item_id}" 
+                    onchange="updatePriceAndTotal(${product.item_id})"
+                    value="${product.quantity}" 
+                    max="${product.maximum_stock}"
+                    min="1">
             </td>
-            <td class="border p-2">
-                <select class="p-2 border rounded data-price-select-${product.item_id}" 
-                        style="width: 120px;" 
+            <td class="px-4 py-3 text-center">
+                <select class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs data-price-select-${product.item_id}" 
                         onchange="updatePriceAndTotal(${product.item_id})">
                     <option value="">Seleccionar precio</option>
                     ${product.prices.map(precio => `
                         <option value="${precio.price}" 
                                 data-price-id="${precio.id}" 
                                 ${precio.id == product.priceId ? 'selected' : ''}>
-                            ${precio.type} - ${precio.price}
+                            ${precio.type} - S/ ${precio.price}
                         </option>`).join('')}
                 </select>
             </td>
-            <td class="border p-2 data-price-value-${product.item_id}" style="text-align: right;">${product.unit_price}</td>
-            <td class="border p-2 data-total-value-${product.item_id}" style="text-align: right;">${(product.unit_price * product.quantity).toFixed(2)}</td>
-            <td class="border p-2 text-center">
-                <button class="bg-red-500 text-white px-2 py-1 rounded eliminar-btn" 
+            <td class="px-4 py-3 text-center font-semibold text-blue-600 data-price-value-${product.item_id}">S/ ${product.unit_price}</td>
+            <td class="px-4 py-3 text-right font-bold text-gray-800 data-total-value-${product.item_id}">S/ ${(product.unit_price * product.quantity).toFixed(2)}</td>
+            <td class="px-4 py-3 text-center">
+                <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105 eliminar-btn" 
                        onclick="deleteProduct(${product.item_id})">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
                     Eliminar
                 </button>
             </td>
@@ -2051,13 +2149,20 @@
         
         tableBody.innerHTML = "";
 
-        services.forEach(service => {
+        services.forEach((service, index) => {
             const row = document.createElement("tr");
+            row.className = index % 2 === 0 ? 'bg-white hover:bg-green-50 transition-colors' : 'bg-gray-50 hover:bg-green-50 transition-colors';
             row.innerHTML = `
-                <td class="border border-gray-300 px-4 py-2">${service.name}</td>
-                <td class="border border-gray-300 px-4 py-2">S/ ${parseFloat(service.price).toFixed(2)}</td>
-                <td class="border border-gray-300 px-4 py-2">
-                    <button class="bg-red-500 text-white px-2 py-1 rounded-md" onclick="deleteServiceTab(${service.id}, '${tabId}')">Eliminar</button>
+                <td class="px-4 py-3 text-gray-800 font-medium">${service.name}</td>
+                <td class="px-4 py-3 text-right font-bold text-green-700">S/ ${parseFloat(service.price).toFixed(2)}</td>
+                <td class="px-4 py-3 text-center">
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow-sm transition-all transform hover:scale-105" 
+                        onclick="deleteServiceTab(${service.id}, '${tabId}')">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Eliminar
+                    </button>
                 </td>
             `;
             tableBody.appendChild(row);
