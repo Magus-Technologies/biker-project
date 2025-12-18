@@ -137,7 +137,7 @@
                                 <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ $product->unit->name ?? '-' }}</td>
                                 <td class="px-3 py-2 text-sm text-gray-900 text-center">
                                     @if($product->prices && $product->prices->count() > 0)
-                                        <select class="border border-gray-300 rounded px-2 py-1 text-xs">
+                                        <select class="border border-gray-300 rounded px-2 py-1 pr-8 text-xs min-w-[180px] bg-white">
                                             @foreach($product->prices as $price)
                                                 <option>{{ $price->type }} - S/ {{ number_format($price->price, 2) }}</option>
                                             @endforeach
