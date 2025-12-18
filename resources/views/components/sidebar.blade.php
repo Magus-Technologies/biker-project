@@ -32,7 +32,7 @@
 
             <!-- SECCIÓN GARANTÍAS -->
             <x-sidebar.menu-section key="garantias" icon="bi-shield-check" title="Garantías" :routes="[
-        ['route' => 'cars.index', 'permission' => 'ver-vehiculos', 'icon' => 'bi-motorcycle', 'title' => 'Motos'],
+        ['route' => 'motos.index', 'permission' => 'ver-vehiculos', 'icon' => 'bi-motorcycle', 'title' => 'Motos'],
         ['route' => 'garantines.index', 'permission' => null, 'icon' => 'bi-shield-check', 'title' => 'Garantía']
     ]" />
 

@@ -7,3 +7,5 @@ ALTER TABLE garantines DROP INDEX IF EXISTS garantines_nro_motor_unique;
 
 -- Opcional: Crear un índice normal (no único) para mejorar búsquedas
 CREATE INDEX idx_garantines_nro_motor ON garantines(nro_motor);
+
+

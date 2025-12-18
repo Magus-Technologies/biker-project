@@ -69,6 +69,10 @@ Route::group(
         // Rutas dinámicas por marca de moto (slug)
         Route::get('cars/marca/{slug}', [App\Http\Controllers\CarController::class, 'showByMarcaSlug'])->name('cars.marca.show');
         Route::get('car/buscarPornroMotor', [App\Http\Controllers\CarController::class, 'searchBuscarVehiculo'])->name('buscar.Vehiculo');
+        
+        // MOTOS (Nuevo sistema simplificado)
+        Route::resource('motos', App\Http\Controllers\MotoController::class);
+        Route::get('motos/marca/{slug}', [App\Http\Controllers\MotoController::class, 'showByMarca'])->name('motos.marca.show');
         // PRODUCTOS
         Route::resource('products', ProductController::class);
         Route::post('/products/{product}/manage-stock', [ProductController::class, 'manageStock'])->name('products.manage-stock');

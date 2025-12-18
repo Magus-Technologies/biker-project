@@ -129,33 +129,17 @@ class GarantineController extends Controller
                 ], 400);
             }
 
-            $car = null;
+            $moto = null;
 
             if ($nro_motor) {
-                // Buscar por número de motor en la tabla drives y obtener el car relacionado
-                // No filtramos por status para permitir buscar motos inactivas
-                $car = Car::with('driver')
-                    ->whereHas('driver', function($query) use ($nro_motor) {
-                        $query->where('nro_motor', $nro_motor);
-                    })
-                    ->first();
+                // Buscar por número de motor en la tabla motos
+                $moto = \App\Models\Moto::where('nro_motor', $nro_motor)->first();
             } elseif ($nro_chasis) {
-                // Buscar por número de chasis en cars o en drives
-                $car = Car::with('driver')
-                    ->where('nro_chasis', $nro_chasis)
-                    ->first();
-                
-                if (!$car) {
-                    // Si no se encuentra en cars, buscar en drives
-                    $car = Car::with('driver')
-                        ->whereHas('driver', function($query) use ($nro_chasis) {
-                            $query->where('nro_chasis', $nro_chasis);
-                        })
-                        ->first();
-                }
+                // Buscar por número de chasis en la tabla motos
+                $moto = \App\Models\Moto::where('nro_chasis', $nro_chasis)->first();
             }
 
-            if (!$car) {
+            if (!$moto) {
                 $mensaje = $nro_motor 
                     ? "No se encontró ninguna moto registrada con el N° de Motor: {$nro_motor}" 
                     : "No se encontró ninguna moto registrada con el N° de Chasis: {$nro_chasis}";
@@ -165,36 +149,21 @@ class GarantineController extends Controller
                 ], 404);
             }
 
-        // Preparar datos completos incluyendo información del driver
-        $carData = [
-            'id' => $car->id,
-            'placa' => $car->placa,
-            'marca' => $car->marca,
-            'modelo' => $car->modelo,
-            'anio' => $car->anio,
-            'color' => $car->color,
-            'nro_chasis' => $car->nro_chasis ?? ($car->driver->nro_chasis ?? ''),
-            'nro_motor' => $car->driver->nro_motor ?? '',
-            'condicion' => $car->condicion,
-            'lugar_provisional' => $car->lugar_provisional,
-        ];
-
-        // Agregar datos del conductor/dueño actual
-        $driverData = null;
-        if ($car->driver) {
-            $driverData = [
-                'nro_documento' => $car->driver->nro_documento ?? '',
-                'nombres_completos' => trim(($car->driver->nombres ?? '') . ' ' . 
-                                           ($car->driver->apellido_paterno ?? '') . ' ' . 
-                                           ($car->driver->apellido_materno ?? '')),
-                'telefono' => $car->driver->telefono ?? '',
+            // Preparar datos de la moto
+            $motoData = [
+                'id' => $moto->id,
+                'marca' => $moto->marca,
+                'modelo' => $moto->modelo,
+                'anio' => $moto->anio,
+                'color' => $moto->color,
+                'nro_chasis' => $moto->nro_chasis,
+                'nro_motor' => $moto->nro_motor,
+                'lugar_provisional' => $moto->lugar_provisional,
             ];
-        }
 
             return response()->json([
                 'success' => true,
-                'car' => $carData,
-                'driver' => $driverData
+                'moto' => $motoData
             ]);
         } catch (\Exception $e) {
             \Log::error('Error en buscarMoto: ' . $e->getMessage());

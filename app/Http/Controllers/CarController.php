@@ -241,7 +241,22 @@ class CarController extends Controller
         $cars = Car::with('driver')
             ->where('status', 1)
             ->where('marca', $marca)
-            ->get();
+            ->get()
+            ->map(function($car) {
+                // Buscar si tiene garantía activa por el nro_motor del driver
+                $nro_motor = $car->driver->nro_motor ?? null;
+                
+                if ($nro_motor) {
+                    $garantia = \App\Models\Garantine::where('nro_motor', $nro_motor)
+                        ->where('status', 1)
+                        ->first();
+                    $car->esta_vendida = $garantia !== null;
+                } else {
+                    $car->esta_vendida = false;
+                }
+                
+                return $car;
+            });
 
         return view('car.marca', compact('cars', 'marca'));
     }

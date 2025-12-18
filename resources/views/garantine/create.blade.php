@@ -16,7 +16,7 @@
             </h5>
             <p class="text-xs text-gray-500 mb-3 italic">
                 <i class="bi bi-info-circle mr-1"></i>
-                Estos datos se autocompletarán con el dueño actual al buscar la moto, pero puedes modificarlos si el comprador es otra persona.
+                Ingresa el DNI del cliente que está comprando la moto. Puedes buscar automáticamente sus datos con el botón de búsqueda.
             </p>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
                 <div class="w-full">
@@ -27,7 +27,7 @@
                         <input name="n_documento" id="n_documento" type="text" placeholder="Ingrese Documento" required
                             class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <button class="py-2 px-3 sm:px-4 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition flex-shrink-0" type="button"
-                            onclick="apiDNI()">
+                            onclick="buscarDNI()">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -111,8 +111,8 @@
                     <label for="n_placa" class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="bi bi-card-text mr-1 text-gray-500"></i>N° Placa
                     </label>
-                    <input type="text" name="n_placa" id="n_placa" readonly
-                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" name="n_placa" id="n_placa" placeholder="Ingrese número de placa"
+                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div class="w-full">
                     <label for="celular" class="block text-sm font-medium text-gray-700 mb-1">
@@ -281,6 +281,61 @@
     let formGarantine = document.getElementById('formGarantine');
     const Inputnum_doc = document.getElementById('n_documento');
 
+    // Función para buscar DNI en API
+    window.buscarDNI = function() {
+        const num_doc = document.getElementById('n_documento').value;
+        
+        if (!num_doc || num_doc.length !== 8) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'DNI inválido',
+                text: 'Por favor ingrese un DNI de 8 dígitos',
+                confirmButtonColor: '#f59e0b'
+            });
+            return;
+        }
+
+        const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InN5c3RlbWNyYWZ0LnBlQGdtYWlsLmNvbSJ9.yuNS5hRaC0hCwymX_PjXRoSZJWLNNBeOdlLRSUGlHGA';
+        
+        fetch(`https://dniruc.apisperu.com/api/v1/dni/${num_doc}?token=${token}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success === false) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'DNI no encontrado',
+                        text: data.message || 'No se pudo encontrar el DNI',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    document.getElementById('datos_cliente').value = '';
+                } else {
+                    const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`;
+                    document.getElementById('datos_cliente').value = nombreCompleto;
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cliente encontrado',
+                        text: nombreCompleto,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un problema al buscar el DNI',
+                    confirmButtonColor: '#ef4444'
+                });
+            });
+    };
+
     // Función para buscar moto por motor o chasis
     window.buscarMotoGarantia = function(tipo) {
         let valor = '';
@@ -319,37 +374,26 @@
             return response.json();
         })
         .then(data => {
-            if (data.success && data.car) {
+            if (data.success && data.moto) {
                 // Autocompletar campos de la moto
-                document.getElementById('nro_motor').value = data.car.nro_motor || '';
-                document.getElementById('nro_chasis').value = data.car.nro_chasis || '';
-                document.getElementById('marca').value = data.car.marca || '';
-                document.getElementById('modelo').value = data.car.modelo || '';
-                document.getElementById('anio').value = data.car.anio || '';
-                document.getElementById('color').value = data.car.color || '';
-                document.getElementById('n_placa').value = data.car.placa || '';
-
-                // Autocompletar datos del conductor/dueño actual
-                if (data.driver) {
-                    document.getElementById('n_documento').value = data.driver.nro_documento || '';
-                    document.getElementById('datos_cliente').value = data.driver.nombres_completos || '';
-                    if (data.driver.telefono) {
-                        document.getElementById('celular').value = data.driver.telefono || '';
-                    }
-                }
+                document.getElementById('nro_motor').value = data.moto.nro_motor || '';
+                document.getElementById('nro_chasis').value = data.moto.nro_chasis || '';
+                document.getElementById('marca').value = data.moto.marca || '';
+                document.getElementById('modelo').value = data.moto.modelo || '';
+                document.getElementById('anio').value = data.moto.anio || '';
+                document.getElementById('color').value = data.moto.color || '';
+                document.getElementById('n_placa').value = '';
 
                 let mensaje = `<div class="text-left">
                     <p class="font-semibold mb-2">Moto encontrada:</p>
                     <ul class="text-sm space-y-1">
-                        <li>• <strong>Marca:</strong> ${data.car.marca || 'N/A'}</li>
-                        <li>• <strong>Modelo:</strong> ${data.car.modelo || 'N/A'}</li>
-                        <li>• <strong>Placa:</strong> ${data.car.placa || 'N/A'}</li>
+                        <li>• <strong>Marca:</strong> ${data.moto.marca || 'N/A'}</li>
+                        <li>• <strong>Modelo:</strong> ${data.moto.modelo || 'N/A'}</li>
+                        <li>• <strong>Año:</strong> ${data.moto.anio || 'N/A'}</li>
+                        <li>• <strong>Color:</strong> ${data.moto.color || 'N/A'}</li>
                     </ul>
+                    <p class="text-sm text-gray-600 mt-3 italic">Ahora ingresa los datos del cliente comprador</p>
                 </div>`;
-                
-                if (data.driver && data.driver.nombres_completos) {
-                    mensaje += `<p class="text-sm text-gray-600 mt-3">Dueño actual: <strong>${data.driver.nombres_completos}</strong></p>`;
-                }
 
                 Swal.fire({
                     icon: 'success',
@@ -388,50 +432,6 @@
         });
     };
 
-
-    Inputnum_doc.addEventListener('input', () => {
-        const token =
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InN5c3RlbWNyYWZ0LnBlQGdtYWlsLmNvbSJ9.yuNS5hRaC0hCwymX_PjXRoSZJWLNNBeOdlLRSUGlHGA';
-        const num_doc = Inputnum_doc.value;
-        if (num_doc.length === 8) {
-            fetch(`https://dniruc.apisperu.com/api/v1/dni/${num_doc}?token=${token}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la solicitud');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success === false) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message || 'No se pudo encontrar el DNI',
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                        document.getElementById('datos_cliente').value = '';
-                    } else {
-                        document.getElementById('datos_cliente').value = data.nombres + ' ' + data
-                            .apellidoPaterno + ' ' + data.apellidoMaterno || ' ';
-                    }
-
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Hubo un problema con la solicitud',
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                });
-        } else {
-            document.getElementById('apellido_paterno').value = '';
-            document.getElementById('apellido_materno').value = '';
-            document.getElementById('nombres').value = '';
-        }
-    });
 
     formGarantine.addEventListener('submit', function(e) {
         e.preventDefault();
