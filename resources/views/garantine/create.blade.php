@@ -108,13 +108,6 @@
                         class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div class="w-full">
-                    <label for="n_placa" class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="bi bi-card-text mr-1 text-gray-500"></i>N° Placa
-                    </label>
-                    <input type="text" name="n_placa" id="n_placa" placeholder="Ingrese número de placa"
-                        class="block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="w-full">
                     <label for="celular" class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="bi bi-phone mr-1 text-gray-500"></i>Número de Celular
                     </label>
@@ -382,7 +375,6 @@
                 document.getElementById('modelo').value = data.moto.modelo || '';
                 document.getElementById('anio').value = data.moto.anio || '';
                 document.getElementById('color').value = data.moto.color || '';
-                document.getElementById('n_placa').value = '';
 
                 let mensaje = `<div class="text-left">
                     <p class="font-semibold mb-2">Moto encontrada:</p>
@@ -428,7 +420,6 @@
             document.getElementById('modelo').value = '';
             document.getElementById('anio').value = '';
             document.getElementById('color').value = '';
-            document.getElementById('n_placa').value = '';
         });
     };
 
