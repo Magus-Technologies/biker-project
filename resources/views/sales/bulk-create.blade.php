@@ -38,6 +38,27 @@
             </p>
         </div>
 
+        <!-- Banner de recuperación de datos (oculto por defecto) -->
+        <div id="recoveryBanner" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-3 text-sm hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="bi bi-exclamation-triangle text-yellow-600 text-xl"></i>
+                    <div>
+                        <p class="text-yellow-800 font-semibold">¡Tienes ventas mayoristas sin completar!</p>
+                        <p class="text-yellow-700 text-xs mt-1">Se detectaron ventas que no fueron guardadas. Guardadas automáticamente el <span id="recoveryDate"></span></p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="recuperarVenta()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                        <i class="bi bi-arrow-clockwise mr-1"></i>Recuperar
+                    </button>
+                    <button onclick="descartarVenta()" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                        <i class="bi bi-trash mr-1"></i>Descartar
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Tabs de ventas -->
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <!-- Tab Headers -->
@@ -2427,4 +2448,7 @@
             animation: fadeIn 0.3s ease-out;
         }
     </style>
+    
+    <!-- Script de Autoguardado -->
+    <script src="{{ asset('js/sales-autosave.js') }}"></script>
 </x-app-layout>
