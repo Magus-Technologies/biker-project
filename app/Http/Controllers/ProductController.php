@@ -645,6 +645,9 @@ class ProductController extends Controller
                 'location' => 'nullable|string',
                 'brand' => 'required|string|max:255',
                 'unit_name' => 'required|string|max:255',
+                'tienda_id' => 'nullable|exists:tiendas,id',
+                'quantity' => 'nullable|integer|min:0',
+                'minimum_stock' => 'nullable|integer|min:0',
                 'prices' => 'nullable|array',
                 'prices.*' => 'nullable|numeric|min:0',
                 'code_sku' => 'required|string|unique:products,code_sku,' . $id,
@@ -708,7 +711,33 @@ class ProductController extends Controller
             $brandName = ucfirst(strtolower($request->brand));
             $brand = Brand::firstOrCreate(['name' => $brandName]);
             $validated['brand_id'] = $brand->id;
+            
+            // Actualizar tienda_id y minimum_stock
+            $validated['tienda_id'] = $request->tienda_id ?: null;
+            $validated['minimum_stock'] = $request->minimum_stock ?? 0;
+            
             $product->update($validated);
+
+            // Actualizar stock si se proporcionó cantidad
+            if ($request->has('quantity')) {
+                $stock = Stock::where('product_id', $product->id)
+                    ->where('tienda_id', $request->tienda_id ?: null)
+                    ->first();
+                
+                if ($stock) {
+                    $stock->quantity = $request->quantity;
+                    $stock->minimum_stock = $request->minimum_stock ?? 0;
+                    $stock->save();
+                } else {
+                    // Crear nuevo stock si no existe
+                    Stock::create([
+                        'product_id' => $product->id,
+                        'tienda_id' => $request->tienda_id ?: null,
+                        'quantity' => $request->quantity,
+                        'minimum_stock' => $request->minimum_stock ?? 0
+                    ]);
+                }
+            }
 
             // Manejar los precios
             $prices = $validated['prices'] ?? [];

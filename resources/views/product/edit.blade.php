@@ -119,6 +119,41 @@
                             <ul id="unitSuggestions" class="max-h-40 overflow-y-auto"></ul>
                         </div>
                     </div>
+
+                    <div>
+                        <label for="tienda_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-shop mr-1 text-gray-500"></i>Tienda <span class="text-red-500">*</span>
+                        </label>
+                        <select name="tienda_id" id="tienda_id"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Almacén Central</option>
+                            @foreach($tiendas as $tienda)
+                                <option value="{{ $tienda->id }}" {{ $product->tienda_id == $tienda->id ? 'selected' : '' }}>{{ $tienda->nombre }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="bi bi-info-circle mr-1"></i>Selecciona la tienda o deja en "Almacén Central"
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-box-seam mr-1 text-gray-500"></i>Cantidad
+                        </label>
+                        <input type="number" name="quantity" id="quantity" value="{{ $productStock->sum('quantity') ?? 0 }}"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="bi bi-info-circle mr-1"></i>Cantidad total del producto
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="minimum_stock" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-exclamation-triangle mr-1 text-gray-500"></i>Stock Mínimo
+                        </label>
+                        <input type="number" name="minimum_stock" id="minimum_stock" value="{{ $product->minimum_stock }}"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
                 </div>
 
                 <!-- Images -->

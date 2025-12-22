@@ -1600,7 +1600,8 @@
                 text: 'La venta se ha registrado correctamente',
                 confirmButtonColor: '#10b981'
             }).then(() => {
-                resetFormFields();
+                // Redirigir a la página de ventas
+                window.location.href = '{{ route('sales.index') }}';
             });
 
         } catch (error) {
@@ -1724,7 +1725,8 @@
                 text: 'La venta se ha registrado correctamente',
                 confirmButtonColor: '#10b981'
             }).then(() => {
-                resetFormFields();
+                // Redirigir a la página de ventas
+                window.location.href = '{{ route('sales.index') }}';
             });
 
         } catch (error) {
