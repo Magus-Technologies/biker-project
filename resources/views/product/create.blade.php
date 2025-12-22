@@ -71,6 +71,22 @@
                     </div>
 
                     <div>
+                        <label for="tienda_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="bi bi-shop mr-1 text-gray-500"></i>Tienda <span class="text-red-500">*</span>
+                        </label>
+                        <select name="tienda_id" id="tienda_id"
+                            class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Almacén Central</option>
+                            @foreach($tiendas as $tienda)
+                                <option value="{{ $tienda->id }}">{{ $tienda->nombre }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="bi bi-info-circle mr-1"></i>Selecciona la tienda o deja en "Almacén Central"
+                        </p>
+                    </div>
+
+                    <div>
                         <label for="code_bar" class="block text-sm font-medium text-gray-700 mb-1">
                             <i class="bi bi-upc mr-1 text-gray-500"></i>Código de Barras
                         </label>

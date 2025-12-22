@@ -10,6 +10,7 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\VentaPendienteController;
 use App\Http\Controllers\WholesaleController;
 use App\Models\Product;
 use App\Models\Wholesaler;
@@ -136,6 +137,12 @@ Route::group(
 
         Route::get('/sale/pdf/nota/{id}', [SaleController::class, 'generatePDFNotaVenta'])->name('salesNota.pdf');
         Route::post('/sale/enviar-sunat/{id}', [SaleController::class, 'enviarSunat'])->name('sales.enviarSunat');
+
+        // VENTAS PENDIENTES (Autoguardado en DB)
+        Route::post('/ventas-pendientes/guardar', [VentaPendienteController::class, 'guardar'])->name('ventas-pendientes.guardar');
+        Route::get('/ventas-pendientes/obtener', [VentaPendienteController::class, 'obtener'])->name('ventas-pendientes.obtener');
+        Route::post('/ventas-pendientes/limpiar', [VentaPendienteController::class, 'limpiar'])->name('ventas-pendientes.limpiar');
+        Route::get('/ventas-pendientes/verificar', [VentaPendienteController::class, 'verificar'])->name('ventas-pendientes.verificar');
 
         // PEDIDOS
         Route::resource('pedidos', App\Http\Controllers\PedidoController::class);

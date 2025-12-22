@@ -431,7 +431,6 @@ class ProductController extends Controller
         $messages = [
             'description.string' => 'La descripción debe ser un texto.',
             'model.required' => 'El modelo es obligatorio.',
-            'tienda_id.required' => 'La tienda es obligatoria.',
             'tienda_id.exists' => 'La tienda seleccionada no es válida.',
             'brand.required' => 'La marca es obligatoria.',
             'unit_name.required' => 'La unidad es obligatoria.',
@@ -456,8 +455,8 @@ class ProductController extends Controller
             'code_bar' => 'required|string|unique:products,code_bar',
             'quantity' => 'nullable|integer|min:0',
             'control_type' => 'required|in:cantidad,codigo_unico',
+            'tienda_id' => 'nullable|exists:tiendas,id', // Validación de tienda (opcional)
         ];
-        // Eliminado: validación de tienda ya no es necesaria porque siempre usaremos almacén central
 
         try {
             $validated = $request->validate($validationRules, $messages);
@@ -470,6 +469,9 @@ class ProductController extends Controller
 
         // Asegurar que el control_type se guarde correctamente
         $validated['control_type'] = $request->control_type;
+        
+        // Guardar tienda_id (puede ser NULL para almacén central)
+        $validated['tienda_id'] = $request->tienda_id ?: null;
 
         DB::beginTransaction();
 
@@ -518,12 +520,14 @@ class ProductController extends Controller
             // Definir quantity para uso posterior
             $quantity = $request->quantity ?? 0;
 
-            // Crear stock en almacén central si hay cantidad
+            // Crear stock en la tienda seleccionada o almacén central si hay cantidad
             if ($quantity > 0) {
-                // Crear stock con tienda_id NULL para almacén central
+                // Usar la tienda seleccionada o NULL para almacén central
+                $tiendaId = $request->tienda_id ?: null;
+                
                 $stock = Stock::create([
                     'product_id' => $product->id,
-                    'tienda_id' => null,  // NULL indica almacén central
+                    'tienda_id' => $tiendaId,  // NULL indica almacén central, o el ID de la tienda
                     'quantity' => $request->quantity,
                     'minimum_stock' => $request->minimum_stock,
                 ]);
@@ -546,7 +550,7 @@ class ProductController extends Controller
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => '¡El producto ha sido registrado con éxito!',
+                'message' => '¡El producto ha sido registrado con éxito!' . ($request->tienda_id ? ' en la tienda seleccionada' : ' en el almacén central'),
                 'product' => $product
             ]);
         } catch (\Exception $e) {

@@ -561,11 +561,28 @@
             metodoPagoText: metodoPago
         };
         
-        // Actualizar resumen
-        document.getElementById('resumenTipoDoc').textContent = tipoDoc;
-        document.getElementById('resumenTipoPago').textContent = tipoPago;
-        document.getElementById('resumenMetodoPago').textContent = metodoPago;
-        document.getElementById('documentoResumen').classList.remove('hidden');
+        // Buscar el tab activo para actualizar su resumen
+        const activeTab = document.querySelector('.tab-content.active');
+        let tabId = null;
+        
+        if (activeTab) {
+            // Extraer el tabId del ID del contenido activo (formato: content-sale-1)
+            const contentId = activeTab.id;
+            tabId = contentId.replace('content-', '');
+        }
+        
+        // Actualizar resumen con o sin sufijo de tab
+        const suffix = tabId ? `_${tabId}` : '';
+        
+        const resumenTipoDoc = document.getElementById(`resumenTipoDoc${suffix}`);
+        const resumenTipoPago = document.getElementById(`resumenTipoPago${suffix}`);
+        const resumenMetodoPago = document.getElementById(`resumenMetodoPago${suffix}`);
+        const documentoResumen = document.getElementById(`documentoResumen${suffix}`);
+        
+        if (resumenTipoDoc) resumenTipoDoc.textContent = tipoDoc;
+        if (resumenTipoPago) resumenTipoPago.textContent = tipoPago;
+        if (resumenMetodoPago) resumenMetodoPago.textContent = metodoPago;
+        if (documentoResumen) documentoResumen.classList.remove('hidden');
         
         // Cerrar panel
         cerrarPanelDocumento();
@@ -1080,16 +1097,34 @@
     document.addEventListener('DOMContentLoaded', function() {
         cargarMecanicos();
         
-        document.getElementById('mecanico_select').addEventListener('change', function() {
-            document.getElementById('mechanics_id').value = this.value;
-        });
+        const mecanicoSelect = document.getElementById('mecanico_select');
+        const mechanicsIdInput = document.getElementById('mechanics_id');
+        
+        if (mecanicoSelect && mechanicsIdInput) {
+            mecanicoSelect.addEventListener('change', function() {
+                mechanicsIdInput.value = this.value;
+                console.log('🔧 Mecánico seleccionado:', this.value);
+                console.log('🔧 Campo mechanics_id actualizado:', mechanicsIdInput.value);
+            });
+        } else {
+            console.error('❌ No se encontraron los campos de mecánico');
+        }
     });
 
     // Funciones del modal
     function seleccionarMecanico(id, datos) {
-        document.getElementById('mechanics_id').value = id;
-        const select = document.getElementById('mecanico_select');
-        select.value = id;
+        const mechanicsIdInput = document.getElementById('mechanics_id');
+        const mecanicoSelect = document.getElementById('mecanico_select');
+        
+        if (mechanicsIdInput) {
+            mechanicsIdInput.value = id;
+            console.log('🔧 Mecánico seleccionado desde modal:', id);
+        }
+        
+        if (mecanicoSelect) {
+            mecanicoSelect.value = id;
+        }
+        
         cerrarModal();
     }
 
@@ -1291,38 +1326,94 @@
 
 
     // // 🔹 Función para construir el objeto de orden
-    function buildOrderData() {
-        return {
-            ...getCustomerData(),
-            products: quotationItems,
-            services: services
+    function buildOrderData(tabId = null) {
+        // Función auxiliar para obtener valor de forma segura
+        const getValue = (id, defaultValue = '') => {
+            // Si hay tabId, buscar primero con sufijo, sino sin sufijo
+            const elementId = tabId ? `${id}_${tabId}` : id;
+            const element = document.getElementById(elementId);
+            
+            // Si no encuentra con sufijo, intentar sin sufijo (fallback)
+            if (!element && tabId) {
+                const fallbackElement = document.getElementById(id);
+                return fallbackElement ? fallbackElement.value.trim() : defaultValue;
+            }
+            
+            return element ? element.value.trim() : defaultValue;
         };
-    }
-    // // Extraer los datos del cliente
-    function getCustomerData() {
-        return {
-            customer_dni: document.getElementById("dni_personal").value.trim(),
-            customer_names_surnames: document.getElementById("nombres_apellidos").value.trim(),
-            customer_address: document.getElementById("direccion").value.trim(),
-            motorcycle_model: document.getElementById("motorcycle_model").value.trim(),
-            phone: document.getElementById("phone").value.trim(),
-            districts_id: document.getElementById("districts_id")?.value || 'todos',
-            mechanics_id: document.getElementById("mechanics_id").value,
-            payments_id: document.getElementById("paymentType").value,
-            order_date: document.getElementById("orderDate").value,
-            currency: document.getElementById("orderCurrency").value,
-            document_type_id: document.getElementById("documentType").value,
-            nro_dias: document.getElementById("nro_dias").value,
-            fecha_vencimiento: document.getElementById("fecha_vencimiento").value,
-            igv: parseAmount("igvAmount"),
-            total: parseAmount("totalAmount")
+
+        const getTextContent = (id, defaultValue = '0.00') => {
+            // Si hay tabId, buscar primero con sufijo, sino sin sufijo
+            const elementId = tabId ? `${id}_${tabId}` : id;
+            const element = document.getElementById(elementId);
+            
+            // Si no encuentra con sufijo, intentar sin sufijo (fallback)
+            if (!element && tabId) {
+                const fallbackElement = document.getElementById(id);
+                return fallbackElement ? fallbackElement.textContent.replace("S/ ", "").trim() : defaultValue;
+            }
+            
+            return element ? element.textContent.replace("S/ ", "").trim() : defaultValue;
         };
+
+        // Preparar productos en el formato esperado por el backend
+        const products = (quotationItems || []).map(product => ({
+            item_id: product.item_id,
+            quantity: product.quantity,
+            unit_price: product.unit_price
+        }));
+
+        // Preparar servicios en el formato esperado por el backend
+        const servicesFormatted = (services || []).map(service => ({
+            name: service.name,
+            price: service.price
+        }));
+
+        // Preparar pagos en el formato esperado por el backend
+        const paymentsFormatted = payments && payments.length > 0 ? payments : [{
+            payment_method_id: getValue('paymentMethod1'),
+            amount: parseFloat(getTextContent('totalAmount')) || 0,
+            order: 1
+        }];
+
+        const orderData = {
+            customer_dni: getValue('dni_personal'),
+            customer_names_surnames: getValue('nombres_apellidos'),
+            customer_address: getValue('direccion'),
+            phone: getValue('phone'),
+            motorcycle_model: getValue('motorcycle_model'),
+            districts_id: getValue('districts_id') === 'todos' ? null : getValue('districts_id'),
+            mechanics_id: getValue('mechanics_id') || null,
+            payments_id: getValue('paymentType') || null,
+            order_date: getValue('orderDate') || new Date().toISOString().split('T')[0],
+            currency: getValue('orderCurrency') || 'SOLES',
+            document_type_id: getValue('documentType') || null,
+            nro_dias: getValue('nro_dias') || null,
+            fecha_vencimiento: getValue('fecha_vencimiento') || null,
+            igv: parseFloat(getTextContent('igvAmount')) || 0,
+            total: parseFloat(getTextContent('totalAmount')) || 0,
+            products: products,
+            services: servicesFormatted,
+            payments: paymentsFormatted
+        };
+
+        // 🔍 DEBUG: Mostrar datos completos que se van a enviar
+        console.log('📦 Datos completos de la orden (tabId:', tabId, '):', orderData);
+        console.log('👤 Cliente:', orderData.customer_names_surnames);
+        console.log('📄 DNI:', orderData.customer_dni);
+        console.log('🔧 Mecánico ID:', orderData.mechanics_id);
+        console.log('💰 Total:', orderData.total);
+        console.log('💰 IGV:', orderData.igv);
+        console.log('📦 Productos:', orderData.products);
+        console.log('🛠️ Servicios:', orderData.services);
+        console.log('💳 Pagos:', orderData.payments);
+
+        return orderData;
     }
     // // Convierte valores monetarios a números
     function parseAmount(elementId) {
         return parseFloat(document.getElementById(elementId).textContent.replace("S/ ", "")) || 0;
     }
-    // Función para limpiar el formulario y preparar para nueva venta
     function resetFormFields() {
         // Limpiar modelo de moto y teléfono
         document.getElementById('motorcycle_model').value = '';
@@ -1478,6 +1569,12 @@
                 throw new Error(data.error || "Error en la petición");
             }
 
+            // ✅ LIMPIAR AUTOGUARDADO INMEDIATAMENTE DESPUÉS DE GUARDAR EXITOSAMENTE
+            if (typeof window.limpiarAutoguardadoVenta === 'function') {
+                window.limpiarAutoguardadoVenta();
+                console.log('🗑️ Autoguardado limpiado después de guardar venta exitosamente');
+            }
+
             // Si viene de un pedido, marcarlo como convertido
             if (pedidoId && data.sale_id) {
                 try {
@@ -1492,46 +1589,154 @@
                             sale_id: data.sale_id
                         })
                     });
-                } catch (e) {
-                    console.error('Error al marcar pedido como convertido:', e);
+                } catch (error) {
+                    console.error('Error marcando pedido como convertido:', error);
                 }
             }
 
             Swal.fire({
                 icon: 'success',
-                title: '¡Venta guardada!',
-                text: pedidoId ? 'La venta se ha creado y el pedido ha sido convertido.' : 'Venta guardada exitosamente',
-                confirmButtonColor: '#10b981',
-                showCancelButton: true,
-                confirmButtonText: 'Ir al índice',
-                cancelButtonText: 'Nueva venta'
-            }).then((result) => {
-                // Limpiar autoguardado después de guardar exitosamente
-                if (typeof window.limpiarAutoguardadoVenta === 'function') {
-                    window.limpiarAutoguardadoVenta();
-                }
-                
-                if (result.isConfirmed) {
-                    // Redirigir al índice de ventas
-                    window.location.href = `${baseUrl}/sales`;
-                } else {
-                    // Limpiar los campos para nueva venta
-                    resetFormFields();
-                }
+                title: 'Venta guardada',
+                text: 'La venta se ha registrado correctamente',
+                confirmButtonColor: '#10b981'
+            }).then(() => {
+                resetFormFields();
             });
+
         } catch (error) {
-            console.error("Error al guardar la orden:", error);
+            console.error('Error guardando venta:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: error.message || 'Error al guardar la orden.',
+                text: error.message || 'No se pudo guardar la venta',
                 confirmButtonColor: '#ef4444'
             });
         }
     }
 
+    // 🆕 Función para guardar venta de un tab específico
+    async function saveSalesTab(tabId) {
+        try {
+            // Obtener datos del tab específico usando el tabId
+            const orderData = buildOrderData(tabId);
 
+            // Validaciones antes de enviar
+            if (!orderData.document_type_id) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'Seleccione un tipo de documento',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
 
+            if (!orderData.payments_id) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'Seleccione un tipo de pago',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            if (quotationItems.length === 0 && services.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin productos',
+                    text: 'Agregue al menos un producto o servicio',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            // Validar método de pago si es contado
+            if (orderData.payments_id === '1') {
+                // El panel de documento usa IDs sin sufijo, así que buscamos primero sin sufijo
+                let paymentMethod1 = document.getElementById('paymentMethod1')?.value;
+                
+                // Si no existe sin sufijo, buscar con sufijo (por compatibilidad)
+                if (!paymentMethod1 && tabId) {
+                    paymentMethod1 = document.getElementById(`paymentMethod1_${tabId}`)?.value;
+                }
+                
+                if (!paymentMethod1) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campo requerido',
+                        text: 'Seleccione un método de pago',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                    return;
+                }
+            }
+
+            salePaymentMethods()
+
+            const response = await fetch('{{ route('sales.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    ...orderData,
+                    payments,
+                    pedido_id: pedidoId // Incluir el ID del pedido si existe
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || "Error en la petición");
+            }
+
+            // ✅ LIMPIAR AUTOGUARDADO INMEDIATAMENTE DESPUÉS DE GUARDAR EXITOSAMENTE
+            if (typeof window.limpiarAutoguardadoVenta === 'function') {
+                window.limpiarAutoguardadoVenta();
+                console.log('🗑️ Autoguardado limpiado después de guardar venta exitosamente');
+            }
+
+            // Si viene de un pedido, marcarlo como convertido
+            if (pedidoId && data.sale_id) {
+                try {
+                    await fetch(`${baseUrl}/pedido/marcar-convertido`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            pedido_id: pedidoId,
+                            sale_id: data.sale_id
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error marcando pedido como convertido:', error);
+                }
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Venta guardada',
+                text: 'La venta se ha registrado correctamente',
+                confirmButtonColor: '#10b981'
+            }).then(() => {
+                resetFormFields();
+            });
+
+        } catch (error) {
+            console.error('Error guardando venta:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'No se pudo guardar la venta',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
 
     // Función para actualizar la tabla
     function updateTable() {
@@ -2331,13 +2536,6 @@
         window.currentDocumentTabId = tabId;
     }
 
-    // Función para guardar venta del tab
-    function saveSalesTab(tabId) {
-        console.log('Guardando venta del tab:', tabId);
-        // Aquí iría la lógica para guardar la venta específica del tab
-        saveSales();
-    }
-
     // Función para mostrar modal del tab
     function mostrarModalTab(tabId) {
         const modal = document.getElementById(`modalMecanicos_${tabId}`);
@@ -2468,7 +2666,7 @@
 </script>
 
 
-<!-- Script de Autoguardado -->
-<script src="{{ asset('js/sales-autosave.js') }}"></script>
+<!-- Script de Autoguardado en Base de Datos -->
+<script src="{{ asset('js/sales-autosave-db.js') }}"></script>
 
 </x-app-layout>

@@ -148,6 +148,19 @@ class SaleController extends Controller
     {
         // return response()->json($request);
         try {
+            // 🔍 DEBUG: Log de datos recibidos
+            \Log::info('📦 Datos recibidos en SaleController:', [
+                'customer_names_surnames' => $request->customer_names_surnames,
+                'customer_dni' => $request->customer_dni,
+                'mechanics_id' => $request->mechanics_id,
+                'phone' => $request->phone,
+                'motorcycle_model' => $request->motorcycle_model,
+                'total' => $request->total,
+                'igv' => $request->igv,
+                'payments' => $request->payments,
+                'products' => $request->products,
+            ]);
+            
             // Generar código único para NOTA DE VENTA sin cliente
             $customerName = $request->customer_names_surnames;
             

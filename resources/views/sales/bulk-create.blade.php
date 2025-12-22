@@ -2258,6 +2258,12 @@
                 throw new Error(errorData.message || 'Error al guardar la venta');
             }
 
+            // ✅ LIMPIAR AUTOGUARDADO INMEDIATAMENTE DESPUÉS DE GUARDAR EXITOSAMENTE
+            if (typeof window.limpiarAutoguardadoVenta === 'function') {
+                window.limpiarAutoguardadoVenta();
+                console.log('🗑️ Autoguardado limpiado después de guardar venta exitosamente');
+            }
+
             Swal.fire({
                 icon: 'success',
                 title: '¡Venta guardada!',
@@ -2381,6 +2387,12 @@
             resultHtml += `</ul>`;
         }
 
+        // ✅ LIMPIAR AUTOGUARDADO SI SE GUARDÓ AL MENOS UNA VENTA
+        if (savedCount > 0 && typeof window.limpiarAutoguardadoVenta === 'function') {
+            window.limpiarAutoguardadoVenta();
+            console.log('🗑️ Autoguardado limpiado después de guardar ventas exitosamente');
+        }
+
         Swal.fire({
             icon: savedCount > 0 ? 'success' : 'error',
             title: savedCount > 0 ? '¡Proceso completado!' : 'Error',
@@ -2449,6 +2461,6 @@
         }
     </style>
     
-    <!-- Script de Autoguardado -->
-    <script src="{{ asset('js/sales-autosave.js') }}"></script>
+    <!-- Script de Autoguardado en Base de Datos -->
+    <script src="{{ asset('js/sales-autosave-db.js') }}"></script>
 </x-app-layout>
