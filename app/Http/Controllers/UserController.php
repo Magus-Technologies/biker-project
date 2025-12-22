@@ -223,7 +223,55 @@ class UserController extends Controller
 
     public function destroy($userId)
     {
+        // Si es una petición DELETE (API), eliminar permanentemente
+        if (request()->isMethod('delete')) {
+            try {
+                $user = User::findOrFail($userId);
+                
+                // No permitir eliminar al usuario actual
+                if ($user->id === auth()->id()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No puedes eliminar tu propia cuenta'
+                    ], 403);
+                }
+                
+                // No permitir eliminar a otros administradores
+                if ($user->hasRole('Administrador')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No se puede eliminar a un administrador. Por seguridad, los administradores no pueden ser eliminados.'
+                    ], 403);
+                }
+                
+                $userName = $user->name;
+                $user->delete();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => "El trabajador {$userName} ha sido eliminado permanentemente"
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al eliminar el trabajador: ' . $e->getMessage()
+                ], 500);
+            }
+        }
+        
+        // Si es una petición GET (desde la ruta /delete), solo cambiar estado
         $user = User::findOrFail($userId);
+        
+        // No permitir desactivar al usuario actual
+        if ($user->id === auth()->id()) {
+            return redirect('/users')->with('error', 'No puedes desactivar tu propia cuenta');
+        }
+        
+        // No permitir desactivar a otros administradores si eres administrador
+        if ($user->hasRole('Administrador') && auth()->user()->hasRole('Administrador')) {
+            return redirect('/users')->with('error', 'No puedes desactivar a otro administrador');
+        }
+        
         $user->status = $user->status == 1 ? 0 : 1;
         $user->save();
 

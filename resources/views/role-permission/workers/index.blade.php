@@ -76,18 +76,49 @@
                                     @endif
                                 </td>
                                 <td class="p-1">
-                                    @can('actualizar-trabajadores')
-                                        <a href="{{ url('users/' . $user->id . '/edit') }}"
-                                            class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500 transition-all duration-300 mx-2">
-                                            Editar
-                                        </a>
-                                    @endcan
-                                    @can('eliminar-trabajadores')
-                                        <a href="{{ url('users/' . $user->id . '/delete') }}"
-                                            class="{{ $user->status == 1 ? 'bg-red-600 hover:bg-red-500' : 'bg-green-600 hover:bg-green-500' }} text-white py-2 px-4 rounded-md transition-all duration-300 mx-2">
-                                            {{ $user->status == 1 ? 'Desactivar' : 'Activar' }}
-                                        </a>
-                                    @endcan
+                                    <div class="flex items-center gap-1">
+                                        @can('actualizar-trabajadores')
+                                            <a href="{{ url('users/' . $user->id . '/edit') }}"
+                                                class="inline-flex items-center justify-center text-white p-2 rounded-md hover:opacity-80 transition-all duration-300"
+                                                title="Editar">
+                                                <i class="bi bi-pencil-square text-yellow-500 text-lg"></i>
+                                            </a>
+                                        @endcan
+                                        @can('eliminar-trabajadores')
+                                            @php
+                                                $isAdmin = $user->hasRole('Administrador');
+                                                $isSelf = $user->id === auth()->id();
+                                            @endphp
+                                            
+                                            @if(!$isAdmin || $isSelf)
+                                                <a href="{{ url('users/' . $user->id . '/delete') }}"
+                                                    onclick="return confirmToggleStatus(event, '{{ $user->name }}', {{ $user->status }})"
+                                                    class="inline-flex items-center justify-center text-white p-2 rounded-md hover:opacity-80 transition-all duration-300 {{ $isSelf ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                    title="{{ $isSelf ? 'No puedes desactivar tu propia cuenta' : ($user->status == 1 ? 'Desactivar' : 'Activar') }}"
+                                                    {{ $isSelf ? 'onclick="return false;"' : '' }}>
+                                                    <i class="bi {{ $user->status == 1 ? 'bi-toggle-on text-green-500' : 'bi-toggle-off text-gray-400' }} text-lg"></i>
+                                                </a>
+                                            @else
+                                                <span class="inline-flex items-center justify-center text-white p-2 rounded-md opacity-50 cursor-not-allowed"
+                                                    title="Los administradores no pueden ser desactivados">
+                                                    <i class="bi bi-toggle-on text-green-500 text-lg"></i>
+                                                </span>
+                                            @endif
+                                            
+                                            @if(!$isAdmin && !$isSelf)
+                                                <button onclick="confirmDelete(event, {{ $user->id }}, '{{ $user->name }}')"
+                                                    class="inline-flex items-center justify-center text-white p-2 rounded-md hover:opacity-80 transition-all duration-300"
+                                                    title="Eliminar permanentemente">
+                                                    <i class="bi bi-trash3-fill text-red-500 text-lg"></i>
+                                                </button>
+                                            @else
+                                                <span class="inline-flex items-center justify-center text-white p-2 rounded-md opacity-50 cursor-not-allowed"
+                                                    title="{{ $isSelf ? 'No puedes eliminar tu propia cuenta' : 'Los administradores no pueden ser eliminados' }}">
+                                                    <i class="bi bi-trash3-fill text-gray-400 text-lg"></i>
+                                                </span>
+                                            @endif
+                                        @endcan
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -152,6 +183,137 @@
     </div>
 
     <script>
+        // Función de confirmación con doble alerta para administradores
+        async function confirmToggleStatus(event, userName, currentStatus) {
+            event.preventDefault();
+            
+            const userRole = '{{ auth()->user()->getRoleNames()->first() }}';
+            const action = currentStatus == 1 ? 'desactivar' : 'activar';
+            const url = event.currentTarget.href;
+            
+            // Primera confirmación
+            const result = await Swal.fire({
+                title: `¿${action.charAt(0).toUpperCase() + action.slice(1)} trabajador?`,
+                html: `¿Estás seguro de que deseas ${action} a <strong>${userName}</strong>?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: currentStatus == 1 ? '#f59e0b' : '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: `Sí, ${action}`,
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) {
+                return false;
+            }
+            
+            // Segunda confirmación solo para administradores
+            if (userRole === 'Administrador') {
+                const secondConfirm = await Swal.fire({
+                    title: '⚠️ Confirmación de Administrador',
+                    html: `Esta acción ${action === 'desactivar' ? 'desactivará' : 'activará'} al trabajador <strong>${userName}</strong>.<br>¿Estás completamente seguro?`,
+                    icon: currentStatus == 1 ? 'warning' : 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: currentStatus == 1 ? '#d33' : '#10b981',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: `Sí, ${action} definitivamente`,
+                    cancelButtonText: 'Cancelar'
+                });
+                
+                if (!secondConfirm.isConfirmed) {
+                    return false;
+                }
+            }
+            
+            // Si pasó todas las confirmaciones, redirigir
+            window.location.href = url;
+            return false;
+        }
+        
+        // Función para eliminar trabajador con doble confirmación para administradores
+        async function confirmDelete(event, userId, userName) {
+            event.preventDefault();
+            
+            const userRole = '{{ auth()->user()->getRoleNames()->first() }}';
+            
+            // Primera confirmación
+            const result = await Swal.fire({
+                title: '¿Eliminar trabajador?',
+                html: `¿Estás seguro de que deseas eliminar a <strong>${userName}</strong>?<br><small class="text-gray-500">Esta acción no se puede deshacer</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) {
+                return false;
+            }
+            
+            // Segunda confirmación solo para administradores
+            if (userRole === 'Administrador') {
+                const secondConfirm = await Swal.fire({
+                    title: '⚠️ Confirmación de Administrador',
+                    html: `Esta acción eliminará <strong>permanentemente</strong> al trabajador <strong>${userName}</strong>.<br><br>Se perderán todos sus datos asociados.<br><br>¿Estás completamente seguro?`,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Sí, eliminar definitivamente',
+                    cancelButtonText: 'Cancelar'
+                });
+                
+                if (!secondConfirm.isConfirmed) {
+                    return false;
+                }
+            }
+            
+            // Si pasó todas las confirmaciones, hacer la petición DELETE
+            try {
+                const response = await fetch(`{{ url('users') }}/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminado',
+                        text: data.message || 'El trabajador ha sido eliminado correctamente',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'No se pudo eliminar el trabajador',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al eliminar el trabajador',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+            
+            return false;
+        }
+        
         // Funciones para el modal de tiendas
         function openTiendaModal() {
             document.getElementById('tiendaModal').classList.remove('hidden');
