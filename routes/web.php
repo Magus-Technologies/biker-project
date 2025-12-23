@@ -201,10 +201,11 @@ Route::group(
 
         // CAJAS - MÓDULO DE CONTROL DE EFECTIVO
         Route::resource('cajas', App\Http\Controllers\CajaController::class);
+        Route::get('/cajas-exportar-excel', [App\Http\Controllers\CajaController::class, 'exportarExcel'])->name('cajas.exportar.excel');
         Route::get('/cajas/{id}/close', [App\Http\Controllers\CajaController::class, 'close'])->name('cajas.close');
         Route::post('/cajas/{id}/cerrar', [App\Http\Controllers\CajaController::class, 'cerrar'])->name('cajas.cerrar');
         Route::post('/cajas/{id}/movimiento', [App\Http\Controllers\CajaController::class, 'registrarMovimiento'])->name('cajas.registrarMovimiento');
-        Route::get('/cajas/{id}/reporte', [App\Http\Controllers\CajaController::class, 'reporte'])->name('cajas.reporte');
+        Route::get('/cajas/{id}/reporte/pdf', [App\Http\Controllers\CajaController::class, 'reportePDF'])->name('cajas.reporte.pdf');
         Route::get('/cajas/filtrar/buscar', [App\Http\Controllers\CajaController::class, 'filtrar'])->name('cajas.filtrar');
 
         // NUEVAS RUTAS - Agregar estas líneas adicionales:

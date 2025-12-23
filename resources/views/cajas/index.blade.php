@@ -17,6 +17,11 @@
                     </a>
                 @endcan
             @endif
+            
+            <a href="{{ route('cajas.exportar.excel') }}" 
+               class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                <i class="bi bi-file-excel mr-2"></i>Exportar Excel
+            </a>
         </div>
 
         <!-- Mensajes de éxito o error -->
@@ -139,8 +144,8 @@
                                     @endif
                                     
                                     @if($caja->estado === 'cerrada')
-                                        <a href="{{ route('cajas.reporte', $caja->id) }}" 
-                                           class="text-green-600 hover:text-green-800" title="Ver reporte">
+                                        <a href="{{ route('cajas.reporte.pdf', $caja->id) }}" target="_blank"
+                                           class="text-red-600 hover:text-red-800" title="Ver reporte PDF">
                                             <i class="bi bi-file-earmark-pdf text-lg"></i>
                                         </a>
                                     @endif

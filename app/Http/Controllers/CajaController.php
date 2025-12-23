@@ -6,8 +6,11 @@ use App\Models\Caja;
 use App\Models\CajaMovimiento;
 use App\Models\PaymentMethod;
 use App\Models\Tienda;
+use App\Exports\CajasExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CajaController extends Controller
 {
@@ -279,14 +282,31 @@ class CajaController extends Controller
     }
 
     /**
-     * Obtener reporte de caja
+     * Generar PDF del reporte de caja
      */
-    public function reporte($id)
+    public function reportePDF($id)
     {
-        $caja = Caja::with(['usuario', 'tienda', 'usuarioCierre', 'movimientos.metodoPago'])
+        $caja = Caja::with(['usuario', 'tienda', 'usuarioCierre', 'movimientos.metodoPago', 'movimientos.usuario'])
             ->findOrFail($id);
 
-        return view('cajas.reporte', compact('caja'));
+        $pdf = Pdf::loadView('cajas.pdf', compact('caja'));
+        
+        return $pdf->stream('reporte-caja-' . $caja->codigo . '.pdf');
+    }
+
+    /**
+     * Exportar listado de cajas a Excel
+     */
+    public function exportarExcel()
+    {
+        $cajas = Caja::with(['usuario', 'tienda', 'usuarioCierre'])
+            ->orderBy('fecha_apertura', 'desc')
+            ->get();
+
+        return Excel::download(
+            new CajasExport($cajas),
+            'listado-cajas-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     /**
