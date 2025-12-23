@@ -38,6 +38,10 @@
 
             <!-- MÓDULOS DE COMPRAS (INDIVIDUALES) -->
             <x-sidebar.menu-item route="buys.index" icon="bi-bag" title="Compras" />
+            
+            <!-- MÓDULO DE CAJA -->
+            <x-sidebar.menu-item route="cajas.index" icon="bi-cash-coin" title="Caja" permission="ver-cajas" />
+            
             <x-sidebar.menu-section key="ventas" icon="bi-cart" title="Ventas" :routes="[
                 ['route' => 'sales.index', 'permission' => null, 'icon' => 'bi-cart-check', 'title' => 'Ventas'],
                 ['route' => 'sales.bulk-create', 'permission' => null, 'icon' => 'bi-cart-plus', 'title' => 'Ventas Mayoristas'],

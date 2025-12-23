@@ -199,6 +199,14 @@ Route::group(
         Route::get('/buy/{id}/reception-data', [BuyController::class, 'getReceptionData'])->name('buy.receptionData');
         Route::post('/buy/{id}/process-reception', [BuyController::class, 'processReception'])->name('buy.processReception');
 
+        // CAJAS - MÓDULO DE CONTROL DE EFECTIVO
+        Route::resource('cajas', App\Http\Controllers\CajaController::class);
+        Route::get('/cajas/{id}/close', [App\Http\Controllers\CajaController::class, 'close'])->name('cajas.close');
+        Route::post('/cajas/{id}/cerrar', [App\Http\Controllers\CajaController::class, 'cerrar'])->name('cajas.cerrar');
+        Route::post('/cajas/{id}/movimiento', [App\Http\Controllers\CajaController::class, 'registrarMovimiento'])->name('cajas.registrarMovimiento');
+        Route::get('/cajas/{id}/reporte', [App\Http\Controllers\CajaController::class, 'reporte'])->name('cajas.reporte');
+        Route::get('/cajas/filtrar/buscar', [App\Http\Controllers\CajaController::class, 'filtrar'])->name('cajas.filtrar');
+
         // NUEVAS RUTAS - Agregar estas líneas adicionales:
         Route::get('/buy/search-products', [BuyController::class, 'searchProducts'])->name('buy.search-products');
         Route::get('/buy/buscar-documento/{doc}', [BuyController::class, 'buscarDocumento'])->name('buy.buscar-documento');

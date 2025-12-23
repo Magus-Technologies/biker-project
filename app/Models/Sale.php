@@ -23,6 +23,7 @@ class Sale extends Model
         'phone',
         'seller_name',
         'tienda_id',
+        'caja_id',
         'code',
         'igv',
         'quotation_id',
@@ -103,5 +104,10 @@ class Sale extends Model
     public function tienda()
     {
         return $this->belongsTo(Tienda::class, 'tienda_id');
+    }
+
+    public function caja()
+    {
+        return $this->belongsTo(Caja::class, 'caja_id');
     }
 }
